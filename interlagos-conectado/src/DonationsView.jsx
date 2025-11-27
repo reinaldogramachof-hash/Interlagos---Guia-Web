@@ -24,6 +24,26 @@ export default function DonationsView() {
             progress: 30,
             icon: <HandHeart className="text-orange-500" />,
             color: "bg-orange-50 text-orange-700 border-orange-100"
+        },
+        {
+            id: 3,
+            title: "Material Escolar",
+            org: "Projeto Futuro",
+            description: "Arrecadação de cadernos, lápis e mochilas para crianças da rede pública.",
+            target: "Meta: 100 Kits",
+            progress: 80,
+            icon: <Gift className="text-blue-500" />,
+            color: "bg-blue-50 text-blue-700 border-blue-100"
+        },
+        {
+            id: 4,
+            title: "Ração para Todos",
+            org: "Abrigo Feliz",
+            description: "Ajude a alimentar mais de 50 cães resgatados. Precisamos de ração seca e úmida.",
+            target: "Meta: 500kg",
+            progress: 15,
+            icon: <Heart className="text-red-500" />,
+            color: "bg-red-50 text-red-700 border-red-100"
         }
     ];
 
@@ -43,6 +63,22 @@ export default function DonationsView() {
             desc: "Espaço de desenvolvimento para crianças e jovens de baixa renda.",
             pix: "doar@casadozezinho.org.br",
             image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=200"
+        },
+        {
+            id: 3,
+            name: "Lar dos Idosos",
+            cause: "Assistência Social",
+            desc: "Acolhimento e cuidado para idosos em situação de vulnerabilidade.",
+            pix: "contato@laridosos.org",
+            image: "https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&q=80&w=200"
+        },
+        {
+            id: 4,
+            name: "Mãos que Ajudam",
+            cause: "Combate à Fome",
+            desc: "Distribuição de marmitas para pessoas em situação de rua.",
+            pix: "ajuda@maos.org",
+            image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=200"
         }
     ];
 
@@ -59,6 +95,27 @@ export default function DonationsView() {
             title: "Livros Didáticos",
             for: "João Pedro (10 anos)",
             desc: "Preciso de livros do 5º ano para acompanhar as aulas.",
+            urgent: false
+        },
+        {
+            id: 3,
+            title: "Muletas",
+            for: "Carlos (45 anos)",
+            desc: "Quebrei a perna e preciso de muletas para me locomover.",
+            urgent: true
+        },
+        {
+            id: 4,
+            title: "Roupas de Bebê",
+            for: "Ana (Gestante)",
+            desc: "Estou grávida de 8 meses e preciso de roupinhas para recém-nascido.",
+            urgent: false
+        },
+        {
+            id: 5,
+            title: "Cama de Solteiro",
+            for: "Lucas (Estudante)",
+            desc: "Mudei para o bairro para estudar e preciso de uma cama usada.",
             urgent: false
         }
     ];

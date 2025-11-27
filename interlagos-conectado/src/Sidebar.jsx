@@ -1,7 +1,6 @@
-import React from 'react';
-import { ChevronRight, Tag, Info, Star, Heart } from 'lucide-react';
+import { ChevronRight, Tag, Info, Star, Heart, ShieldCheck, LogIn } from 'lucide-react';
 
-export default function Sidebar({ currentView, categories = [], selectedCategory, setSelectedCategory, handleAdminClick }) {
+export default function Sidebar({ currentView, categories = [], selectedCategory, setSelectedCategory, handleAdminClick, isAdmin, user, onLogin }) {
 
     const renderContent = () => {
         switch (currentView) {
@@ -28,30 +27,13 @@ export default function Sidebar({ currentView, categories = [], selectedCategory
                             ))}
                         </div>
                     </>
-                );
 
-            case 'news':
-                return (
-                    <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Filtros</h3>
-                        <div className="space-y-1">
-                            {['Todas', 'Urgente', 'Evento', 'Novidade'].map((tag) => (
-                                <button
-                                    key={tag}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                                >
-                                    <Tag size={16} className="text-gray-400" />
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    </>
                 );
 
             case 'donations':
                 return (
                     <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Causas</h3>
+                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Doações</h3>
                         <div className="space-y-1">
                             {['Campanhas', 'ONGs', 'Voluntariado'].map((item) => (
                                 <button
@@ -78,6 +60,24 @@ export default function Sidebar({ currentView, categories = [], selectedCategory
                                 >
                                     <Info size={16} className="text-gray-400" />
                                     {section}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                );
+
+            case 'news':
+                return (
+                    <>
+                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Filtros</h3>
+                        <div className="space-y-1">
+                            {['Urgente', 'Eventos', 'Geral', 'Trânsito'].map((filter) => (
+                                <button
+                                    key={filter}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+                                >
+                                    <Tag size={16} className="text-gray-400" />
+                                    {filter}
                                 </button>
                             ))}
                         </div>

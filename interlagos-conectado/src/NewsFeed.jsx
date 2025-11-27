@@ -43,6 +43,80 @@ export default function NewsFeed() {
         return () => unsubscribe();
     }, []);
 
+    // Mock Data para Notícias (Fallback)
+    const mockNews = [
+        {
+            id: 1,
+            tag: 'Trânsito',
+            title: 'Acidente na Av. Interlagos trava região',
+            content: 'Colisão entre dois carros gera lentidão próximo ao Shopping. Evite a região.',
+            imageUrl: 'https://images.unsplash.com/photo-1566002930283-34b6da931d8e?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 2,
+            tag: 'Comunidade',
+            title: 'Mutirão de Limpeza na Represa',
+            content: 'Voluntários se reúnem neste sábado para limpar as margens. Participe!',
+            imageUrl: 'https://images.unsplash.com/photo-1618477461853-5f8dd68aa395?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 3,
+            tag: 'Esporte',
+            title: 'Corrida de Kart Amador',
+            content: 'Inscrições abertas para o campeonato amador no Kartódromo.',
+            imageUrl: 'https://images.unsplash.com/photo-1516216628859-9bccecab13ca?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 4,
+            tag: 'Cultura',
+            title: 'Cinema ao Ar Livre',
+            content: 'Sessão gratuita no parque neste domingo. Traga sua pipoca!',
+            imageUrl: 'https://images.unsplash.com/photo-1517604931442-710e8b6f7994?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 5,
+            tag: 'Segurança',
+            title: 'Novas Câmeras de Monitoramento',
+            content: 'Prefeitura instala câmeras inteligentes nas principais vias do bairro.',
+            imageUrl: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 6,
+            tag: 'Educação',
+            title: 'Vagas na Creche Municipal',
+            content: 'Abertas as inscrições para o próximo ano letivo. Confira os documentos.',
+            imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 7,
+            tag: 'Saúde',
+            title: 'Campanha de Vacinação',
+            content: 'UBS Interlagos estará aberta neste sábado para vacinação contra gripe.',
+            imageUrl: 'https://images.unsplash.com/photo-1632635938870-843e996f5b9d?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 8,
+            tag: 'Lazer',
+            title: 'Novo Playground no Parque',
+            content: 'Brinquedos novos e acessíveis foram inaugurados hoje.',
+            imageUrl: 'https://images.unsplash.com/photo-1558231980-305e91242d2b?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 9,
+            tag: 'Economia',
+            title: 'Feira Noturna faz sucesso',
+            content: 'Opções gastronômicas atraem moradores toda quinta-feira.',
+            imageUrl: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=200'
+        },
+        {
+            id: 10,
+            tag: 'Clima',
+            title: 'Previsão de Chuva Forte',
+            content: 'Defesa Civil alerta para temporais no fim da tarde. Fique atento.',
+            imageUrl: 'https://images.unsplash.com/photo-1514632542677-48fae74a01b2?auto=format&fit=crop&q=80&w=200'
+        }
+    ];
+
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
 
@@ -103,24 +177,18 @@ export default function NewsFeed() {
                 <div className="space-y-4">
                     {loading ? (
                         <div className="text-center py-10"><div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div></div>
-                    ) : news.length > 0 ? (
-                        news.map((item) => (
-                            <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                                {item.imageUrl && (
-                                    <img src={item.imageUrl} alt={item.title} className="w-20 h-20 rounded-xl object-cover shrink-0" />
-                                )}
-                                <div>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">{item.tag || 'Geral'}</span>
-                                    <h4 className="font-bold text-gray-800 leading-tight mb-2">{item.title}</h4>
-                                    <p className="text-xs text-gray-500 line-clamp-2">{item.content}</p>
-                                </div>
+                    ) : (news.length > 0 ? news : mockNews).map((item) => (
+                        <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                            {item.imageUrl && (
+                                <img src={item.imageUrl} alt={item.title} className="w-20 h-20 rounded-xl object-cover shrink-0" />
+                            )}
+                            <div>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">{item.tag || 'Geral'}</span>
+                                <h4 className="font-bold text-gray-800 leading-tight mb-2">{item.title}</h4>
+                                <p className="text-xs text-gray-500 line-clamp-2">{item.content}</p>
                             </div>
-                        ))
-                    ) : (
-                        <div className="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                            <p className="text-gray-500 text-sm">Nenhuma outra notícia no momento.</p>
                         </div>
-                    )}
+                    ))}
                 </div>
             </div>
         </div>

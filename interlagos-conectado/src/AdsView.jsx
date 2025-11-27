@@ -62,6 +62,56 @@ export default function AdsView() {
             description: 'Bateria 85%, sem marcas de uso. Acompanha carregador.',
             whatsapp: '11999999999',
             time: 'Há 30 min'
+        },
+        {
+            id: 6,
+            category: 'Vendas',
+            title: 'Bicicleta Aro 29',
+            price: 'R$ 900',
+            image: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=300',
+            description: 'Bike seminova, freio a disco, 21 marchas. Ótima para trilha.',
+            whatsapp: '11999999999',
+            time: 'Há 1 dia'
+        },
+        {
+            id: 7,
+            category: 'Serviços',
+            title: 'Manicure e Pedicure',
+            price: 'R$ 45,00',
+            image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=300',
+            description: 'Atendo a domicílio na região de Interlagos. Material esterilizado.',
+            whatsapp: '11999999999',
+            time: 'Há 3 horas'
+        },
+        {
+            id: 8,
+            category: 'Empregos',
+            title: 'Ajudante Geral',
+            price: 'R$ 1.600',
+            image: null,
+            description: 'Vaga para loja de material de construção. Carga e descarga.',
+            whatsapp: '11999999999',
+            time: 'Há 4 horas'
+        },
+        {
+            id: 9,
+            category: 'Imóveis',
+            title: 'Casa 2 Quartos',
+            price: 'R$ 280.000',
+            image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b91d?auto=format&fit=crop&q=80&w=300',
+            description: 'Venda. Garagem para 2 carros, quintal grande. Aceita financiamento.',
+            whatsapp: '11999999999',
+            time: 'Há 2 dias'
+        },
+        {
+            id: 10,
+            category: 'Vendas',
+            title: 'Geladeira Brastemp',
+            price: 'R$ 1.100',
+            image: 'https://images.unsplash.com/photo-1571175443880-49e1d58b794a?auto=format&fit=crop&q=80&w=300',
+            description: 'Frost Free, inox, funcionando perfeitamente. Motivo: mudança.',
+            whatsapp: '11999999999',
+            time: 'Há 6 horas'
         }
     ];
 

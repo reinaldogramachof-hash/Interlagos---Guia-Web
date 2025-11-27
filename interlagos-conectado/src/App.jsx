@@ -3,15 +3,16 @@ import {
   Search, MapPin, Phone, MessageCircle, Star,
   Menu, X, Plus, ChevronRight, Store,
   Utensils, Wrench, ShoppingBag, HeartPulse, Heart, Newspaper, Download, LifeBuoy,
-  Car, GraduationCap, Dog, Zap
+  Car, GraduationCap, Dog, Zap, ShieldCheck, LogIn, Settings
 } from 'lucide-react';
 
 // Importações do Firebase SDK
-import { collection, addDoc, query, onSnapshot, orderBy, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, orderBy, serverTimestamp, doc, updateDoc, increment, getDoc, setDoc } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 // IMPORTANTE: Importar do seu arquivo de configuração local
 import { db, auth } from './firebaseConfig';
+import LoginPage from './LoginPage';
 import Seeder from './Seeder';
 import PremiumCarousel from './PremiumCarousel';
 import SuperPremiumCarousel from './SuperPremiumCarousel';
@@ -21,6 +22,8 @@ import UtilityView from './UtilityView';
 import AdsView from './AdsView';
 import DonationsView from './DonationsView';
 import Sidebar from './Sidebar';
+import LoginModal from './LoginModal';
+import UserProfile from './UserProfile';
 import { mockData } from './mockData';
 import { registerInstallPrompt, installApp, isInstallAvailable } from './pwaUtils';
 
@@ -48,43 +51,89 @@ const categories = [
 ];
 
 export default function App() {
+  // MOCK AUTH STATE
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mockUserRole, setMockUserRole] = useState(null); // 'admin' or 'user'
+
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // Novo estado para controle de role
+  const [showLoginModal, setShowLoginModal] = useState(false); // Controle do modal de login
+
   const [merchants, setMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [showAdmin, setShowAdmin] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState('merchants'); // 'merchants', 'ads', 'news', 'utility'
+  const [currentView, setCurrentView] = useState('merchants');
 
-  const handleAdminClick = () => {
-    if (isAuthenticated) {
+  const handleMockLogin = (role) => {
+    setIsAuthenticated(true);
+    setMockUserRole(role);
+    setIsAdmin(role === 'admin');
+
+    // Mock User Object for compatibility
+    setUser({
+      uid: 'mock-uid',
+      displayName: role === 'admin' ? 'Administrador' : 'Morador',
+      email: role === 'admin' ? 'admin@interlagos.com' : 'morador@interlagos.com',
+      photoURL: null
+    });
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setMockUserRole(null);
+    setUser(null);
+    setIsAdmin(false);
+    setShowAdmin(false);
+  };
+
+
+  // Função para verificar/criar usuário no Firestore e obter role
+  const checkUserRole = async (currentUser) => {
+    if (!currentUser) {
+      setIsAdmin(false);
+      setShowAdmin(false); // Garante que o painel feche ao deslogar
+      return;
+    }
+
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      // Usuário já existe, verifica se é admin
+      const userData = userSnap.data();
+      setIsAdmin(userData.role === 'admin');
+    } else {
+      // Novo usuário, cria registro básico
+      // AUTO-PROMOÇÃO: Se for o email do dono, já cria como admin
+      const isOwner = currentUser.email === 'reinaldogramachof@gmail.com';
+
+      await setDoc(userRef, {
+        email: currentUser.email,
+        name: currentUser.displayName || currentUser.email.split('@')[0], // Fallback para nome se não tiver (email login)
+        photoURL: currentUser.photoURL,
+        role: isOwner ? 'admin' : 'user',
+        createdAt: serverTimestamp()
+      });
+      setIsAdmin(isOwner);
+    }
+  };
+
+  // Override handleAdminClick for Mock Mode
+  const handleAdminClick = async () => {
+    if (mockUserRole === 'admin') {
       setShowAdmin(!showAdmin);
     } else {
-      const pin = prompt("Digite a senha de acesso:");
-      if (pin === '594623') {
-        setIsAuthenticated(true);
-        setShowAdmin(true);
-      } else if (pin !== null) {
-        alert("Senha incorreta!");
-      }
+      alert("Acesso negado. Você está logado como Morador.");
     }
   };
 
   // 1. Autenticação e Carregamento de Dados
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        // Tenta usar token customizado se disponível, senão anônimo
-        await signInAnonymously(auth);
-      } catch (error) {
-        console.error("Erro na autenticação:", error);
-      }
-    };
-    initAuth();
-
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      checkUserRole(currentUser);
     });
 
     // PWA Install Prompt Listener
@@ -152,6 +201,10 @@ export default function App() {
   });
 
   // --- Renderização Principal ---
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleMockLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-gray-800 pb-20">
 
@@ -171,43 +224,78 @@ export default function App() {
           {/* Barra de Busca (Desktop: Centralizada e Larga) */}
           <div className="flex-1 max-w-2xl hidden md:block">
             <div className="relative group">
-              <Search className="absolute left-3 top-3 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+              <Search className="absolute left-3 top-3 text-indigo-300 group-focus-within:text-white transition-colors" size={18} />
               <input
                 type="text"
                 placeholder="O que você procura? (ex: Mecânica, Pizza, Gás)"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl text-gray-800 border-none outline-none ring-2 ring-transparent focus:ring-yellow-400 bg-indigo-800/40 placeholder-indigo-200 text-white shadow-inner transition-all"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl text-white border-none outline-none ring-1 ring-indigo-500/30 focus:ring-yellow-400 bg-indigo-800/50 placeholder-indigo-300 shadow-inner transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-2.5 text-indigo-300 hover:text-white"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </div>
           </div>
 
-          <button
-            onClick={installApp}
-            className="hidden md:flex items-center gap-2 text-xs bg-indigo-800/50 p-2 rounded-lg hover:bg-indigo-600 border border-indigo-500/30 transition-colors backdrop-blur-sm whitespace-nowrap text-indigo-100"
-          >
-            <Download size={14} /> Instalar App
-          </button>
+          {/* Área do Usuário (Desktop) */}
+          <div className="hidden md:flex items-center gap-3">
+            {isInstallAvailable && (
+              <button
+                onClick={installApp}
+                className="flex items-center gap-2 text-xs bg-indigo-800/50 p-2 rounded-lg hover:bg-indigo-600 border border-indigo-500/30 transition-colors backdrop-blur-sm whitespace-nowrap text-indigo-100"
+              >
+                <Download size={14} /> App
+              </button>
+            )}
 
-          <button
-            onClick={handleAdminClick}
-            className="text-xs bg-indigo-800/50 p-2 rounded-lg hover:bg-indigo-600 border border-indigo-500/30 transition-colors backdrop-blur-sm whitespace-nowrap"
-          >
-            {showAdmin ? 'Fechar' : 'Área do Gestor'}
-          </button>
+            {user ? (
+              <UserProfile user={user} isAdmin={isAdmin} onLogout={handleLogout} />
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 transition-colors shadow-sm"
+              >
+                Entrar
+              </button>
+            )}
+          </div>
+
+          {isAdmin && (
+            <button
+              onClick={() => setShowAdmin(!showAdmin)}
+              className={`p-2 rounded-full transition-colors ${showAdmin ? 'bg-yellow-400 text-indigo-900' : 'text-indigo-200 hover:bg-white/10'}`}
+              title="Menu Admin"
+            >
+              <Settings size={24} />
+            </button>
+          )}
         </div>
 
         {/* Barra de Busca (Mobile Only) */}
         <div className="md:hidden px-4 pb-4">
           <div className="relative group">
-            <Search className="absolute left-3 top-3 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+            <Search className="absolute left-3 top-3 text-indigo-300 group-focus-within:text-white transition-colors" size={18} />
             <input
               type="text"
-              placeholder="Buscar..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-gray-800 border-none outline-none ring-2 ring-transparent focus:ring-yellow-400 bg-indigo-800/40 placeholder-indigo-200 text-white shadow-inner transition-all"
+              placeholder="Buscar no bairro..."
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl text-white border-none outline-none ring-1 ring-indigo-500/30 focus:ring-yellow-400 bg-indigo-800/50 placeholder-indigo-300 shadow-inner transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-2.5 text-indigo-300 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -220,7 +308,10 @@ export default function App() {
           categories={categories}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
-          handleAdminClick={handleAdminClick}
+          handleAdminClick={handleAdminClick} // Passando a nova função com lógica de auth
+          isAdmin={isAdmin} // Passando estado de admin
+          user={user} // Passando usuário
+          onLogin={() => setShowLoginModal(true)} // Ação de login
         />
 
         {/* Conteúdo Principal */}
@@ -261,20 +352,20 @@ export default function App() {
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Categorias (Mobile/Tablet Only) */}
                 <div className="lg:hidden mb-6">
-                  <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
+                  <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
                     {categories.map((cat) => (
                       <button
                         key={cat.id}
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`flex flex-col items-center justify-center min-w-[85px] h-20 p-2 rounded-xl text-xs font-medium transition-all snap-start border
+                        className={`flex flex-col items-center justify-center min-w-[80px] h-20 p-2 rounded-2xl text-[10px] font-bold transition-all snap-start border shadow-sm
                           ${selectedCategory === cat.id
-                            ? 'bg-indigo-600 text-white shadow-md border-indigo-600 scale-105'
+                            ? 'bg-indigo-600 text-white border-indigo-600 scale-105 shadow-indigo-200'
                             : 'bg-white text-gray-500 border-gray-100 hover:border-indigo-200 hover:bg-indigo-50'}`}
                       >
-                        <div className={`mb-1 p-1.5 rounded-full ${selectedCategory === cat.id ? 'bg-white/20' : 'bg-gray-100'}`}>
+                        <div className={`mb-1.5 p-2 rounded-full ${selectedCategory === cat.id ? 'bg-white/20' : 'bg-gray-50'}`}>
                           {cat.icon}
                         </div>
-                        <span className="text-center leading-tight">{cat.label}</span>
+                        <span className="text-center leading-tight">{cat.label.split(' ')[0]}</span>
                       </button>
                     ))}
                   </div>
@@ -414,6 +505,16 @@ export default function App() {
 
       {/* Footer Mobile Padding */}
       <div className="h-10 lg:hidden"></div>
+      {/* Modal de Login */}
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSuccess={(user) => {
+            console.log("Logado com sucesso:", user.email);
+            // O estado 'user' será atualizado automaticamente pelo onAuthStateChanged
+          }}
+        />
+      )}
     </div>
   );
 }
