@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Search, MapPin, Phone, MessageCircle, Star,
   Menu, X, Plus, ChevronRight, Store,
-  Utensils, Wrench, ShoppingBag, HeartPulse,
+  Utensils, Wrench, ShoppingBag, HeartPulse, Heart, Newspaper, Download, LifeBuoy,
   Car, GraduationCap, Dog, Zap
 } from 'lucide-react';
 
@@ -19,6 +19,7 @@ import AdminPanel from './AdminPanel';
 import NewsFeed from './NewsFeed';
 import UtilityView from './UtilityView';
 import AdsView from './AdsView';
+import DonationsView from './DonationsView';
 import Sidebar from './Sidebar';
 import { mockData } from './mockData';
 import { registerInstallPrompt, installApp, isInstallAvailable } from './pwaUtils';
@@ -29,8 +30,9 @@ const appId = 'interlagos-v1';
 const navItems = [
   { id: 'merchants', label: 'Comércio', icon: <Store size={18} /> },
   { id: 'ads', label: 'Anúncios', icon: <ShoppingBag size={18} /> },
-  { id: 'news', label: 'Notícias', icon: <Zap size={18} /> },
-  { id: 'utility', label: 'Utilidade', icon: <HeartPulse size={18} /> },
+  { id: 'news', label: 'Notícias', icon: <Newspaper size={18} /> },
+  { id: 'donations', label: 'Doações', icon: <Heart size={18} /> },
+  { id: 'utility', label: 'Utilidade', icon: <LifeBuoy size={18} /> },
 ];
 
 // CATEGORIAS ATUALIZADAS BASEADO NO RELATÓRIO DE INTELIGÊNCIA
@@ -184,7 +186,7 @@ export default function App() {
             onClick={installApp}
             className="hidden md:flex items-center gap-2 text-xs bg-indigo-800/50 p-2 rounded-lg hover:bg-indigo-600 border border-indigo-500/30 transition-colors backdrop-blur-sm whitespace-nowrap text-indigo-100"
           >
-            <Zap size={14} /> Instalar App
+            <Download size={14} /> Instalar App
           </button>
 
           <button
@@ -400,6 +402,9 @@ export default function App() {
                 <NewsFeed />
               </div>
             )}
+
+            {/* VIEW: DOAÇÕES */}
+            {currentView === 'donations' && <DonationsView />}
 
             {/* VIEW: UTILIDADE */}
             {currentView === 'utility' && <UtilityView />}

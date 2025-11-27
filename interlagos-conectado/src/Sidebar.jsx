@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Tag, Info, Star } from 'lucide-react';
+import { ChevronRight, Tag, Info, Star, Heart } from 'lucide-react';
 
 export default function Sidebar({ currentView, categories = [], selectedCategory, setSelectedCategory, handleAdminClick }) {
 
@@ -42,6 +42,24 @@ export default function Sidebar({ currentView, categories = [], selectedCategory
                                 >
                                     <Tag size={16} className="text-gray-400" />
                                     {tag}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                );
+
+            case 'donations':
+                return (
+                    <>
+                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Causas</h3>
+                        <div className="space-y-1">
+                            {['Campanhas', 'ONGs', 'Voluntariado'].map((item) => (
+                                <button
+                                    key={item}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+                                >
+                                    <Heart size={16} className="text-gray-400" />
+                                    {item}
                                 </button>
                             ))}
                         </div>
