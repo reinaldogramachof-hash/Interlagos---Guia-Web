@@ -20,7 +20,6 @@ import NewsFeed from './NewsFeed';
 import UtilityView from './UtilityView';
 import AdsView from './AdsView';
 import Sidebar from './Sidebar';
-import ErrorBoundary from './ErrorBoundary';
 import { mockData } from './mockData';
 import { registerInstallPrompt, installApp, isInstallAvailable } from './pwaUtils';
 
@@ -224,7 +223,8 @@ export default function App() {
 
         {/* Conteúdo Principal */}
         <main className="flex-1 min-w-0">
-          <ErrorBoundary>
+          {/* Conteúdo Principal */}
+          <main className="flex-1 min-w-0">
             {/* Navigation Tabs (Mobile & Desktop) */}
             <div className="bg-white border-b border-gray-200 sticky top-[72px] z-40 mb-6 shadow-sm">
               <div className="flex overflow-x-auto scrollbar-hide">
@@ -403,7 +403,7 @@ export default function App() {
 
             {/* VIEW: UTILIDADE */}
             {currentView === 'utility' && <UtilityView />}
-          </ErrorBoundary>
+          </main>
         </main>
       </div>
 

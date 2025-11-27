@@ -92,7 +92,9 @@ export default function Sidebar({ currentView, categories = [], selectedCategory
     return (
         <aside className="hidden lg:block w-64 sticky top-24 shrink-0 animate-in fade-in slide-in-from-left-4">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 min-h-[300px]">
-                {renderContent()}
+                <div key={currentView} className="animate-in fade-in slide-in-from-left-2 duration-300">
+                    {renderContent()}
+                </div>
             </div>
 
             {/* Banner Promocional Sidebar */}
