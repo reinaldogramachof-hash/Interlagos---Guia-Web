@@ -1,0 +1,397 @@
+export const mockData = [
+    // --- SUPER PREMIUM (Super Destaques) - Total 5 ---
+    {
+        id: 'mock-1',
+        name: "Supermercado Rosalina",
+        category: "Comércio",
+        description: "O mercado da família no coração do Interlagos. Aceitamos Cartão Rosalina. Padaria, açougue e ofertas diárias.",
+        whatsapp: "12991002233",
+        address: "R. Ubirajara Raimundo de Souza, 194",
+        isPremium: true,
+        plan: 'super',
+        rating: 4.9,
+        views: 120
+    },
+    {
+        id: 'mock-2',
+        name: "Point Do Pastel SJC",
+        category: "Alimentação",
+        description: "O melhor pastel da Av. Nicanor! Massa caseira, caldo de cana e lanches rápidos. Aberto até às 23h.",
+        whatsapp: "12988776655",
+        address: "Av. Nicanor Reis, 444",
+        isPremium: true,
+        plan: 'super',
+        rating: 4.8,
+        views: 98
+    },
+    {
+        id: 'mock-16',
+        name: "Academia Ironworks",
+        category: "Saúde",
+        description: "A maior estrutura do bairro. Musculação, Crossfit e Natação. Planos a partir de R$ 89,90.",
+        whatsapp: "12997778899",
+        address: "Av. Nicanor Reis, 800",
+        isPremium: true,
+        plan: 'super',
+        rating: 4.9,
+        views: 150
+    },
+    {
+        id: 'mock-17',
+        name: "Colégio Futuro",
+        category: "Educação",
+        description: "Ensino bilíngue do maternal ao médio. Matrículas abertas com desconto especial para moradores.",
+        whatsapp: "12996665544",
+        address: "R. Prof. José Silveira, 100",
+        isPremium: true,
+        plan: 'super',
+        rating: 4.8,
+        views: 110
+    },
+    {
+        id: 'mock-18',
+        name: "Hamburgueria Artesanal",
+        category: "Alimentação",
+        description: "Burgers de verdade na brasa. Blend exclusivo 180g. Delivery grátis acima de R$ 50.",
+        whatsapp: "12995554433",
+        address: "R. Ubirajara, 300",
+        isPremium: true,
+        plan: 'super',
+        rating: 4.7,
+        views: 135
+    },
+
+    // --- PREMIUM (Destaques Normais) - Total 10 ---
+    {
+        id: 'mock-3',
+        name: "Clínica Med Odonto",
+        category: "Saúde",
+        description: "Dra. Camilla Medina. Ortodontia, Implantes e Estética Dental. Sorriso novo perto de você.",
+        whatsapp: "12999887744",
+        address: "Av. Nicanor Reis, 443",
+        isPremium: true,
+        plan: 'premium',
+        views: 85
+    },
+    {
+        id: 'mock-4',
+        name: "Interlagos Auto Center",
+        category: "Automotivo",
+        description: "Mecânica geral, suspensão, freios e troca de óleo. Diagnóstico computadorizado.",
+        whatsapp: "12997766554",
+        address: "R. Prof. José Silveira, 21",
+        isPremium: true,
+        plan: 'premium',
+        views: 76
+    },
+    {
+        id: 'mock-5',
+        name: "Pizzaria Dominius",
+        category: "Alimentação",
+        description: "A pizza mais recheada do bairro. Peça pelo App ou Zap. Promoção de Borda Recheada Grátis às terças.",
+        whatsapp: "12981122334",
+        address: "Delivery - Parque Interlagos",
+        isPremium: true,
+        plan: 'premium',
+        views: 150
+    },
+    {
+        id: 'mock-19',
+        name: "Lava Rápido JetWash",
+        category: "Automotivo",
+        description: "Lavagem detalhada, polimento e cristalização. Buscamos e levamos seu carro.",
+        whatsapp: "12994443322",
+        address: "Av. Nicanor Reis, 1020",
+        isPremium: true,
+        plan: 'premium',
+        views: 65
+    },
+    {
+        id: 'mock-20',
+        name: "Drogasil Interlagos",
+        category: "Saúde",
+        description: "Medicamentos, perfumaria e dermocosméticos. Farmacêutico de plantão.",
+        whatsapp: "1239312233",
+        address: "Av. Nicanor Reis, 500",
+        isPremium: true,
+        plan: 'premium',
+        views: 90
+    },
+    {
+        id: 'mock-21',
+        name: "Pet Shop Amigo Fiel",
+        category: "Pet",
+        description: "Tudo para seu melhor amigo. Banho, tosa, rações premium e acessórios.",
+        whatsapp: "12993332211",
+        address: "R. João Miacci, 45",
+        isPremium: true,
+        plan: 'premium',
+        views: 70
+    },
+    {
+        id: 'mock-22',
+        name: "Salão Beleza Pura",
+        category: "Saúde",
+        description: "Cabelo, manicure, pedicure e depilação. Dia da Noiva e pacotes mensais.",
+        whatsapp: "12992221100",
+        address: "R. Ubirajara, 550",
+        isPremium: true,
+        plan: 'premium',
+        views: 55
+    },
+    {
+        id: 'mock-23',
+        name: "Padaria Pão de Ouro",
+        category: "Alimentação",
+        description: "Pão quentinho a toda hora. Bolos, tortas e encomendas para festas.",
+        whatsapp: "12991110099",
+        address: "Av. Nicanor Reis, 200",
+        isPremium: true,
+        plan: 'premium',
+        views: 110
+    },
+    {
+        id: 'mock-24',
+        name: "CellFix Assistência",
+        category: "Serviços",
+        description: "Conserto de celulares e tablets. Troca de tela, bateria e conectores. Orçamento grátis.",
+        whatsapp: "12998887766",
+        address: "Galeria Interlagos, Loja 4",
+        isPremium: true,
+        plan: 'premium',
+        views: 45
+    },
+    {
+        id: 'mock-25',
+        name: "Wizard Idiomas",
+        category: "Educação",
+        description: "Inglês, Espanhol e Francês. Metodologia exclusiva. Turmas para crianças e adultos.",
+        whatsapp: "1239324455",
+        address: "Av. Nicanor Reis, 600",
+        isPremium: true,
+        plan: 'premium',
+        views: 80
+    },
+
+    // --- BASIC (Padrão) - Total 20 ---
+    {
+        id: 'mock-6',
+        name: "Lima Pet Shop",
+        category: "Pet",
+        description: "Rações, acessórios e consultório veterinário. Banho e Tosa com agendamento.",
+        whatsapp: "12996655443",
+        address: "Av. Nicanor Reis, 55",
+        isPremium: false,
+        plan: 'basic',
+        views: 45
+    },
+    {
+        id: 'mock-7',
+        name: "NB Gym Academia",
+        category: "Saúde",
+        description: "Musculação Old School e aeróbico. Aceitamos Wellhub (Gympass). Venha treinar com a gente.",
+        whatsapp: "12995544332",
+        address: "R. Ubirajara Raimundo de Souza, 352",
+        isPremium: false,
+        plan: 'basic',
+        views: 60
+    },
+    {
+        id: 'mock-8',
+        name: "Genaro Disk Marmitex",
+        category: "Alimentação",
+        description: "Comida caseira de verdade. Entregamos em todo o Interlagos sem taxa. Almoço e Jantar.",
+        whatsapp: "12994433221",
+        address: "R. João Miacci, 10",
+        isPremium: false,
+        plan: 'basic',
+        views: 30
+    },
+    {
+        id: 'mock-9',
+        name: "Iberê Barbearia Club",
+        category: "Saúde",
+        description: "Corte, barba e bigode. Ambiente climatizado e cerveja gelada. Clube de assinatura mensal.",
+        whatsapp: "12993322110",
+        address: "Próximo à Praça Central",
+        isPremium: false,
+        plan: 'basic',
+        views: 25
+    },
+    {
+        id: 'mock-10',
+        name: "CESC Escola Infantil",
+        category: "Educação",
+        description: "Educação com amor. Do berçário ao pré. Matrículas abertas para 2026.",
+        whatsapp: "12992211009",
+        address: "Parque Interlagos",
+        isPremium: false,
+        plan: 'basic',
+        views: 80
+    },
+    {
+        id: 'mock-11',
+        name: "Depósito de Gás Chama Azul",
+        category: "Serviços",
+        description: "Gás de cozinha e água mineral. Entrega rápida (moto). Aceitamos Pix e Cartão.",
+        whatsapp: "12991100998",
+        address: "Atendimento Volante",
+        isPremium: false,
+        plan: 'basic',
+        views: 55
+    },
+    {
+        id: 'mock-12',
+        name: "Eletricista Zé Carlos",
+        category: "Serviços",
+        description: "Instalações elétricas, chuveiros, tomadas e padrões de energia. Atendo emergências.",
+        whatsapp: "12998877665",
+        address: "",
+        isPremium: false,
+        plan: 'basic',
+        views: 20
+    },
+    {
+        id: 'mock-13',
+        name: "Manicure & Pedicure da Rose",
+        category: "Saúde",
+        description: "Unhas decoradas, spa dos pés e sobrancelha. Atendimento à domicílio ou no local.",
+        whatsapp: "12997766554",
+        address: "R. Ubirajara, altura do 400",
+        isPremium: false,
+        plan: 'basic',
+        views: 35
+    },
+    {
+        id: 'mock-14',
+        name: "Oficina de Motos Duas Rodas",
+        category: "Automotivo",
+        description: "Especialista em Honda e Yamaha. Pneus, relação e revisão geral.",
+        whatsapp: "12996655443",
+        address: "Av. Nicanor Reis",
+        isPremium: false,
+        plan: 'basic',
+        views: 40
+    },
+    {
+        id: 'mock-15',
+        name: "Bazar e Papelaria Interlagos",
+        category: "Comércio",
+        description: "Material escolar, xerox, impressão e presentes. Recarga de celular.",
+        whatsapp: "",
+        address: "Próximo à escola",
+        isPremium: false,
+        plan: 'basic',
+        views: 15
+    },
+    {
+        id: 'mock-26',
+        name: "Costureira da Maria",
+        category: "Serviços",
+        description: "Ajustes, barras, zíperes e roupas sob medida. Trabalho rápido e caprichoso.",
+        whatsapp: "12995556677",
+        address: "R. Ubirajara, 120",
+        isPremium: false,
+        plan: 'basic',
+        views: 18
+    },
+    {
+        id: 'mock-27',
+        name: "Chaveiro 24h Interlagos",
+        category: "Serviços",
+        description: "Abertura de portas, cópias de chaves e cadeados. Atendimento de emergência.",
+        whatsapp: "12994445566",
+        address: "Atendimento Móvel",
+        isPremium: false,
+        plan: 'basic',
+        views: 22
+    },
+    {
+        id: 'mock-28',
+        name: "Borracharia do Zé",
+        category: "Automotivo",
+        description: "Conserto de pneus, vulcanização e troca. Aberto aos domingos.",
+        whatsapp: "12993334455",
+        address: "Av. Nicanor Reis, 900",
+        isPremium: false,
+        plan: 'basic',
+        views: 30
+    },
+    {
+        id: 'mock-29',
+        name: "Açaí do Jota",
+        category: "Alimentação",
+        description: "O melhor açaí da região. Diversos acompanhamentos e tamanhos. Copo ou tigela.",
+        whatsapp: "12992223344",
+        address: "Praça Central",
+        isPremium: false,
+        plan: 'basic',
+        views: 40
+    },
+    {
+        id: 'mock-30',
+        name: "Doceria Sonho Doce",
+        category: "Alimentação",
+        description: "Bolos de pote, brigadeiros gourmet e doces finos. Aceitamos encomendas.",
+        whatsapp: "12991112233",
+        address: "R. João Miacci, 88",
+        isPremium: false,
+        plan: 'basic',
+        views: 28
+    },
+    {
+        id: 'mock-31',
+        name: "Papelaria Criativa",
+        category: "Comércio",
+        description: "Artigos de papelaria, escritório e informática. Impressão colorida e plastificação.",
+        whatsapp: "12998889900",
+        address: "Av. Nicanor Reis, 330",
+        isPremium: false,
+        plan: 'basic',
+        views: 15
+    },
+    {
+        id: 'mock-32',
+        name: "Loja de Roupas Estilo",
+        category: "Comércio",
+        description: "Moda feminina e masculina. Jeans, camisetas e acessórios. Preço único R$ 49,90.",
+        whatsapp: "12997778800",
+        address: "R. Ubirajara, 410",
+        isPremium: false,
+        plan: 'basic',
+        views: 35
+    },
+    {
+        id: 'mock-33',
+        name: "Barbearia Vintage",
+        category: "Saúde",
+        description: "Corte clássico e moderno. Toalha quente e navalha. Agende seu horário.",
+        whatsapp: "12996667788",
+        address: "R. Prof. José Silveira, 50",
+        isPremium: false,
+        plan: 'basic',
+        views: 20
+    },
+    {
+        id: 'mock-34',
+        name: "Manutenção de PC InfoTech",
+        category: "Serviços",
+        description: "Formatação, limpeza e upgrade de computadores e notebooks. Remoção de vírus.",
+        whatsapp: "12995556699",
+        address: "R. Ubirajara, 600",
+        isPremium: false,
+        plan: 'basic',
+        views: 12
+    },
+    {
+        id: 'mock-35',
+        name: "Aulas de Violão e Guitarra",
+        category: "Educação",
+        description: "Aprenda a tocar do zero. Professor com 10 anos de experiência. Aulas presenciais ou online.",
+        whatsapp: "12994445588",
+        address: "R. João Miacci, 120",
+        isPremium: false,
+        plan: 'basic',
+        views: 10
+    }
+];

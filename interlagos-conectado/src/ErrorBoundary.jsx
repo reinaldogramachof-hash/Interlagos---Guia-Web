@@ -1,0 +1,43 @@
+import React from 'react';
+
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null, errorInfo: null };
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        this.setState({ error, errorInfo });
+        console.error("Uncaught error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="p-8 bg-red-50 text-red-900 rounded-xl m-4 border border-red-200">
+                    <h2 className="text-xl font-bold mb-2">Ops! Algo deu errado.</h2>
+                    <p className="mb-4">Ocorreu um erro ao carregar esta seção.</p>
+                    <details className="whitespace-pre-wrap text-xs font-mono bg-white p-4 rounded border border-red-100">
+                        {this.state.error && this.state.error.toString()}
+                        <br />
+                        {this.state.errorInfo && this.state.errorInfo.componentStack}
+                    </details>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700"
+                    >
+                        Recarregar Página
+                    </button>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
+export default ErrorBoundary;
