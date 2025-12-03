@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Phone, MapPin, Bus, Train, AlertTriangle, Stethoscope, Building2, Zap, Droplet, Wifi, Shield, Truck, ChevronRight } from 'lucide-react';
 import ServiceDetailModal from './ServiceDetailModal';
 
-export default function UtilityView() {
+export default function UtilityView({ user }) {
     const [selectedService, setSelectedService] = useState(null);
 
     const emergencyServices = [

@@ -35,7 +35,7 @@ const mockNews = [
     }
 ];
 
-export default function NewsFeed() {
+export default function NewsFeed({ user }) {
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState(null);

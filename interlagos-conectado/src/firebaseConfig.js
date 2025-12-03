@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+// import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -24,4 +25,11 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
+// Initialize App Check (Uncomment and add site key when ready)
+// const appCheck = initializeAppCheck(app, {
+//     provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_SITE_KEY'),
+//     isTokenAutoRefreshEnabled: true
+// });
+
 export { db, auth, analytics, googleProvider };
+// export { appCheck };

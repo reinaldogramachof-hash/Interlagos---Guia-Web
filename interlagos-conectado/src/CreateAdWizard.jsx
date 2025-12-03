@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Camera, ChevronRight, ChevronLeft, Check, Upload } from 'lucide-react';
+import { Camera, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from './firebaseConfig';
 import Modal from './Modal';
 
-export default function CreateAdWizard({ isOpen, onClose }) {
+export default function CreateAdWizard({ isOpen, onClose, user }) {
     const [step, setStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         category: '',
         title: '',
         price: '',
+        whatsapp: '',
         description: '',
-        images: []
+        image: '' // URL simples por enquanto
     });
 
     const categories = ['Vendas', 'Empregos', 'Imóveis', 'Serviços'];
@@ -17,18 +21,45 @@ export default function CreateAdWizard({ isOpen, onClose }) {
     const handleNext = () => setStep(prev => prev + 1);
     const handleBack = () => setStep(prev => prev - 1);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aqui entraria a lógica de envio para o Firebase
-        alert("Anúncio enviado para aprovação!");
-        onClose();
-        setStep(1);
-        setFormData({ category: '', title: '', price: '', description: '', images: [] });
+
+        if (!user) {
+            alert("Você precisa estar logado para publicar um anúncio!");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await addDoc(collection(db, 'ads'), {
+                ...formData,
+                createdAt: serverTimestamp(),
+                status: 'active',
+                userId: user.uid,
+                userName: user.displayName || 'Usuário Anônimo',
+                userPhoto: user.photoURL || null
+            });
+            alert("Anúncio publicado com sucesso!");
+            onClose();
+            setStep(1);
+            setFormData({ category: '', title: '', price: '', whatsapp: '', description: '', image: '' });
+        } catch (error) {
+            console.error("Erro ao publicar:", error);
+            alert("Erro ao publicar anúncio.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Criar Anúncio">
             <div className="py-2">
+                {!user && (
+                    <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
+                        <span className="font-bold">Atenção:</span> Você precisa fazer login para publicar.
+                    </div>
+                )}
+
                 {/* Progress Bar */}
                 <div className="flex items-center justify-between mb-8 px-2">
                     {[1, 2, 3].map((s) => (
@@ -67,20 +98,25 @@ export default function CreateAdWizard({ isOpen, onClose }) {
                         </div>
                     )}
 
-                    {/* STEP 2: Fotos */}
+                    {/* STEP 2: Fotos (Simplificado) */}
                     {step === 2 && (
                         <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                             <div className="text-center">
-                                <h3 className="text-lg font-bold text-gray-800">Adicione Fotos</h3>
-                                <p className="text-sm text-gray-500">Mostre os detalhes do seu produto</p>
+                                <h3 className="text-lg font-bold text-gray-800">Adicione uma Foto</h3>
+                                <p className="text-sm text-gray-500">Cole a URL de uma imagem (ex: Unsplash) por enquanto.</p>
                             </div>
 
-                            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-                                <div className="bg-white p-4 rounded-full shadow-sm mb-3">
-                                    <Camera size={32} className="text-indigo-600" />
-                                </div>
-                                <span className="font-bold text-indigo-600">Adicionar Fotos</span>
-                                <span className="text-xs text-gray-400 mt-1">Até 5 imagens</span>
+                            <input
+                                type="text"
+                                placeholder="https://exemplo.com/imagem.jpg"
+                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                value={formData.image}
+                                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                            />
+
+                            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 flex flex-col items-center justify-center bg-gray-50 text-gray-400">
+                                <Camera size={32} className="mb-2" />
+                                <span className="text-xs">Upload de arquivo em breve</span>
                             </div>
                         </div>
                     )}
@@ -89,31 +125,44 @@ export default function CreateAdWizard({ isOpen, onClose }) {
                     {step === 3 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Título do Anúncio</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Título</label>
                                 <input
                                     type="text"
                                     className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    placeholder="Ex: Bicicleta Aro 29 seminova"
+                                    placeholder="Ex: Bicicleta Aro 29"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                                     required
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Preço</label>
-                                <input
-                                    type="text"
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    placeholder="R$ 0,00"
-                                    value={formData.price}
-                                    onChange={e => setFormData({ ...formData, price: e.target.value })}
-                                    required
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">Preço</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        placeholder="R$ 0,00"
+                                        value={formData.price}
+                                        onChange={e => setFormData({ ...formData, price: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">WhatsApp</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        placeholder="11999998888"
+                                        value={formData.whatsapp}
+                                        onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Descrição</label>
                                 <textarea
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none h-32 resize-none"
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none"
                                     placeholder="Conte mais detalhes..."
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -147,9 +196,10 @@ export default function CreateAdWizard({ isOpen, onClose }) {
                         ) : (
                             <button
                                 type="submit"
+                                disabled={isSubmitting}
                                 className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors shadow-lg shadow-green-200"
                             >
-                                <Check size={20} /> Publicar Anúncio
+                                {isSubmitting ? 'Enviando...' : <><Check size={20} /> Publicar</>}
                             </button>
                         )}
                     </div>

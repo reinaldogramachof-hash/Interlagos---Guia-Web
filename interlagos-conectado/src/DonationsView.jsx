@@ -1,88 +1,36 @@
-import React, { useState } from 'react';
-import { Heart, HandHeart, Gift, Users, ChevronRight, MessageCircle, PlusCircle, AlertCircle, Building2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Heart, HandHeart, Gift, ChevronRight, MessageCircle, PlusCircle } from 'lucide-react';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from './firebaseConfig';
 import CampaignDetailModal from './CampaignDetailModal';
 
-export default function DonationsView() {
+export default function DonationsView({ user }) {
     const [activeTab, setActiveTab] = useState('campaigns');
     const [selectedCampaign, setSelectedCampaign] = useState(null);
+    const [campaigns, setCampaigns] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const campaigns = [
-        {
-            id: 1,
-            title: 'Inverno Solidário 2024',
-            organizer: 'Associação de Moradores',
-            image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=500',
-            raised: '150 cobertores',
-            goal: '500 cobertores',
-            progress: 30,
-            endDate: '30/06/2024',
-            description: 'Neste inverno, ajude quem mais precisa. Estamos arrecadando cobertores e agasalhos em bom estado para distribuição nas comunidades carentes da região de Interlagos.',
-            collectionPoints: [
-                { name: 'Sede da Associação', address: 'Rua dos Moradores, 123', hours: 'Seg-Sex, 9h-18h' },
-                { name: 'Mercado do Bairro', address: 'Av. Principal, 500', hours: 'Todos os dias, 8h-20h' }
-            ],
-            pix: 'associacao@interlagos.com.br'
-        },
-        {
-            id: 2,
-            title: 'Reforma da Creche Comunitária',
-            organizer: 'ONG Criança Feliz',
-            image: 'https://images.unsplash.com/photo-1502086223501-60051f87b847?auto=format&fit=crop&q=80&w=500',
-            raised: 'R$ 5.000',
-            goal: 'R$ 20.000',
-            progress: 25,
-            endDate: '15/07/2024',
-            description: 'A Creche Comunitária precisa de reparos urgentes no telhado e pintura. Sua doação ajudará a manter um ambiente seguro e acolhedor para nossas crianças.',
-            pix: 'ong@criancafeliz.org.br'
-        },
-        {
-            id: 3,
-            title: 'Cestas Básicas para Famílias',
-            organizer: 'Paróquia São José',
-            image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=500',
-            raised: '80 cestas',
-            goal: '200 cestas',
-            progress: 40,
-            endDate: 'Permanente',
-            description: 'Arrecadação mensal de alimentos não perecíveis para montagem de cestas básicas destinadas às famílias cadastradas na assistência social da paróquia.',
-            collectionPoints: [
-                { name: 'Secretaria da Paróquia', address: 'Praça da Matriz, s/n', hours: 'Ter-Sáb, 8h-17h' }
-            ]
-        }
-    ];
+    // Carregar campanhas reais
+    useEffect(() => {
+        setLoading(true);
+        const q = query(collection(db, 'campaigns'), orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setCampaigns(fetched);
+            setLoading(false);
+        }, (error) => {
+            console.error("Erro ao carregar campanhas:", error);
+            setLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
+    // Mock para outras abas (por enquanto)
     const ngos = [
-        {
-            id: 1,
-            name: 'ONG Criança Feliz',
-            cause: 'Educação Infantil',
-            description: 'Atendemos 150 crianças em situação de vulnerabilidade.',
-            image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=200'
-        },
-        {
-            id: 2,
-            name: 'Proteção Animal Interlagos',
-            cause: 'Causa Animal',
-            description: 'Resgate e reabilitação de animais de rua.',
-            image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=200'
-        }
+        { id: 1, name: 'ONG Criança Feliz', cause: 'Educação', description: 'Atendemos 150 crianças.', image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=200' },
     ];
-
     const requests = [
-        {
-            id: 1,
-            title: "Cadeira de Rodas",
-            for: "Dona Maria (78 anos)",
-            desc: "Preciso emprestada por 2 meses enquanto me recupero de uma cirurgia.",
-            urgent: true
-        },
-        {
-            id: 2,
-            title: "Roupas de Bebê",
-            for: "Ana (Gestante)",
-            desc: "Estou grávida de 8 meses e preciso de roupinhas para recém-nascido.",
-            urgent: false
-        }
+        { id: 1, title: "Cadeira de Rodas", for: "Dona Maria", desc: "Preciso emprestada por 2 meses.", urgent: true },
     ];
 
     return (
@@ -98,65 +46,52 @@ export default function DonationsView() {
 
             {/* Tabs */}
             <div className="flex p-1 bg-gray-100 rounded-xl mb-6 mx-4">
-                <button
-                    onClick={() => setActiveTab('campaigns')}
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'campaigns' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    Campanhas
-                </button>
-                <button
-                    onClick={() => setActiveTab('ngos')}
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'ngos' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    ONGs Locais
-                </button>
-                <button
-                    onClick={() => setActiveTab('mural')}
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'mural' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    Mural
-                </button>
+                <button onClick={() => setActiveTab('campaigns')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'campaigns' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500'}`}>Campanhas</button>
+                <button onClick={() => setActiveTab('ngos')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'ngos' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500'}`}>ONGs</button>
+                <button onClick={() => setActiveTab('mural')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'mural' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500'}`}>Mural</button>
             </div>
 
             {/* Content */}
             <div className="px-4 lg:px-0">
                 {activeTab === 'campaigns' && (
                     <div className="space-y-6">
-                        {campaigns.map((campaign) => (
-                            <div
-                                key={campaign.id}
-                                onClick={() => setSelectedCampaign(campaign)}
-                                className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group"
-                            >
-                                <div className="relative h-48">
-                                    <img src={campaign.image} alt={campaign.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    <div className="absolute top-3 left-3 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                                        Em andamento
-                                    </div>
-                                </div>
-                                <div className="p-5">
-                                    <h3 className="font-bold text-gray-900 text-lg mb-1">{campaign.title}</h3>
-                                    <p className="text-xs text-gray-500 mb-4">Org: {campaign.organizer}</p>
-
-                                    <div className="mb-4">
-                                        <div className="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                            <span>{campaign.raised}</span>
-                                            <span>Meta: {campaign.goal}</span>
+                        {loading ? <p className="text-center text-gray-400">Carregando campanhas...</p> :
+                            campaigns.length === 0 ? <p className="text-center text-gray-400">Nenhuma campanha ativa no momento.</p> :
+                                campaigns.map((campaign) => (
+                                    <div
+                                        key={campaign.id}
+                                        onClick={() => setSelectedCampaign(campaign)}
+                                        className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group"
+                                    >
+                                        <div className="relative h-48 bg-gray-200">
+                                            <img src={campaign.image || 'https://via.placeholder.com/500x200?text=Campanha'} alt={campaign.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <div className="absolute top-3 left-3 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                                                Em andamento
+                                            </div>
                                         </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2">
-                                            <div
-                                                className="bg-green-500 h-2 rounded-full transition-all duration-1000"
-                                                style={{ width: `${campaign.progress}%` }}
-                                            ></div>
+                                        <div className="p-5">
+                                            <h3 className="font-bold text-gray-900 text-lg mb-1">{campaign.title}</h3>
+                                            <p className="text-xs text-gray-500 mb-4">Org: {campaign.organizer}</p>
+
+                                            <div className="mb-4">
+                                                <div className="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                                                    <span>{campaign.raised || '0'}</span>
+                                                    <span>Meta: {campaign.goal}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-100 rounded-full h-2">
+                                                    <div
+                                                        className="bg-green-500 h-2 rounded-full transition-all duration-1000"
+                                                        style={{ width: `${Math.min(campaign.progress || 0, 100)}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            <button className="w-full bg-pink-50 text-pink-600 py-3 rounded-xl font-bold text-sm hover:bg-pink-100 transition-colors">
+                                                Quero Ajudar
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <button className="w-full bg-pink-50 text-pink-600 py-3 rounded-xl font-bold text-sm hover:bg-pink-100 transition-colors">
-                                        Quero Ajudar
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                                ))}
                     </div>
                 )}
 
@@ -168,7 +103,6 @@ export default function DonationsView() {
                                 <div>
                                     <h3 className="font-bold text-gray-900 text-sm">{ngo.name}</h3>
                                     <span className="text-xs text-pink-600 font-medium bg-pink-50 px-2 py-0.5 rounded-full">{ngo.cause}</span>
-                                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{ngo.description}</p>
                                 </div>
                                 <ChevronRight className="text-gray-300 ml-auto" size={20} />
                             </div>
@@ -178,34 +112,6 @@ export default function DonationsView() {
 
                 {activeTab === 'mural' && (
                     <div className="space-y-4">
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                            <div className="flex items-start gap-3">
-                                <div className="bg-yellow-100 p-2 rounded-full text-yellow-700">
-                                    <HandHeart size={20} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-yellow-900 text-sm">Preciso de Cadeira de Rodas</h3>
-                                    <p className="text-xs text-yellow-800 mt-1">"Minha mãe sofreu um acidente e precisa de uma cadeira de rodas emprestada por 2 meses."</p>
-                                    <p className="text-[10px] text-yellow-600 mt-2 font-bold">- Maria S., Jd. Satélite</p>
-                                    <button className="mt-3 text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-lg font-bold">Entrar em Contato</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                            <div className="flex items-start gap-3">
-                                <div className="bg-blue-100 p-2 rounded-full text-blue-700">
-                                    <Gift size={20} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-blue-900 text-sm">Doação de Roupas de Bebê</h3>
-                                    <p className="text-xs text-blue-800 mt-1">"Tenho muitas roupinhas de recém-nascido (menino) para doar. Retirar no local."</p>
-                                    <p className="text-[10px] text-blue-600 mt-2 font-bold">- João P., Veleiros</p>
-                                    <button className="mt-3 text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">Quero Buscar</button>
-                                </div>
-                            </div>
-                        </div>
-
                         {requests.map((req) => (
                             <div key={req.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden">
                                 {req.urgent && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">URGENTE</div>}
@@ -214,7 +120,7 @@ export default function DonationsView() {
                                 <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg italic">"{req.desc}"</p>
                                 <button className="w-full border border-green-200 text-green-700 bg-green-50 py-2 rounded-xl font-bold text-sm hover:bg-green-100 transition-colors flex items-center justify-center gap-2">
                                     <MessageCircle size={16} />
-                                    Responder no Chat
+                                    Responder
                                 </button>
                             </div>
                         ))}
@@ -222,19 +128,20 @@ export default function DonationsView() {
                 )}
             </div>
 
-            {/* CTA Final */}
             <div className="mt-8 text-center px-6">
-                <button className="text-rose-600 font-bold text-sm hover:underline flex items-center justify-center gap-1 mx-auto">
+                <button
+                    onClick={() => {
+                        if (!user) alert("Faça login para cadastrar.");
+                        else alert("Funcionalidade em desenvolvimento! Entre em contato pelo WhatsApp.");
+                    }}
+                    className="text-rose-600 font-bold text-sm hover:underline flex items-center justify-center gap-1 mx-auto"
+                >
                     <PlusCircle size={16} />
                     Cadastrar minha ONG ou Pedido
                 </button>
             </div>
 
-            <CampaignDetailModal
-                isOpen={!!selectedCampaign}
-                onClose={() => setSelectedCampaign(null)}
-                campaign={selectedCampaign}
-            />
+            <CampaignDetailModal isOpen={!!selectedCampaign} onClose={() => setSelectedCampaign(null)} campaign={selectedCampaign} />
         </div>
     );
 }
