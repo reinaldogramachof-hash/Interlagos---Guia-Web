@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Star, Store, MessageCircle, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
-export default function SuperPremiumCarousel({ merchants, categories }) {
+export default function SuperPremiumCarousel({ merchants, categories, onMerchantClick }) {
     const scrollRef = useRef(null);
     const [isPaused, setIsPaused] = useState(false);
 
@@ -59,7 +59,7 @@ export default function SuperPremiumCarousel({ merchants, categories }) {
             {/* Navigation Buttons */}
             <button
                 onClick={scrollLeft}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-4 rounded-full shadow-xl text-amber-600 hover:bg-amber-50 hover:scale-110 transition-all backdrop-blur-sm -ml-2 border-2 border-amber-100"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-4 rounded-full shadow-xl text-amber-600 hover:bg-amber-50 hover:scale-110 transition-all backdrop-blur-sm -ml-2 border-2 border-amber-100 hidden md:block"
                 aria-label="Scroll left"
             >
                 <ChevronLeft size={28} />
@@ -67,7 +67,7 @@ export default function SuperPremiumCarousel({ merchants, categories }) {
 
             <button
                 onClick={scrollRight}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-4 rounded-full shadow-xl text-amber-600 hover:bg-amber-50 hover:scale-110 transition-all backdrop-blur-sm -mr-2 border-2 border-amber-100"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-4 rounded-full shadow-xl text-amber-600 hover:bg-amber-50 hover:scale-110 transition-all backdrop-blur-sm -mr-2 border-2 border-amber-100 hidden md:block"
                 aria-label="Scroll right"
             >
                 <ChevronRight size={28} />
@@ -83,7 +83,8 @@ export default function SuperPremiumCarousel({ merchants, categories }) {
                 {infiniteMerchants.map((merchant, index) => (
                     <div
                         key={`${merchant.id}-${index}`}
-                        className="min-w-[320px] md:min-w-[380px] bg-white rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-400/50 relative flex flex-col hover:-translate-y-2 transition-transform duration-500 flex-shrink-0 group/card"
+                        onClick={() => onMerchantClick && onMerchantClick(merchant)}
+                        className="min-w-[320px] md:min-w-[380px] bg-white rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-400/50 relative flex flex-col hover:-translate-y-2 transition-transform duration-500 flex-shrink-0 group/card cursor-pointer"
                     >
                         {/* Super Badge */}
                         <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-300 animate-shimmer"></div>
@@ -121,15 +122,16 @@ export default function SuperPremiumCarousel({ merchants, categories }) {
 
                             <div className="mt-auto pt-6 border-t border-amber-100 flex gap-3">
                                 {merchant.whatsapp ? (
-                                    <a
-                                        href={`https://wa.me/55${merchant.whatsapp.replace(/\D/g, '')}?text=Olá, vi seu SUPER destaque no Guia Interlagos!`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(`https://wa.me/55${merchant.whatsapp.replace(/\D/g, '')}?text=Olá, vi seu SUPER destaque no Guia Interlagos!`, '_blank');
+                                        }}
                                         className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-base font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-green-500/30 active:scale-95"
                                     >
                                         <MessageCircle size={20} />
                                         WhatsApp
-                                    </a>
+                                    </button>
                                 ) : (
                                     <button disabled className="flex-1 bg-gray-100 text-gray-400 text-base font-bold py-3.5 rounded-2xl cursor-not-allowed">
                                         Sem Zap

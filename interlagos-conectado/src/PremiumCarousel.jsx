@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Star, Store, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function PremiumCarousel({ merchants, categories }) {
+export default function PremiumCarousel({ merchants, categories, onMerchantClick }) {
     const scrollRef = useRef(null);
     const [isPaused, setIsPaused] = useState(false);
 
@@ -14,15 +14,12 @@ export default function PremiumCarousel({ merchants, categories }) {
         if (!scrollContainer || isPaused) return;
 
         const scrollInterval = setInterval(() => {
-            // Move 1px at a time for smooth continuous effect, or larger chunks for "slide" effect
-            // User requested "slow automatic scroll", so let's do small increments frequently
             if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 3 * 2) {
-                // If we reached the end of the second set, jump back to the first set (middle)
                 scrollContainer.scrollLeft = scrollContainer.scrollWidth / 3;
             } else {
-                scrollContainer.scrollLeft += 1; // Ultra smooth slow scroll
+                scrollContainer.scrollLeft += 1;
             }
-        }, 20); // 50fps
+        }, 20);
 
         return () => clearInterval(scrollInterval);
     }, [isPaused, merchants]);
@@ -30,7 +27,6 @@ export default function PremiumCarousel({ merchants, categories }) {
     // Initial centering
     useEffect(() => {
         if (scrollRef.current) {
-            // Start in the middle set
             scrollRef.current.scrollLeft = scrollRef.current.scrollWidth / 3;
         }
     }, [merchants]);
@@ -38,7 +34,6 @@ export default function PremiumCarousel({ merchants, categories }) {
     const scrollLeft = () => {
         if (scrollRef.current) {
             scrollRef.current.scrollBy({ left: -320, behavior: 'smooth' });
-            // Pause briefly after manual interaction
             setIsPaused(true);
             setTimeout(() => setIsPaused(false), 3000);
         }
@@ -47,7 +42,6 @@ export default function PremiumCarousel({ merchants, categories }) {
     const scrollRight = () => {
         if (scrollRef.current) {
             scrollRef.current.scrollBy({ left: 320, behavior: 'smooth' });
-            // Pause briefly after manual interaction
             setIsPaused(true);
             setTimeout(() => setIsPaused(false), 3000);
         }
@@ -62,19 +56,16 @@ export default function PremiumCarousel({ merchants, categories }) {
                 <h2 className="font-bold text-gray-800 text-xl">Destaques da Região</h2>
             </div>
 
-            {/* Navigation Buttons - Centered and Simple */}
             <button
                 onClick={scrollLeft}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 p-3 rounded-full shadow-lg text-indigo-600 hover:bg-white hover:scale-110 transition-all backdrop-blur-sm -ml-2 border border-gray-100"
-                aria-label="Scroll left"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 p-3 rounded-full shadow-lg text-indigo-600 hover:bg-white hover:scale-110 transition-all backdrop-blur-sm -ml-2 border border-gray-100 hidden md:block"
             >
                 <ChevronLeft size={24} />
             </button>
 
             <button
                 onClick={scrollRight}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 p-3 rounded-full shadow-lg text-indigo-600 hover:bg-white hover:scale-110 transition-all backdrop-blur-sm -mr-2 border border-gray-100"
-                aria-label="Scroll right"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 p-3 rounded-full shadow-lg text-indigo-600 hover:bg-white hover:scale-110 transition-all backdrop-blur-sm -mr-2 border border-gray-100 hidden md:block"
             >
                 <ChevronRight size={24} />
             </button>
@@ -84,12 +75,13 @@ export default function PremiumCarousel({ merchants, categories }) {
                 className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide scroll-smooth"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
-                style={{ scrollBehavior: 'auto' }} // Disable native smooth scroll for the auto-scroller to work without fighting
+                style={{ scrollBehavior: 'auto' }}
             >
                 {infiniteMerchants.map((merchant, index) => (
                     <div
                         key={`${merchant.id}-${index}`}
-                        className="min-w-[280px] md:min-w-[320px] bg-white rounded-2xl overflow-hidden shadow-lg border border-yellow-400/30 relative flex flex-col hover:-translate-y-1 transition-transform duration-300 flex-shrink-0"
+                        onClick={() => onMerchantClick && onMerchantClick(merchant)}
+                        className="min-w-[280px] md:min-w-[320px] bg-white rounded-2xl overflow-hidden shadow-lg border border-yellow-400/30 relative flex flex-col hover:-translate-y-1 transition-transform duration-300 flex-shrink-0 cursor-pointer"
                     >
                         <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 flex items-center gap-1 shadow-sm">
                             <Star size={10} className="fill-yellow-900" /> PREMIUM
@@ -116,15 +108,16 @@ export default function PremiumCarousel({ merchants, categories }) {
 
                             <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
                                 {merchant.whatsapp ? (
-                                    <a
-                                        href={`https://wa.me/55${merchant.whatsapp.replace(/\D/g, '')}?text=Olá, vi seu destaque no Guia Interlagos!`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(`https://wa.me/55${merchant.whatsapp.replace(/\D/g, '')}?text=Olá, vi seu destaque no Guia Interlagos!`, '_blank');
+                                        }}
                                         className="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm active:scale-95"
                                     >
                                         <MessageCircle size={16} />
                                         WhatsApp
-                                    </a>
+                                    </button>
                                 ) : (
                                     <button disabled className="flex-1 bg-gray-100 text-gray-400 text-sm font-bold py-2.5 rounded-xl cursor-not-allowed">
                                         Sem Zap

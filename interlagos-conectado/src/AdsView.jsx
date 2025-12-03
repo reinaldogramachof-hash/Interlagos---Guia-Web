@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Megaphone, Tag, Briefcase, Home, Wrench, MessageCircle, PlusCircle, Search } from 'lucide-react';
+import AdDetailModal from './AdDetailModal';
+import CreateAdWizard from './CreateAdWizard';
 
 export default function AdsView() {
     const [activeCategory, setActiveCategory] = useState('Todos');
+    const [selectedAd, setSelectedAd] = useState(null);
+    const [isWizardOpen, setIsWizardOpen] = useState(false);
 
     const categories = [
         { id: 'Todos', label: 'Todos', icon: <Tag size={16} /> },
@@ -164,7 +168,11 @@ export default function AdsView() {
             {/* Lista de Anúncios */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lg:px-0">
                 {filteredAds.map((ad) => (
-                    <div key={ad.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                    <div
+                        key={ad.id}
+                        onClick={() => setSelectedAd(ad)}
+                        className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group cursor-pointer"
+                    >
                         <div className="relative h-48 bg-gray-100 overflow-hidden">
                             {ad.image ? (
                                 <img
@@ -202,10 +210,25 @@ export default function AdsView() {
             </div>
 
             {/* Floating Action Button (FAB) - Anunciar */}
-            <button className="fixed bottom-24 right-4 bg-violet-600 text-white p-4 rounded-full shadow-lg shadow-violet-600/30 hover:bg-violet-700 hover:scale-105 transition-all z-50 flex items-center gap-2 font-bold pr-6">
+            <button
+                onClick={() => setIsWizardOpen(true)}
+                className="fixed bottom-24 right-4 bg-violet-600 text-white p-4 rounded-full shadow-lg shadow-violet-600/30 hover:bg-violet-700 hover:scale-105 transition-all z-50 flex items-center gap-2 font-bold pr-6"
+            >
                 <PlusCircle size={24} />
                 Anunciar Grátis
             </button>
+
+            {/* Modais */}
+            <AdDetailModal
+                isOpen={!!selectedAd}
+                onClose={() => setSelectedAd(null)}
+                ad={selectedAd}
+            />
+
+            <CreateAdWizard
+                isOpen={isWizardOpen}
+                onClose={() => setIsWizardOpen(false)}
+            />
         </div>
     );
 }
