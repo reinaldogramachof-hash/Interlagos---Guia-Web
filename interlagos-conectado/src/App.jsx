@@ -1,90 +1,89 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Store,
-  Newspaper,
-  Heart,
-  AlertTriangle,
-  Search,
-  Menu,
-  User,
-  MapPin,
-  MessageCircle,
-  ShoppingBag,
-  Utensils,
-  Car,
-  Dumbbell,
-  Scissors,
-  Briefcase,
-  MoreHorizontal,
-  LogOut,
-  Settings,
-  PlusCircle,
-  Home
-} from 'lucide-react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { auth, db } from './firebaseConfig';
-
-// Components
-import LoginModal from './LoginModal';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { db, auth } from './firebaseConfig';
+import Sidebar from './Sidebar';
 import MerchantDetailModal from './MerchantDetailModal';
+import AdDetailModal from './AdDetailModal';
+import NewsDetailModal from './NewsDetailModal';
+import ServiceDetailModal from './ServiceDetailModal';
+import CampaignDetailModal from './CampaignDetailModal';
+import LoginModal from './LoginModal';
+import UserProfile from './UserProfile';
+import CreateAdWizard from './CreateAdWizard';
 import AdminPanel from './AdminPanel';
-import ChatbotWidget from './components/ChatbotWidget';
-
-// Context
-import { ChatContextProvider } from './context/ChatContext';
-
-// Views
-import AdsView from './AdsView';
+import Seeder from './Seeder';
 import NewsFeed from './NewsFeed';
+import AdsView from './AdsView';
 import DonationsView from './DonationsView';
 import UtilityView from './UtilityView';
-import PremiumCarousel from './PremiumCarousel';
-import SuperPremiumCarousel from './SuperPremiumCarousel';
-import Seeder from './Seeder';
+import HistoryView from './HistoryView';
+import SuggestionsView from './SuggestionsView';
+import ManagementView from './ManagementView';
+import PlansView from './PlansView';
+import MerchantLandingView from './MerchantLandingView';
+import ChatbotWidget from './components/ChatbotWidget';
+import { ChatContextProvider } from './context/ChatContext';
+import { Menu, Search, Filter, User, LogOut, PlusCircle, MoreHorizontal, Utensils, ShoppingBag, Stethoscope, Hammer, Car, Scissors, GraduationCap, Dog } from 'lucide-react';
 
 const categories = [
-  { id: 'Todos', label: 'Todos', icon: <Store size={20} /> },
-  { id: 'Alimentação', label: 'Alimentação', icon: <Utensils size={20} /> },
-  { id: 'Saúde', label: 'Saúde', icon: <Dumbbell size={20} /> },
+  { id: 'Todos', label: 'Todos', icon: <Filter size={20} /> },
+  { id: 'Restaurantes', label: 'Restaurantes', icon: <Utensils size={20} /> },
+  { id: 'Serviços', label: 'Serviços', icon: <Filter size={20} /> },
+  { id: 'Lojas', label: 'Lojas', icon: <ShoppingBag size={20} /> },
+  { id: 'Saúde', label: 'Saúde', icon: <Stethoscope size={20} /> },
+  { id: 'Pet', label: 'Pet & Vet', icon: <Dog size={20} /> },
+  { id: 'Construção', label: 'Construção', icon: <Hammer size={20} /> },
   { id: 'Automotivo', label: 'Automotivo', icon: <Car size={20} /> },
   { id: 'Beleza', label: 'Beleza', icon: <Scissors size={20} /> },
-  { id: 'Serviços', label: 'Serviços', icon: <Briefcase size={20} /> },
+  { id: 'Educação', label: 'Educação', icon: <GraduationCap size={20} /> },
   { id: 'Outros', label: 'Outros', icon: <MoreHorizontal size={20} /> }
 ];
 
 export default function App() {
   const [currentView, setCurrentView] = useState('merchants');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [user, setUser] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
   const [merchants, setMerchants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showCreateAd, setShowCreateAd] = useState(false);
+  const [selectedAd, setSelectedAd] = useState(null);
+  const [selectedNews, setSelectedNews] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
 
   // Carregar comerciantes do Firestore em tempo real
   useEffect(() => {
-    setLoading(true);
-    const q = query(collection(db, 'merchants'), orderBy('createdAt', 'desc'));
+    if (!db) {
+      console.warn("Firestore (db) não inicializado. Pulando carregamento de comerciantes.");
+      setLoading(false);
+      return;
+    }
 
+    const q = query(collection(db, 'merchants'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedMerchants = snapshot.docs.map(doc => ({
+      const merchantsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      setMerchants(fetchedMerchants);
+      setMerchants(merchantsData);
       setLoading(false);
     }, (error) => {
-      console.error("Erro ao carregar comerciantes:", error);
+      console.error("Erro ao buscar comerciantes:", error);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
+  // Monitorar estado de autenticação
   useEffect(() => {
+    if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
@@ -99,307 +98,363 @@ export default function App() {
     }
   };
 
+  // Mock Data for Merchants (moved from internal state to top level or imported)
+  const mockMerchants = [
+    { id: 'mock1', name: 'Padaria do Bairro', category: 'Restaurantes', rating: 4.8, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=500', description: 'A melhor padaria da região com pães fresquinhos.' },
+    { id: 'mock2', name: 'Farmácia Central', category: 'Saúde', rating: 4.5, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80&w=500', description: 'Medicamentos e produtos de higiene com atendimento de qualidade.' },
+    { id: 'mock3', name: 'Oficina Mecânica', category: 'Serviços', rating: 4.9, image: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&q=80&w=500', description: 'Serviços automotivos completos para seu veículo.' },
+    { id: 'mock4', name: 'Loja de Roupas Chic', category: 'Lojas', rating: 4.2, image: 'https://images.unsplash.com/photo-1523381294911-8d3cead1858b?auto=format&fit=crop&q=80&w=500', description: 'As últimas tendências da moda para todas as idades.' },
+    { id: 'mock5', name: 'Restaurante Sabor Caseiro', category: 'Restaurantes', rating: 4.7, image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=500', description: 'Comida caseira deliciosa e ambiente acolhedor.' },
+    { id: 'mock6', name: 'Pet Shop Amigo Fiel', category: 'Pet', rating: 4.6, image: 'https://images.unsplash.com/photo-1583511655856-3ce830668271?auto=format&fit=crop&q=80&w=500', description: 'Tudo para o seu pet, de ração a banho e tosa.' },
+    { id: 'mock7', name: 'Salão de Beleza Divas', category: 'Beleza', rating: 4.3, image: 'https://images.unsplash.com/photo-1599305445671-ac291c9a87d6?auto=format&fit=crop&q=80&w=500', description: 'Cortes, coloração e tratamentos para o seu cabelo.' },
+    { id: 'mock8', name: 'Livraria Conhecimento', category: 'Lojas', rating: 4.9, image: 'https://images.unsplash.com/photo-1532012197247-fee6a2ed53b0?auto=format&fit=crop&q=80&w=500', description: 'Um universo de livros para todas as idades e gostos.' },
+    { id: 'mock9', name: 'Academia Corpo Ativo', category: 'Saúde', rating: 4.4, image: 'https://images.unsplash.com/photo-1571019625454-f112b322f987?auto=format&fit=crop&q=80&w=500', description: 'Treinos personalizados e equipamentos modernos.' },
+    { id: 'mock10', name: 'Floricultura Jardim Encantado', category: 'Outros', rating: 4.8, image: 'https://images.unsplash.com/photo-1509721434272-b79147e0e708?auto=format&fit=crop&q=80&w=500', description: 'Flores frescas e arranjos para todas as ocasiões.' },
+  ];
+
+  const filteredMerchants = (merchants.length > 0 ? merchants : mockMerchants).filter(merchant => {
+    const matchesCategory = selectedCategory === 'Todos' || merchant.category === selectedCategory;
+    const matchesSearch = merchant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      merchant.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
   const handleMerchantClick = (merchant) => {
     setSelectedMerchant(merchant);
   };
 
-  const handleTrackClick = (id) => {
-    console.log("Track click:", id);
-  };
+  if (showCreateAd) {
+    return <CreateAdWizard onBack={() => setShowCreateAd(false)} />;
+  }
 
-  const filteredMerchants = merchants.filter(merchant => {
-    const matchesCategory = selectedCategory === 'Todos' || merchant.category === selectedCategory;
-    const matchesSearch = merchant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      merchant.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const sortedMerchants = [...filteredMerchants].sort((a, b) => {
-    // Super Premium first, then Premium, then Basic
-    const score = (plan) => {
-      if (plan === 'super') return 3;
-      if (plan === 'premium') return 2;
-      return 1;
-    };
-    return score(b.plan) - score(a.plan);
-  });
-
-  const navItems = [
-    { id: 'merchants', label: 'Comércio', icon: <Store size={20} /> },
-    { id: 'ads', label: 'Anúncios', icon: <ShoppingBag size={20} /> },
-    { id: 'news', label: 'Notícias', icon: <Newspaper size={20} /> },
-    { id: 'donations', label: 'Doações', icon: <Heart size={20} /> },
-    { id: 'utility', label: 'Utilidade', icon: <AlertTriangle size={20} /> }
-  ];
-
-  // Lista de administradores
-  const ADMIN_EMAILS = ['reinaldogramachof@gmail.com'];
-  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+  if (showAdmin) {
+    return <AdminPanel onBack={() => setShowAdmin(false)} />;
+  }
 
   return (
     <ChatContextProvider>
-      <div className="min-h-screen bg-slate-50 font-sans text-gray-800 pb-20 md:pb-0 md:pl-64">
+      <div className="dark">
+        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-500/30">
 
-        {/* Sidebar (Desktop) */}
-        <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 fixed left-0 top-0 bottom-0 z-50">
-          <div className="p-6 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-              <MapPin className="fill-indigo-600 text-white" />
-              Interlagos
-            </h1>
-            <p className="text-xs text-gray-400 mt-1">Guia Digital do Bairro</p>
-          </div>
+          {/* Mobile Header */}
+          <header className="lg:hidden bg-slate-900/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
+                <span className="font-bold text-white text-lg tracking-tight">IC</span>
+              </div>
+              <h1 className="font-bold text-lg text-white">
+                Interlagos
+              </h1>
+            </div>
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="p-2 hover:bg-white/5 rounded-full transition-colors relative group"
+            >
+              {user ? (
+                user.photoURL ?
+                  <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full border-2 border-indigo-500" />
+                  : <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">{user.displayName?.[0] || 'U'}</div>
+              ) : (
+                <User className="text-slate-400 group-hover:text-white transition-colors" size={24} />
+              )}
+            </button>
+          </header>
 
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setCurrentView(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all
-                  ${currentView === item.id
-                    ? 'bg-indigo-50 text-indigo-600 shadow-sm'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-          </nav>
+          <div className="flex">
+            {/* Sidebar (Desktop) */}
+            <Sidebar
+              currentView={currentView}
+              setCurrentView={setCurrentView}
+              handleAdminClick={() => setShowAdmin(true)}
+              className="hidden lg:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r border-white/5 bg-slate-900/50 backdrop-blur-xl"
+            />
 
-          <div className="p-4 border-t border-gray-100">
-            {user ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
-                    {user.displayName ? user.displayName[0] : <User size={20} />}
+            {/* Main Content */}
+            <main className="flex-1 max-w-7xl mx-auto w-full pb-24 lg:pb-8">
+
+              {/* Desktop Header & Search */}
+              <div className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 p-4 lg:p-6 mb-6 lg:mb-8 transition-all duration-300">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 max-w-6xl mx-auto">
+
+                  {/* Search Bar */}
+                  <div className="relative flex-1 group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Search className="text-slate-500 group-focus-within:text-indigo-400 transition-colors duration-300" size={20} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="O que você procura hoje?"
+                      className="w-full bg-slate-800/50 border border-white/5 text-slate-200 rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-slate-800 transition-all duration-300 placeholder:text-slate-500 shadow-sm"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900 truncate">{user.displayName || 'Usuário'}</p>
-                    <button onClick={handleLogout} className="text-xs text-red-500 hover:underline flex items-center gap-1">
-                      <LogOut size={12} /> Sair
+
+                  {/* Desktop User Actions */}
+                  <div className="hidden lg:flex items-center gap-3">
+                    {user ? (
+                      <div className="flex items-center gap-3 bg-slate-800/50 p-1.5 pr-4 rounded-full border border-white/5 hover:border-white/10 transition-all">
+                        {user.photoURL ? (
+                          <img src={user.photoURL} alt="User" className="w-9 h-9 rounded-full border border-indigo-500/30" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm">
+                            {user.displayName?.[0] || 'U'}
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="text-xs text-slate-400 font-medium">Olá,</span>
+                          <span className="text-sm font-bold text-slate-200 leading-none">{user.displayName?.split(' ')[0]}</span>
+                        </div>
+                        <button
+                          onClick={handleLogout}
+                          className="ml-2 p-2 hover:bg-red-500/10 hover:text-red-400 rounded-full transition-colors"
+                          title="Sair"
+                        >
+                          <LogOut size={18} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setIsLoginOpen(true)}
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 active:scale-95"
+                      >
+                        <User size={20} />
+                        <span>Entrar</span>
+                      </button>
+                    )}
+
+                    {/* Admin Toggle (Dev only) */}
+                    <button
+                      onClick={() => setShowAdmin(true)}
+                      className="p-3 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-indigo-400 rounded-xl border border-white/5 transition-all"
+                      title="Painel Admin"
+                    >
+                      <Filter size={20} />
                     </button>
                   </div>
                 </div>
 
-                {isAdmin && (
-                  <button
-                    onClick={() => setShowAdmin(true)}
-                    className="w-full bg-amber-50 text-amber-700 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-amber-100 transition-colors border border-amber-200"
-                  >
-                    <Settings size={16} />
-                    Painel Admin
-                  </button>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors"
-              >
-                Entrar
-              </button>
-            )}
-          </div>
-        </aside>
-
-        {/* Mobile Header */}
-        <header className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-              <MapPin size={18} />
-            </div>
-            <span className="font-bold text-gray-900">Interlagos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {user ? (
-              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs" onClick={handleLogout}>
-                {user.displayName ? user.displayName[0] : <User size={16} />}
-              </div>
-            ) : (
-              <button onClick={() => setShowLoginModal(true)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                <User size={24} />
-              </button>
-            )}
-          </div>
-        </header>
-
-        <main className="max-w-5xl mx-auto p-4 md:p-8">
-
-          {/* Search Bar (Global) */}
-          <div className="mb-8 relative">
-            <input
-              type="text"
-              placeholder="O que você procura hoje?"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          </div>
-
-          {/* Seeder (Development Tool) */}
-          <Seeder />
-
-          {/* View Content */}
-          {currentView === 'merchants' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-
-              {/* Categories (Mobile) */}
-              <div className="md:hidden mb-6 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-                <div className="flex gap-3">
-                  {categories.map((cat) => (
+                {/* Mobile Categories (Horizontal Scroll) */}
+                <div className="lg:hidden mt-4 -mx-4 px-4 overflow-x-auto pb-2 scrollbar-hide flex gap-3">
+                  {categories.map(cat => (
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className={`flex flex-col items-center justify-center min-w-[70px] p-2 rounded-xl text-[10px] font-bold transition-all border
-                        ${selectedCategory === cat.id
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-white text-gray-500 border-gray-100'}`}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat.id
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                        : 'bg-slate-800/50 text-slate-400 border border-white/5'
+                        }`}
                     >
-                      <div className="mb-1">{cat.icon}</div>
+                      {cat.icon}
                       {cat.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Categories (Desktop) */}
-              <div className="hidden md:flex flex-wrap gap-2 mb-8">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all border
-                        ${selectedCategory === cat.id
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'}`}
-                  >
-                    {cat.icon}
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
+              <div className="px-4 lg:px-6 max-w-6xl mx-auto space-y-8">
 
-              {/* Super Premium Carousel */}
-              {!loading && filteredMerchants.some(m => m.plan === 'super') && (
-                <SuperPremiumCarousel
-                  merchants={filteredMerchants.filter(m => m.plan === 'super')}
-                  categories={categories}
-                  onMerchantClick={handleMerchantClick}
-                />
-              )}
+                {/* Dynamic Content View */}
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {currentView === 'merchants' && (
+                    <>
+                      {/* Categories Tabs (Moved from Sidebar) */}
+                      <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+                        {categories.map(cat => (
+                          <button
+                            key={cat.id}
+                            onClick={() => setSelectedCategory(cat.id)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat.id
+                              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                              : 'bg-slate-800/50 text-slate-400 border border-white/5 hover:bg-slate-800'
+                              }`}
+                          >
+                            {cat.icon}
+                            {cat.label}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Featured Merchants (Premium) */}
+                      {selectedCategory === 'Todos' && !searchTerm && (
+                        <section className="mb-12">
+                          <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                              <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                              Destaques da Região
+                            </h2>
+                          </div>
+                          {/* TODO: Implement PremiumCarousel */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Placeholder for Premium Merchants */}
+                            {merchants.filter(m => m.isPremium).slice(0, 3).map(merchant => (
+                              <div key={merchant.id} onClick={() => handleMerchantClick(merchant)} className="bg-slate-800/50 border border-white/5 rounded-2xl p-4 cursor-pointer hover:bg-slate-800 transition-all">
+                                <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden">
+                                  <img src={merchant.image || `https://source.unsplash.com/random/800x600/?store,${merchant.category}`} alt={merchant.name} className="w-full h-full object-cover" />
+                                </div>
+                                <h3 className="font-bold text-lg">{merchant.name}</h3>
+                                <p className="text-slate-400 text-sm line-clamp-2">{merchant.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      )}
 
-              {/* Premium Carousel */}
-              {!loading && filteredMerchants.some(m => m.plan === 'premium' || (m.isPremium && m.plan !== 'super')) && (
-                <PremiumCarousel
-                  merchants={filteredMerchants.filter(m => m.plan === 'premium' || (m.isPremium && m.plan !== 'super'))}
-                  categories={categories}
-                  onMerchantClick={handleMerchantClick}
-                />
-              )}
+                      {/* All Merchants Grid */}
+                      <section>
+                        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                          <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
+                          {searchTerm ? `Resultados para "${searchTerm}"` : `${selectedCategory}`}
+                        </h2>
 
-              {/* Basic List */}
-              <section className="mt-8">
-                <h2 className="font-bold text-gray-800 text-xl mb-4 flex items-center gap-2">
-                  <Store className="text-indigo-600" size={24} />
-                  Explorar Bairro
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sortedMerchants.filter(m => (!m.isPremium || m.plan === 'basic') && m.plan !== 'super' && m.plan !== 'premium').map((merchant) => (
-                    <div
-                      key={merchant.id}
-                      onClick={() => handleMerchantClick(merchant)}
-                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all flex gap-4 items-start cursor-pointer group"
-                    >
-                      <div className="w-16 h-16 rounded-lg flex-shrink-0 bg-gray-50 overflow-hidden">
-                        {merchant.image ? (
-                          <img src={merchant.image} alt={merchant.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                        {loading ? (
+                          <div className="flex justify-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                          </div>
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300">
-                            <Store />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredMerchants.map(merchant => (
+                              <div
+                                key={merchant.id}
+                                onClick={() => handleMerchantClick(merchant)}
+                                className="group bg-slate-800/40 hover:bg-slate-800 border border-white/5 hover:border-indigo-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
+                              >
+                                <div className="aspect-video bg-slate-700/50 rounded-xl mb-4 overflow-hidden relative">
+                                  <img
+                                    src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`}
+                                    alt={merchant.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                  />
+                                  <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-medium text-white border border-white/10">
+                                    {merchant.category}
+                                  </div>
+                                </div>
+                                <h3 className="font-bold text-lg text-slate-100 mb-1 group-hover:text-indigo-400 transition-colors">{merchant.name}</h3>
+                                <p className="text-slate-400 text-sm line-clamp-2 mb-3">{merchant.description}</p>
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                  Aberto agora
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
-                      </div>
 
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 text-base truncate">{merchant.name}</h3>
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 mb-2 inline-block">
-                          {merchant.category}
-                        </span>
-                        <p className="text-xs text-gray-500 line-clamp-2 mb-2">{merchant.description}</p>
-
-                        {merchant.whatsapp && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(`https://wa.me/55${merchant.whatsapp.replace(/\D/g, '')}`, '_blank');
-                            }}
-                            className="text-green-600 text-xs font-bold flex items-center gap-1 hover:underline"
-                          >
-                            <MessageCircle size={12} />
-                            WhatsApp
-                          </button>
+                        {!loading && filteredMerchants.length === 0 && (
+                          <div className="text-center py-20 bg-slate-800/30 rounded-3xl border border-white/5 border-dashed">
+                            <div className="bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Search className="text-slate-500" size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">Nenhum resultado encontrado</h3>
+                            <p className="text-slate-400 max-w-md mx-auto">
+                              Não encontramos nada para "{searchTerm}" na categoria {selectedCategory}.
+                              Tente buscar por outro termo.
+                            </p>
+                          </div>
                         )}
-                      </div>
-                    </div>
-                  ))}
+                      </section>
+                    </>
+                  )}
+
+                  {currentView === 'news' && (
+                    <NewsFeed user={user} />
+                  )}
+
+                  {currentView === 'ads' && (
+                    <AdsView user={user} onAdClick={setSelectedAd} />
+                  )}
+
+                  {currentView === 'donations' && (
+                    <DonationsView user={user} onCampaignClick={setSelectedCampaign} />
+                  )}
+
+                  {currentView === 'utility' && (
+                    <UtilityView onServiceClick={setSelectedService} />
+                  )}
+
+                  {currentView === 'history' && (
+                    <HistoryView />
+                  )}
+
+                  {currentView === 'suggestions' && (
+                    <SuggestionsView />
+                  )}
+
+                  {currentView === 'management' && (
+                    <ManagementView />
+                  )}
+
+                  {currentView === 'plans' && (
+                    <PlansView />
+                  )}
+
+                  {currentView === 'merchant-landing' && (
+                    <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />
+                  )}
+
                 </div>
-              </section>
-            </div>
+              </div>
+            </main>
+          </div>
+
+          {/* Floating Action Button (Mobile) */}
+          <button
+            onClick={() => setShowCreateAd(true)}
+            className="lg:hidden fixed bottom-20 right-4 bg-indigo-600 text-white p-4 rounded-full shadow-xl shadow-indigo-500/30 hover:bg-indigo-700 transition-all active:scale-90 z-30"
+          >
+            <PlusCircle size={24} />
+          </button>
+
+          {/* Modals */}
+          {selectedMerchant && (
+            <MerchantDetailModal
+              merchant={selectedMerchant}
+              onClose={() => setSelectedMerchant(null)}
+            />
           )}
 
-          {currentView === 'ads' && <AdsView user={user} />}
-          {currentView === 'news' && <NewsFeed user={user} />}
-          {currentView === 'donations' && <DonationsView user={user} />}
-          {currentView === 'utility' && <UtilityView user={user} />}
+          {isLoginOpen && (
+            <LoginModal
+              onClose={() => setIsLoginOpen(false)}
+              onSuccess={(user) => {
+                setUser(user);
+                setIsLoginOpen(false);
+              }}
+            />
+          )}
 
-        </main>
+          {selectedAd && (
+            <AdDetailModal
+              ad={selectedAd}
+              onClose={() => setSelectedAd(null)}
+            />
+          )}
 
-        {/* Mobile Bottom Navigation */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50 pb-safe">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setCurrentView(item.id)}
-              className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all
-                ${currentView === item.id
-                  ? 'text-indigo-600'
-                  : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              {React.cloneElement(item.icon, { size: 24, className: currentView === item.id ? 'fill-current' : '' })}
-              <span className="text-[10px] font-medium mt-1">{item.label}</span>
-            </button>
-          ))}
-        </nav>
+          {selectedNews && (
+            <NewsDetailModal
+              news={selectedNews}
+              onClose={() => setSelectedNews(null)}
+            />
+          )}
 
-        {/* Modals */}
-        {showLoginModal && (
-          <LoginModal
-            onClose={() => setShowLoginModal(false)}
-            onSuccess={(user) => {
-              console.log("Logado:", user);
-              setShowLoginModal(false);
-            }}
-          />
-        )}
+          {selectedService && (
+            <ServiceDetailModal
+              service={selectedService}
+              onClose={() => setSelectedService(null)}
+            />
+          )}
 
-        {showAdmin && (
-          <AdminPanel
-            merchants={merchants}
-            categories={categories}
-            onClose={() => setShowAdmin(false)}
-          />
-        )}
+          {selectedCampaign && (
+            <CampaignDetailModal
+              campaign={selectedCampaign}
+              onClose={() => setSelectedCampaign(null)}
+            />
+          )}
 
-        <MerchantDetailModal
-          isOpen={!!selectedMerchant}
-          onClose={() => setSelectedMerchant(null)}
-          merchant={selectedMerchant}
-        />
+          {/* Chatbot Widget */}
+          <ChatbotWidget />
 
-        {/* Chatbot Widget */}
-        <ChatbotWidget />
-
+        </div>
       </div>
     </ChatContextProvider>
   );

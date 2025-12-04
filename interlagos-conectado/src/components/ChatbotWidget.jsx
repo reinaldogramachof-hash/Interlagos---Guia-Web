@@ -16,6 +16,7 @@ export default function ChatbotWidget() {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
+        if (!auth) return;
         const unsubscribe = auth.onAuthStateChanged((u) => {
             setUser(u);
         });
@@ -111,8 +112,8 @@ export default function ChatbotWidget() {
                         {messages.map((msg) => (
                             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[85%] rounded-2xl p-3 text-sm ${msg.sender === 'user'
-                                        ? 'bg-blue-600 text-white rounded-tr-none'
-                                        : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-600'
+                                    ? 'bg-blue-600 text-white rounded-tr-none'
+                                    : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-600'
                                     }`}>
                                     {/* Persona Badge */}
                                     {msg.sender === 'chatbot' && msg.chatbotPersona && (

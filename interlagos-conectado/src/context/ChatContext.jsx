@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom'; // Assuming react-router is used, or we'll use window.location
+import React, { createContext, useState, useContext } from 'react';
 
 const ChatContext = createContext();
 
 export const ChatContextProvider = ({ children }) => {
+    console.log("ChatContextProvider rendering");
     const [contextData, setContextData] = useState({
         pageName: 'Home',
-        pageUrl: '/',
+        pageUrl: window.location.pathname, // Usando window.location
         actionInProgress: null,
         selectedItemId: null
     });

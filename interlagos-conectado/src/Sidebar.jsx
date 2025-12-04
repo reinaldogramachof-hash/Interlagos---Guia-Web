@@ -1,128 +1,61 @@
-import { ChevronRight, Tag, Info, Star, Heart, ShieldCheck, LogIn } from 'lucide-react';
+import React from 'react';
+import { Store, Newspaper, Megaphone, Heart, Siren, History, Lightbulb, Users, ShieldCheck, DollarSign, Star } from 'lucide-react';
 
-export default function Sidebar({ currentView, categories = [], selectedCategory, setSelectedCategory, handleAdminClick, isAdmin, user, onLogin }) {
-
-    const renderContent = () => {
-        switch (currentView) {
-            case 'merchants':
-                return (
-                    <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Categorias</h3>
-                        <div className="space-y-1">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                    ${selectedCategory === cat.id
-                                            ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200'
-                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                                >
-                                    <span className={`${selectedCategory === cat.id ? 'text-indigo-600' : 'text-gray-400'}`}>
-                                        {cat.icon}
-                                    </span>
-                                    {cat.label}
-                                    {selectedCategory === cat.id && <ChevronRight size={14} className="ml-auto opacity-50" />}
-                                </button>
-                            ))}
-                        </div>
-                    </>
-
-                );
-
-            case 'donations':
-                return (
-                    <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Doações</h3>
-                        <div className="space-y-1">
-                            {['Campanhas', 'ONGs', 'Voluntariado'].map((item) => (
-                                <button
-                                    key={item}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                                >
-                                    <Heart size={16} className="text-gray-400" />
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
-                    </>
-                );
-
-            case 'utility':
-                return (
-                    <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Acesso Rápido</h3>
-                        <div className="space-y-1">
-                            {['Emergência', 'Saúde', 'Serviços Públicos'].map((section) => (
-                                <button
-                                    key={section}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                                >
-                                    <Info size={16} className="text-gray-400" />
-                                    {section}
-                                </button>
-                            ))}
-                        </div>
-                    </>
-                );
-
-            case 'news':
-                return (
-                    <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Filtros</h3>
-                        <div className="space-y-1">
-                            {['Urgente', 'Eventos', 'Geral', 'Trânsito'].map((filter) => (
-                                <button
-                                    key={filter}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                                >
-                                    <Tag size={16} className="text-gray-400" />
-                                    {filter}
-                                </button>
-                            ))}
-                        </div>
-                    </>
-                );
-
-            case 'ads':
-                return (
-                    <>
-                        <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-3 px-2">Categorias</h3>
-                        <div className="space-y-1">
-                            {['Vagas de Emprego', 'Vendas', 'Serviços', 'Imóveis'].map((cat) => (
-                                <button
-                                    key={cat}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                                >
-                                    <Tag size={16} className="text-gray-400" />
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-                    </>
-                );
-
-            default:
-                return null;
-        }
-    };
+export default function Sidebar({ currentView, setCurrentView, handleAdminClick, className }) {
+    const menuItems = [
+        { id: 'merchants', label: 'Comércios', icon: <Store size={20} /> },
+        { id: 'news', label: 'Notícias', icon: <Newspaper size={20} /> },
+        { id: 'ads', label: 'Classificados', icon: <Megaphone size={20} /> },
+        { id: 'donations', label: 'Doações', icon: <Heart size={20} /> },
+        { id: 'utility', label: 'Utilidade Pública', icon: <Siren size={20} /> },
+        { id: 'history', label: 'História', icon: <History size={20} /> },
+        { id: 'suggestions', label: 'Sugestões', icon: <Lightbulb size={20} /> },
+        { id: 'management', label: 'Gestão', icon: <ShieldCheck size={20} /> },
+        { id: 'plans', label: 'Planos', icon: <DollarSign size={20} /> },
+    ];
 
     return (
-        <aside className="hidden lg:block w-64 sticky top-24 shrink-0 animate-in fade-in slide-in-from-left-4">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 min-h-[300px]">
-                <div key={currentView} className="animate-in fade-in slide-in-from-left-2 duration-300">
-                    {renderContent()}
+        <aside className={className}>
+            <div className="px-6 pb-6 pt-0 flex flex-col h-full">
+                <div className="flex items-center justify-center mb-0 mt-0">
+                    <img src="/logoIC.png" alt="Interlagos Conectado" className="h-44 w-auto object-contain drop-shadow-xl scale-110 transition-transform duration-300" />
                 </div>
-            </div>
 
-            {/* Banner Promocional Sidebar */}
-            <div className="mt-6 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white text-center shadow-lg">
-                <Star className="mx-auto mb-2 text-yellow-400 fill-yellow-400" size={24} />
-                <h4 className="font-bold text-sm mb-1">Quer destacar seu negócio?</h4>
-                <p className="text-xs text-indigo-100 mb-3">Apareça para milhares de vizinhos todos os dias.</p>
-                <button onClick={handleAdminClick} className="w-full bg-white text-indigo-700 text-xs font-bold py-2 rounded-lg hover:bg-indigo-50 transition-colors">
-                    Cadastrar Agora
-                </button>
+                <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-hide -mt-6">
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setCurrentView(item.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${currentView === item.id
+                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 font-semibold'
+                                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                }`}
+                        >
+                            <div className={`transition-colors ${currentView === item.id ? 'text-white' : 'text-slate-500 group-hover:text-white'}`}>
+                                {item.icon}
+                            </div>
+                            {item.label}
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="mt-auto pt-6">
+                    {/* Card Destaque Simplificado */}
+                    <button
+                        onClick={() => setCurrentView('merchant-landing')}
+                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-4 text-left shadow-lg shadow-indigo-500/20 group hover:shadow-indigo-500/40 transition-all duration-300 hover:-translate-y-1 border border-white/10"
+                    >
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                                <Star size={18} className="text-yellow-300 fill-yellow-300" />
+                            </div>
+                            <span className="font-bold text-white text-sm">Destaque seu Negócio</span>
+                        </div>
+                        <p className="text-xs text-indigo-100 leading-relaxed">
+                            Atraia mais clientes e cresça com a gente.
+                        </p>
+                    </button>
+                </div>
             </div>
         </aside>
     );
