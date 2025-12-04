@@ -1,0 +1,43 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "merchants",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "category",
+                    "order": "asc"
+                },
+                {
+                    "fieldPath": "businessConfig.isPremium",
+                    "order": "desc"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "ads",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "category",
+                    "order": "asc"
+                },
+                {
+                    "fieldPath": "createdAt",
+                    "order": "desc"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "news",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "publishDate",
+                    "order": "desc"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}

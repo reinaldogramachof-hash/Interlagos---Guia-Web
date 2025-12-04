@@ -1,0 +1,22 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs18",
+    "region": "southamerica-east1",
+    "schedule": [
+      {
+        "target": "cleanupDeletedUsers",
+        "description": "Hard delete de usuários inativos",
+        "schedule": "every 24 hours"
+      }
+    ],
+    "env": {
+      "ALGOLIA_APP_ID": "secreto:algolia-app-id",
+      "ALGOLIA_API_KEY": "secreto:algolia-api-key"
+    }
+  }
+}

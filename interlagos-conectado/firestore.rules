@@ -1,0 +1,51 @@
+// firestore.rules - Regras de Segurança Aprimoradas
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Regras para a coleção 'users'
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId; // Usuário só lê o próprio perfil
+      allow create: if request.auth != null && request.auth.uid == userId; // Criação apenas para o próprio usuário (no sign-up)
+      allow update: if request.auth != null && request.auth.uid == userId; // Update apenas para o próprio usuário
+      allow delete: if false; // Ninguém deleta usuários diretamente
+    }
+
+    // Regras para a coleção 'merchants'
+    match /merchants/{merchantId} {
+      allow read: if true; // Leitura pública
+      // Escrita restrita, permitindo apenas o 'ownerId' e BLOQUEANDO alterações em 'metrics'
+      allow update: if request.auth.uid == resource.data.ownerId &&
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['metrics']);
+      allow create: if request.auth != null; // Criação por usuários autenticados
+      allow delete: if false; // Ninguém deleta merchants diretamente
+    }
+
+    // Regras para a coleção 'merchants/{merchantId}/reviews/{reviewId}'
+    match /merchants/{merchantId}/reviews/{reviewId} {
+      allow read: if true; // Leitura pública
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.authorUid; // Criar apenas se for o próprio autor
+      allow update: if request.auth != null && request.auth.uid == resource.data.authorUid; // Editar apenas o próprio review
+      allow delete: if request.auth != null && request.auth.uid == resource.data.authorUid; // Deletar apenas o próprio review
+    }
+
+    // Regras para a coleção 'ads'
+    match /ads/{adId} {
+      allow read: if true; // Leitura pública
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.author.uid; // Criação por usuários autenticados, se for o autor
+      allow update: if request.auth != null && request.auth.uid == resource.data.author.uid; // Editar apenas o próprio anúncio
+      allow delete: if request.auth != null && request.auth.uid == resource.data.author.uid; // Deletar apenas o próprio anúncio
+    }
+
+    // Regras para as coleções 'news', 'campaigns', 'plans'
+    match /{collectionId} {
+      allow read: if collectionId in ['news', 'campaigns', 'plans']; // Leitura pública
+      allow write: if false; // Ninguém escreve diretamente (administrado por Cloud Functions/admin)
+    }
+
+    // Regras para 'processed_events' (usada para idempotência)
+    match /processed_events/{eventId} {
+      allow read, write: if false; // Apenas Admin SDK (Cloud Functions)
+    }
+  }
+}
