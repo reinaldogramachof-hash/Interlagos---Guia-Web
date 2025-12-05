@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Tag, MapPin, Clock, Filter, Search, PlusCircle, MessageCircle, Briefcase } from 'lucide-react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from './firebaseConfig';
+import { useAuth } from './context/AuthContext';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
+import LoginModal from './LoginModal';
+import { incrementAdClick } from './services/statsService';
 
 const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Veículos', 'Eletrônicos', 'Doações'];
 
-export default function AdsView({ user }) {
+export default function AdsView() {
+    const { currentUser } = useAuth();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
-    // Carregar Anúncios do Firestore
+    // Carregar Anúncios APROVADOS do Firestore
     useEffect(() => {
         setLoading(true);
-        const q = query(collection(db, 'ads'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'ads'), where('status', '==', 'approved'), orderBy('createdAt', 'desc'));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedAds = snapshot.docs.map(doc => ({
@@ -36,6 +41,20 @@ export default function AdsView({ user }) {
     const filteredAds = selectedCategory === 'Todos'
         ? ads
         : ads.filter(ad => ad.category === selectedCategory);
+
+    const handleCreateClick = () => {
+        if (!currentUser) {
+            setShowLoginModal(true);
+        } else {
+            setIsWizardOpen(true);
+        }
+    };
+
+    const handleWhatsAppClick = (ad) => {
+        incrementAdClick(ad.id);
+        const number = ad.contact.replace(/\D/g, '');
+        window.open(`https://wa.me/55${number}?text=Olá, vi seu anúncio ${ad.title} no App Interlagos!`, '_blank');
+    };
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
@@ -68,7 +87,7 @@ export default function AdsView({ user }) {
                     <h3 className="text-slate-800 dark:text-white font-bold mb-1">Nenhum anúncio aqui</h3>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Seja o primeiro a anunciar nesta categoria!</p>
                     <button
-                        onClick={() => setIsWizardOpen(true)}
+                        onClick={handleCreateClick}
                         className="text-indigo-600 dark:text-indigo-400 font-bold text-sm hover:underline"
                     >
                         Criar anúncio agora
@@ -109,7 +128,13 @@ export default function AdsView({ user }) {
                                 <p className="text-indigo-600 dark:text-indigo-400 font-bold text-lg mb-2">{ad.price}</p>
                                 <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-4 h-10">{ad.description}</p>
 
-                                <button className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleWhatsAppClick(ad);
+                                    }}
+                                    className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+                                >
                                     <MessageCircle size={18} />
                                     Chamar no Zap
                                 </button>
@@ -121,7 +146,7 @@ export default function AdsView({ user }) {
 
             {/* Floating Action Button (FAB) - Anunciar */}
             <button
-                onClick={() => setIsWizardOpen(true)}
+                onClick={handleCreateClick}
                 className="fixed bottom-24 right-4 bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all z-50 flex items-center gap-2 font-bold pr-6"
             >
                 <PlusCircle size={24} />
@@ -138,8 +163,10 @@ export default function AdsView({ user }) {
             <CreateAdWizard
                 isOpen={isWizardOpen}
                 onClose={() => setIsWizardOpen(false)}
-                user={user}
+                user={currentUser}
             />
+
+            {showLoginModal && <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onSuccess={() => { setShowLoginModal(false); setIsWizardOpen(true); }} />}
         </div>
     );
 }

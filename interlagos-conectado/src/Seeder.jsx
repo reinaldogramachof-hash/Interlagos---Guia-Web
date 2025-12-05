@@ -1,228 +1,199 @@
 import React, { useState } from 'react';
+import { collection, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebaseConfig';
-import { collection, addDoc, serverTimestamp, getDocs, writeBatch } from 'firebase/firestore';
-import { Database, UploadCloud, CheckCircle, AlertTriangle } from 'lucide-react';
+import { mockData } from './mockData';
+import { Database, RefreshCw, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 
-// --- DADOS DE EXEMPLO (MOCKS) ---
-
-const MOCK_MERCHANTS = [
-    {
-        name: "Supermercado Rosalina",
-        category: "Comércio",
-        description: "O mercado da família no coração do Interlagos. Aceitamos Cartão Rosalina.",
-        whatsapp: "11991002233",
-        address: "R. Ubirajara Raimundo de Souza, 194",
-        isPremium: true,
-        plan: 'super',
-        rating: 4.8,
-        views: 120
-    },
-    {
-        name: "Point Do Pastel SJC",
-        category: "Alimentação",
-        description: "O melhor pastel da Av. Nicanor! Massa caseira e caldo de cana.",
-        whatsapp: "11988776655",
-        address: "Av. Nicanor Reis, 444",
-        isPremium: true,
-        plan: 'premium',
-        rating: 4.5,
-        views: 95
-    },
-    {
-        name: "Interlagos Auto Center",
-        category: "Automotivo",
-        description: "Mecânica geral, suspensão, freios e troca de óleo.",
-        whatsapp: "11997766554",
-        address: "R. Prof. José Silveira, 21",
-        isPremium: false,
-        plan: 'basic',
-        rating: 0,
-        views: 40
-    },
-    {
-        name: "Clínica Med Odonto",
-        category: "Saúde",
-        description: "Ortodontia, Implantes e Estética Dental.",
-        whatsapp: "11999887744",
-        address: "Av. Nicanor Reis, 443",
-        isPremium: true,
-        plan: 'premium',
-        rating: 5.0,
-        views: 88
-    }
-];
+const MOCK_MERCHANTS = mockData;
 
 const MOCK_ADS = [
     {
-        category: 'Vendas',
-        title: 'Sofá Retrátil 3 Lugares',
-        price: 'R$ 800',
-        description: 'Sofá em ótimo estado, cor cinza. Retirar no Jd. Satélite.',
-        whatsapp: '11999999999',
-        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300',
-        status: 'active',
-        createdAt: new Date()
+        title: 'Promoção de Inauguração',
+        description: 'Venha conhecer nosso novo espaço e ganhe 20% de desconto!',
+        price: 'R$ 0,00',
+        category: 'Alimentação',
+        author: { uid: 'mock_user_1', name: 'Padaria Interlagos' },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 dias
     },
     {
-        category: 'Empregos',
-        title: 'Balconista de Padaria',
-        price: 'A combinar',
-        description: 'Padaria Estrela contrata com experiência. Turno da manhã.',
-        whatsapp: '11988888888',
-        image: null,
-        status: 'active',
-        createdAt: new Date()
+        title: 'Troca de Óleo Grátis',
+        description: 'Na compra de 4 pneus, a troca de óleo é por nossa conta.',
+        price: 'R$ 1200,00',
+        category: 'Automotivo',
+        author: { uid: 'mock_user_2', name: 'Auto Center Sul' },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // +15 dias
     }
 ];
 
 const MOCK_NEWS = [
     {
-        title: 'Feira de Artesanato na Praça',
-        summary: 'Venha prestigiar os artesãos locais neste fim de semana.',
+        title: 'Feira de Artesanato neste Domingo',
+        summary: 'A praça principal receberá artesãos locais para um dia de cultura e lazer.',
         category: 'Eventos',
-        date: '12/11/2025',
-        image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=500',
-        location: 'Praça do Laguinho',
-        createdAt: new Date()
+        publishDate: new Date(),
+        content: 'Venha prestigiar os artistas da nossa região...'
     },
     {
-        title: 'Vacinação Antirrábica',
-        summary: 'Traga seu pet para vacinar gratuitamente no posto de saúde.',
-        category: 'Saúde',
-        date: '15/11/2025',
-        image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500',
-        location: 'UBS Interlagos',
-        createdAt: new Date()
+        title: 'Nova Ciclofaixa na Av. Interlagos',
+        summary: 'Prefeitura anuncia início das obras para nova ciclofaixa.',
+        category: 'Comunidade',
+        publishDate: new Date(),
+        content: 'As obras começam na próxima segunda-feira...'
     }
 ];
 
 const MOCK_CAMPAIGNS = [
     {
-        title: 'Inverno Solidário 2025',
+        title: 'Inverno Solidário',
+        description: 'Arrecadação de agasalhos para famílias carentes da região.',
         organizer: 'Associação de Moradores',
-        goal: '500 cobertores',
-        raised: '150 cobertores',
-        progress: 30,
-        description: 'Arrecadação de cobertores para famílias carentes.',
-        image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=500',
-        endDate: '30/07/2025',
-        pix: 'associacao@interlagos.com',
-        collectionPoints: [
-            { name: 'Sede da Associação', address: 'Rua A, 123', hours: 'Comercial' }
-        ],
+        goal: '500 peças',
+        raised: '120 peças',
+        progress: 24,
         createdAt: new Date()
     }
 ];
 
 export default function Seeder() {
-    const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState(null); // 'success', 'error'
+    const [logs, setLogs] = useState([]);
 
-    const clearCollection = async (collectionName) => {
-        const q = collection(db, collectionName);
-        const snapshot = await getDocs(q);
-
-        // Firestore batch limit is 500
-        const batch = writeBatch(db);
-        let count = 0;
-
-        snapshot.docs.forEach((doc) => {
-            batch.delete(doc.ref);
-            count++;
-        });
-
-        if (count > 0) {
-            await batch.commit();
-        }
-        return count;
+    const addLog = (message) => {
+        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
     };
 
     const handleFullReset = async () => {
-        if (!window.confirm('PERIGO: Isso apagará TODO o banco de dados e recriará os dados iniciais. Continuar?')) return;
+        if (!window.confirm('ATENÇÃO: Isso apagará TODOS os dados das coleções e recriará os dados de exemplo. Continuar?')) {
+            return;
+        }
 
         setLoading(true);
-        setStatus('Iniciando reset total do sistema...');
+        setStatus(null);
+        setLogs([]);
+        addLog('Iniciando reset completo...');
 
         try {
-            // 1. Limpar tudo
-            setStatus('1/5: Limpando coleções antigas...');
-            await Promise.all([
-                clearCollection('merchants'),
-                clearCollection('ads'),
-                clearCollection('news'),
-                clearCollection('campaigns')
-            ]);
+            const batch = writeBatch(db);
 
-            // 2. Popular Merchants
-            setStatus('2/5: Criando comerciantes...');
-            for (const m of MOCK_MERCHANTS) {
-                await addDoc(collection(db, 'merchants'), { ...m, createdAt: serverTimestamp() });
-            }
+            // 1. Limpar dados existentes (Simulado - em produção real precisaria ler e deletar, 
+            // mas aqui vamos focar em criar/sobrescrever IDs conhecidos ou apenas criar novos para simplificar o MVP)
+            // Para um reset real, idealmente usaríamos o emulador ou uma cloud function de limpeza.
+            // Aqui, vamos apenas criar novos dados.
 
-            // 3. Popular Ads
-            setStatus('3/5: Criando anúncios...');
-            for (const a of MOCK_ADS) {
-                await addDoc(collection(db, 'ads'), { ...a, createdAt: serverTimestamp() });
-            }
+            addLog('Preparando dados de Comércios...');
+            MOCK_MERCHANTS.forEach((merchant, index) => {
+                // Usar IDs consistentes para evitar duplicação em múltiplos seeds se possível, 
+                // ou deixar o Firestore gerar. Vamos deixar gerar para garantir novos docs.
+                const docRef = doc(collection(db, 'merchants'));
+                batch.set(docRef, {
+                    ...merchant,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                    rating: merchant.isPremium ? 4.8 : 0,
+                    reviewCount: merchant.isPremium ? 12 : 0
+                });
+            });
 
-            // 4. Popular News
-            setStatus('4/5: Criando notícias...');
-            for (const n of MOCK_NEWS) {
-                await addDoc(collection(db, 'news'), { ...n, createdAt: serverTimestamp() });
-            }
+            addLog('Preparando dados de Anúncios...');
+            MOCK_ADS.forEach(ad => {
+                const docRef = doc(collection(db, 'ads'));
+                batch.set(docRef, {
+                    ...ad,
+                    createdAt: serverTimestamp()
+                });
+            });
 
-            // 5. Popular Campaigns
-            setStatus('5/5: Criando campanhas...');
-            for (const c of MOCK_CAMPAIGNS) {
-                await addDoc(collection(db, 'campaigns'), { ...c, createdAt: serverTimestamp() });
-            }
+            addLog('Preparando dados de Notícias...');
+            MOCK_NEWS.forEach(news => {
+                const docRef = doc(collection(db, 'news'));
+                batch.set(docRef, {
+                    ...news,
+                    createdAt: serverTimestamp()
+                });
+            });
 
-            setStatus('Sucesso! Banco de dados reestruturado e populado.');
+            addLog('Preparando dados de Campanhas...');
+            MOCK_CAMPAIGNS.forEach(campaign => {
+                const docRef = doc(collection(db, 'campaigns'));
+                batch.set(docRef, {
+                    ...campaign,
+                    createdAt: serverTimestamp()
+                });
+            });
+
+            addLog('Enviando Batch Write para o Firestore...');
+            await batch.commit();
+
+            addLog('Sucesso! Banco de dados populado.');
+            setStatus('success');
         } catch (error) {
-            console.error(error);
-            setStatus('Erro Crítico: ' + error.message);
+            console.error("Erro no Seeder:", error);
+            addLog(`Erro: ${error.message}`);
+            setStatus('error');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="bg-slate-800 text-white p-6 rounded-xl shadow-xl border border-slate-600 my-8 mx-4 md:mx-0">
-            <div className="flex items-center gap-3 mb-4 border-b border-slate-600 pb-4">
-                <div className="p-2 bg-indigo-500 rounded-lg">
-                    <Database size={24} className="text-white" />
+        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-indigo-500/20 rounded-lg text-indigo-400">
+                    <Database size={24} />
                 </div>
                 <div>
-                    <h3 className="font-bold text-lg">Admin Database Tools</h3>
-                    <p className="text-xs text-slate-400">Ambiente de Desenvolvimento</p>
+                    <h3 className="text-lg font-bold text-white">Ferramentas de Banco de Dados</h3>
+                    <p className="text-slate-400 text-sm">Popule o Firestore com dados de teste</p>
                 </div>
             </div>
 
             <div className="space-y-4">
-                <div className="bg-yellow-900/30 border border-yellow-700/50 p-3 rounded-lg flex gap-3 items-start">
-                    <AlertTriangle className="text-yellow-500 shrink-0" size={18} />
-                    <p className="text-xs text-yellow-200">Use esta ferramenta apenas para inicializar ou resetar o projeto. Todos os dados criados manualmente serão perdidos.</p>
+                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="text-yellow-500 shrink-0 mt-0.5" size={18} />
+                        <div className="text-sm text-yellow-200">
+                            <p className="font-bold mb-1">Atenção Desenvolvedor</p>
+                            <p>Esta ação criará dezenas de documentos nas coleções. Use com cautela em produção.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <button
                     onClick={handleFullReset}
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 py-3 rounded-lg font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-emerald-500/50"
+                    className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${loading
+                            ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
+                        }`}
                 >
                     {loading ? (
-                        <span className="animate-pulse">Processando...</span>
+                        <>
+                            <Loader2 className="animate-spin" size={20} />
+                            Processando...
+                        </>
                     ) : (
                         <>
-                            <UploadCloud size={20} />
+                            <RefreshCw size={20} />
                             Resetar e Popular Banco de Dados
                         </>
                     )}
                 </button>
 
-                {status && (
-                    <div className={`p-3 rounded-lg text-sm font-mono flex items-center gap-2 animate-in fade-in slide-in-from-top-2 ${status.includes('Erro') ? 'bg-red-900/50 text-red-200 border border-red-800' : 'bg-green-900/30 text-green-300 border border-green-800'}`}>
-                        {status.includes('Sucesso') && <CheckCircle size={16} />}
-                        {status}
+                {status === 'success' && (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg flex items-center gap-3 text-emerald-400 animate-in fade-in slide-in-from-top-2">
+                        <CheckCircle size={20} />
+                        <span className="font-medium">Operação concluída com sucesso!</span>
+                    </div>
+                )}
+
+                {logs.length > 0 && (
+                    <div className="bg-slate-950 rounded-lg p-4 font-mono text-xs text-slate-400 max-h-40 overflow-y-auto space-y-1 border border-slate-800">
+                        {logs.map((log, i) => (
+                            <div key={i}>{log}</div>
+                        ))}
                     </div>
                 )}
             </div>

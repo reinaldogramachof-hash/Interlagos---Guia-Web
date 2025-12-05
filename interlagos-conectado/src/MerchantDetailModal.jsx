@@ -1,129 +1,134 @@
-import React from 'react';
-import { MapPin, Phone, MessageCircle, Clock, Star, Share2, Globe, Instagram, Facebook } from 'lucide-react';
-import Modal from './Modal';
+import React, { useEffect, useState } from 'react';
+import { X, Phone, MapPin, Globe, Clock, Star, Heart, Share2, MessageCircle, Store } from 'lucide-react';
+import { incrementMerchantView, incrementMerchantContactClick } from './services/statsService';
+import { toggleFavorite, checkIsFavorite } from './services/favoritesService';
+import { useAuth } from './context/AuthContext';
 
-export default function MerchantDetailModal({ isOpen, onClose, merchant }) {
-    if (!merchant) return null;
+export default function MerchantDetailModal({ merchant, onClose }) {
+    const { currentUser } = useAuth();
+    const [isFavorite, setIsFavorite] = useState(false);
 
-    // Mock de imagens adicionais se não houver
-    const gallery = merchant.gallery || [
-        merchant.image || 'https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=500',
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=500',
-        'https://images.unsplash.com/photo-1472851294608-415522f96319?auto=format&fit=crop&q=80&w=500'
-    ];
+    useEffect(() => {
+        if (merchant?.id) {
+            incrementMerchantView(merchant.id);
+            if (currentUser) {
+                checkIsFavorite(currentUser.uid, merchant.id).then(setIsFavorite);
+            }
+        }
+    }, [merchant, currentUser]);
 
     const handleWhatsApp = () => {
-        if (merchant.whatsapp) {
-            const number = merchant.whatsapp.replace(/\D/g, '');
-            window.open(`https://wa.me/55${number}?text=Olá, vi sua empresa no App Interlagos!`, '_blank');
-        }
+        if (merchant?.id) incrementMerchantContactClick(merchant.id);
+        const message = `Olá, vi sua loja no Guia Interlagos!`;
+        window.open(`https://wa.me/55${merchant.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
-    const handleCall = () => {
-        if (merchant.phone || merchant.whatsapp) {
-            window.location.href = `tel:${merchant.phone || merchant.whatsapp}`;
+    const handleToggleFavorite = async () => {
+        if (!currentUser) {
+            alert("Faça login para favoritar!");
+            return;
         }
+        const newState = await toggleFavorite(currentUser.uid, merchant.id, 'merchant', {
+            name: merchant.name,
+            image: merchant.image || null,
+            category: merchant.category
+        });
+        setIsFavorite(newState);
     };
 
-    const handleMap = () => {
-        if (merchant.address) {
-            const query = encodeURIComponent(`${merchant.address}, Interlagos, São Paulo`);
-            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-        }
-    };
+    if (!merchant) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={merchant.name}>
-            <div className="space-y-6">
-                {/* Capa e Galeria */}
-                <div className="-mx-4 -mt-4 mb-4">
-                    <div className="h-56 bg-gray-200 relative">
-                        <img
-                            src={gallery[0]}
-                            alt={merchant.name}
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                            <div className="flex items-center gap-2">
-                                <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
+
+                {/* Header Image */}
+                <div className="h-64 bg-gray-200 relative shrink-0">
+                    <img
+                        src={merchant.image || `https://source.unsplash.com/800x600/?${merchant.category}`}
+                        alt={merchant.name}
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+                    <button onClick={onClose} className="absolute top-4 right-4 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 backdrop-blur-md transition-all">
+                        <X size={20} />
+                    </button>
+
+                    <div className="absolute bottom-0 left-0 p-8 w-full">
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full mb-3 shadow-lg">
                                     {merchant.category}
                                 </span>
-                                {merchant.rating && (
-                                    <div className="flex items-center gap-1 text-yellow-400 text-xs font-bold bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-                                        <Star size={12} fill="currentColor" />
-                                        {merchant.rating}
-                                    </div>
-                                )}
+                                <h2 className="text-4xl font-bold text-white mb-1 shadow-sm">{merchant.name}</h2>
+                                <div className="flex items-center gap-2 text-gray-200 text-sm">
+                                    <MapPin size={14} className="text-indigo-400" />
+                                    <span>{merchant.address || 'Interlagos, SP'}</span>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleToggleFavorite}
+                                    className={`p-3 rounded-full backdrop-blur-md transition-all ${isFavorite ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                                >
+                                    <Heart size={20} fill={isFavorite ? "currentColor" : "none"} />
+                                </button>
+                                <button className="p-3 bg-white/20 text-white rounded-full hover:bg-white/30 backdrop-blur-md transition-all">
+                                    <Share2 size={20} />
+                                </button>
                             </div>
                         </div>
                     </div>
-                    {/* Mini Galeria */}
-                    <div className="flex gap-2 p-4 overflow-x-auto scrollbar-hide">
-                        {gallery.map((img, idx) => (
-                            <img
-                                key={idx}
-                                src={img}
-                                alt={`Galeria ${idx}`}
-                                className="w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-gray-100"
-                            />
-                        ))}
-                    </div>
                 </div>
 
-                {/* Informações Principais */}
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{merchant.name}</h2>
-                    <p className="text-gray-600 leading-relaxed">{merchant.description}</p>
-                </div>
+                {/* Content */}
+                <div className="p-8 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Main Info */}
+                        <div className="md:col-span-2 space-y-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                    <Store size={20} className="text-indigo-600" /> Sobre
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    {merchant.description || 'Uma excelente opção em Interlagos com produtos de qualidade e ótimo atendimento.'}
+                                </p>
+                            </div>
 
-                {/* Informações de Contato e Endereço */}
-                <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
-                    {merchant.address && (
-                        <div className="flex items-start gap-3 text-sm text-gray-700">
-                            <MapPin className="text-indigo-600 shrink-0 mt-0.5" size={18} />
-                            <span>{merchant.address}</span>
+                            <div className="flex gap-3 pt-4">
+                                <button onClick={handleWhatsApp} className="flex-1 bg-green-500 text-white py-3.5 rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2">
+                                    <MessageCircle size={20} /> Chamar no Zap
+                                </button>
+                                <button className="flex-1 bg-indigo-50 text-indigo-700 py-3.5 rounded-xl font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
+                                    <Phone size={20} /> Ligar Agora
+                                </button>
+                            </div>
                         </div>
-                    )}
-                    <div className="flex items-center gap-3 text-sm text-gray-700">
-                        <Clock className="text-indigo-600 shrink-0" size={18} />
-                        <span>Aberto agora • Fecha às 18:00</span>
+
+                        {/* Sidebar Info */}
+                        <div className="space-y-6">
+                            <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Clock size={18} className="text-gray-400" /> Horários
+                                </h3>
+                                <div className="space-y-2 text-sm text-gray-600">
+                                    <div className="flex justify-between"><span>Seg - Sex</span> <span className="font-medium text-gray-900">09:00 - 18:00</span></div>
+                                    <div className="flex justify-between"><span>Sábado</span> <span className="font-medium text-gray-900">09:00 - 14:00</span></div>
+                                    <div className="flex justify-between text-red-400"><span>Domingo</span> <span>Fechado</span></div>
+                                </div>
+                            </div>
+
+                            <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
+                                <div className="flex items-center gap-2 mb-2 text-indigo-900 font-bold">
+                                    <Star size={18} className="text-amber-400 fill-amber-400" /> 4.8
+                                </div>
+                                <p className="text-xs text-indigo-700">Baseado em 128 avaliações de clientes locais.</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                {/* Comodidades (Tags) */}
-                <div className="flex flex-wrap gap-2">
-                    {['Wi-Fi Grátis', 'Estacionamento', 'Pet Friendly', 'Acessível'].map((tag, i) => (
-                        <span key={i} className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                            {tag}
-                        </span>
-                    ))}
-                </div>
-
-                {/* Botões de Ação Fixos */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                    <button
-                        onClick={handleWhatsApp}
-                        className="col-span-2 bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors shadow-lg shadow-green-200"
-                    >
-                        <MessageCircle size={20} />
-                        Chamar no WhatsApp
-                    </button>
-                    <button
-                        onClick={handleCall}
-                        className="bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
-                    >
-                        <Phone size={20} />
-                        Ligar
-                    </button>
-                    <button
-                        onClick={handleMap}
-                        className="bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
-                    >
-                        <MapPin size={20} />
-                        Como Chegar
-                    </button>
                 </div>
             </div>
-        </Modal>
+        </div>
     );
 }

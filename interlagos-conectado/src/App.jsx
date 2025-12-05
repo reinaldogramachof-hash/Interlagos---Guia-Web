@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { db, auth } from './firebaseConfig';
+import { db } from './firebaseConfig';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './Sidebar';
 import MerchantDetailModal from './MerchantDetailModal';
 import AdDetailModal from './AdDetailModal';
@@ -9,10 +9,10 @@ import NewsDetailModal from './NewsDetailModal';
 import ServiceDetailModal from './ServiceDetailModal';
 import CampaignDetailModal from './CampaignDetailModal';
 import LoginModal from './LoginModal';
-import UserProfile from './UserProfile';
 import CreateAdWizard from './CreateAdWizard';
 import AdminPanel from './AdminPanel';
-import Seeder from './Seeder';
+import MerchantPanel from './panels/MerchantPanel';
+import ResidentPanel from './panels/ResidentPanel';
 import NewsFeed from './NewsFeed';
 import AdsView from './AdsView';
 import DonationsView from './DonationsView';
@@ -22,33 +22,29 @@ import SuggestionsView from './SuggestionsView';
 import ManagementView from './ManagementView';
 import PlansView from './PlansView';
 import MerchantLandingView from './MerchantLandingView';
-// import ChatbotWidget from './components/ChatbotWidget';
-// import { ChatContextProvider } from './context/ChatContext';
-import { Menu, Search, Filter, User, LogOut, PlusCircle, LayoutDashboard } from 'lucide-react';
+import NotificationBell from './components/NotificationBell';
+import { Search, User, LogOut, PlusCircle, LayoutDashboard, Store, UserCircle, ChevronDown } from 'lucide-react';
 import { categories } from './constants/categories';
-import { mockData } from './mockData';
 
-export default function App() {
+function AppContent() {
+  const { currentUser, logout, isAdmin, isMaster, isMerchant } = useAuth();
   const [currentView, setCurrentView] = useState('merchants');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAdmin, setShowAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
   const [merchants, setMerchants] = useState([]);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [showCreateAd, setShowCreateAd] = useState(false);
   const [selectedAd, setSelectedAd] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Carregar comerciantes do Firestore em tempo real
   useEffect(() => {
     if (!db) {
-      console.warn("Firestore (db) não inicializado. Pulando carregamento de comerciantes.");
       setLoading(false);
       return;
     }
@@ -69,24 +65,8 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Monitorar estado de autenticação
-  useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Erro ao sair:", error);
-    }
-  };
-
-  const filteredMerchants = (merchants.length > 0 ? merchants : mockData).filter(merchant => {
+  // Filtragem de comerciantes
+  const filteredMerchants = merchants.filter(merchant => {
     const matchesCategory = selectedCategory === 'Todos' || merchant.category === selectedCategory;
     const matchesSearch = merchant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       merchant.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -97,13 +77,144 @@ export default function App() {
     setSelectedMerchant(merchant);
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setUserMenuOpen(false);
+    setCurrentView('merchants');
+  };
+
   if (showCreateAd) {
-    return <CreateAdWizard onBack={() => setShowCreateAd(false)} />;
+    return <CreateAdWizard onClose={() => setShowCreateAd(false)} user={currentUser} isOpen={true} />;
   }
 
-  if (showAdmin) {
-    return <AdminPanel merchants={merchants} onClose={() => setShowAdmin(false)} user={user} />;
-  }
+  // Renderização condicional das views principais
+  const renderView = () => {
+    switch (currentView) {
+      case 'admin':
+        return <AdminPanel onClose={() => setCurrentView('merchants')} />;
+      case 'merchant-panel':
+        return <MerchantPanel />;
+      case 'resident-panel':
+        return <ResidentPanel />;
+      case 'news':
+        return <NewsFeed />;
+      case 'ads':
+        return <AdsView />;
+      case 'donations':
+        return <DonationsView />;
+      case 'utility':
+        return <UtilityView onServiceClick={setSelectedService} />;
+      case 'history':
+        return <HistoryView />;
+      case 'suggestions':
+        return <SuggestionsView />;
+      case 'management':
+        return <ManagementView />;
+      case 'plans':
+        return <PlansView />;
+      case 'merchant-landing':
+        return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />;
+      case 'merchants':
+      default:
+        return (
+          <>
+            {/* Categories Tabs */}
+            <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat.id
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                    : 'bg-slate-800/50 text-slate-400 border border-white/5 hover:bg-slate-800'
+                    }`}
+                >
+                  {cat.icon}
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Featured Merchants */}
+            {selectedCategory === 'Todos' && !searchTerm && (
+              <section className="mb-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                    Destaques da Região
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {merchants.filter(m => m.isPremium).slice(0, 3).map(merchant => (
+                    <div key={merchant.id} onClick={() => handleMerchantClick(merchant)} className="bg-slate-800/50 border border-white/5 rounded-2xl p-4 cursor-pointer hover:bg-slate-800 transition-all">
+                      <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden">
+                        <img src={merchant.image || `https://source.unsplash.com/random/800x600/?store,${merchant.category}`} alt={merchant.name} className="w-full h-full object-cover" />
+                      </div>
+                      <h3 className="font-bold text-lg">{merchant.name}</h3>
+                      <p className="text-slate-400 text-sm line-clamp-2">{merchant.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* All Merchants Grid */}
+            <section>
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
+                {searchTerm ? `Resultados para "${searchTerm}"` : `${selectedCategory}`}
+              </h2>
+
+              {loading ? (
+                <div className="flex justify-center py-20">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredMerchants.map(merchant => (
+                    <div
+                      key={merchant.id}
+                      onClick={() => handleMerchantClick(merchant)}
+                      className="group bg-slate-800/40 hover:bg-slate-800 border border-white/5 hover:border-indigo-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
+                    >
+                      <div className="aspect-video bg-slate-700/50 rounded-xl mb-4 overflow-hidden relative">
+                        <img
+                          src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`}
+                          alt={merchant.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-medium text-white border border-white/10">
+                          {merchant.category}
+                        </div>
+                      </div>
+                      <h3 className="font-bold text-lg text-slate-100 mb-1 group-hover:text-indigo-400 transition-colors">{merchant.name}</h3>
+                      <p className="text-slate-400 text-sm line-clamp-2 mb-3">{merchant.description}</p>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Aberto agora
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!loading && filteredMerchants.length === 0 && (
+                <div className="text-center py-20 bg-slate-800/30 rounded-3xl border border-white/5 border-dashed">
+                  <div className="bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="text-slate-500" size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Nenhum resultado encontrado</h3>
+                  <p className="text-slate-400 max-w-md mx-auto">
+                    Não encontramos nada para "{searchTerm}" na categoria {selectedCategory}.
+                  </p>
+                </div>
+              )}
+            </section>
+          </>
+        );
+    }
+  };
 
   return (
     <div className="dark">
@@ -115,22 +226,23 @@ export default function App() {
             <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
               <span className="font-bold text-white text-lg tracking-tight">IC</span>
             </div>
-            <h1 className="font-bold text-lg text-white">
-              Interlagos
-            </h1>
+            <h1 className="font-bold text-lg text-white">Interlagos</h1>
           </div>
-          <button
-            onClick={() => setIsLoginOpen(true)}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors relative group"
-          >
-            {user ? (
-              user.photoURL ?
-                <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full border-2 border-indigo-500" />
-                : <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">{user.displayName?.[0] || 'U'}</div>
-            ) : (
-              <User className="text-slate-400 group-hover:text-white transition-colors" size={24} />
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <button
+              onClick={() => currentUser ? setUserMenuOpen(!userMenuOpen) : setIsLoginOpen(true)}
+              className="p-2 hover:bg-white/5 rounded-full transition-colors relative group"
+            >
+              {currentUser ? (
+                currentUser.photoURL ?
+                  <img src={currentUser.photoURL} alt={currentUser.displayName} className="w-8 h-8 rounded-full border-2 border-indigo-500" />
+                  : <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">{currentUser.displayName?.[0] || 'U'}</div>
+              ) : (
+                <User className="text-slate-400 group-hover:text-white transition-colors" size={24} />
+              )}
+            </button>
+          </div>
         </header>
 
         <div className="flex">
@@ -138,7 +250,6 @@ export default function App() {
           <Sidebar
             currentView={currentView}
             setCurrentView={setCurrentView}
-            handleAdminClick={() => setShowAdmin(true)}
             className="hidden lg:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r border-white/5 bg-slate-900/50 backdrop-blur-xl"
           />
 
@@ -164,27 +275,72 @@ export default function App() {
                 </div>
 
                 {/* Desktop User Actions */}
-                <div className="hidden lg:flex items-center gap-3">
-                  {user ? (
-                    <div className="flex items-center gap-3 bg-slate-800/50 p-1.5 pr-4 rounded-full border border-white/5 hover:border-white/10 transition-all">
-                      {user.photoURL ? (
-                        <img src={user.photoURL} alt="User" className="w-9 h-9 rounded-full border border-indigo-500/30" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm">
-                          {user.displayName?.[0] || 'U'}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <span className="text-xs text-slate-400 font-medium">Olá,</span>
-                        <span className="text-sm font-bold text-slate-200 leading-none">{user.displayName?.split(' ')[0]}</span>
-                      </div>
+                <div className="hidden lg:flex items-center gap-4">
+                  <NotificationBell />
+
+                  {currentUser ? (
+                    <div className="relative">
                       <button
-                        onClick={handleLogout}
-                        className="ml-2 p-2 hover:bg-red-500/10 hover:text-red-400 rounded-full transition-colors"
-                        title="Sair"
+                        onClick={() => setUserMenuOpen(!userMenuOpen)}
+                        className="flex items-center gap-3 bg-slate-800/50 p-1.5 pr-4 rounded-full border border-white/5 hover:border-white/10 transition-all"
                       >
-                        <LogOut size={18} />
+                        {currentUser.photoURL ? (
+                          <img src={currentUser.photoURL} alt="User" className="w-9 h-9 rounded-full border border-indigo-500/30" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm">
+                            {currentUser.displayName?.[0] || 'U'}
+                          </div>
+                        )}
+                        <div className="flex flex-col items-start">
+                          <span className="text-xs text-slate-400 font-medium">Olá,</span>
+                          <span className="text-sm font-bold text-slate-200 leading-none">{currentUser.displayName?.split(' ')[0]}</span>
+                        </div>
+                        <ChevronDown size={16} className="text-slate-400" />
                       </button>
+
+                      {/* User Dropdown Menu */}
+                      {userMenuOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                          <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-xl border border-white/10 z-50 overflow-hidden animate-in fade-in zoom-in-95">
+                            <div className="p-2 space-y-1">
+                              {(isAdmin || isMaster) && (
+                                <button
+                                  onClick={() => { setCurrentView('admin'); setUserMenuOpen(false); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
+                                >
+                                  <LayoutDashboard size={16} />
+                                  Painel Admin
+                                </button>
+                              )}
+                              {isMerchant && (
+                                <button
+                                  onClick={() => { setCurrentView('merchant-panel'); setUserMenuOpen(false); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
+                                >
+                                  <Store size={16} />
+                                  Painel do Comerciante
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { setCurrentView('resident-panel'); setUserMenuOpen(false); }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
+                              >
+                                <UserCircle size={16} />
+                                Minha Conta
+                              </button>
+                              <div className="h-px bg-white/10 my-1" />
+                              <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <LogOut size={16} />
+                                Sair
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <button
@@ -195,15 +351,6 @@ export default function App() {
                       <span>Entrar</span>
                     </button>
                   )}
-
-                  {/* Admin Toggle (Dev only) */}
-                  <button
-                    onClick={() => setShowAdmin(true)}
-                    className="p-3 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-indigo-400 rounded-xl border border-white/5 transition-all"
-                    title="Painel Admin"
-                  >
-                    <LayoutDashboard size={20} />
-                  </button>
                 </div>
               </div>
 
@@ -226,145 +373,9 @@ export default function App() {
             </div>
 
             <div className="px-4 lg:px-6 max-w-6xl mx-auto space-y-8">
-
               {/* Dynamic Content View */}
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {currentView === 'merchants' && (
-                  <>
-                    {/* Categories Tabs (Moved from Sidebar) */}
-                    <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-                      {categories.map(cat => (
-                        <button
-                          key={cat.id}
-                          onClick={() => setSelectedCategory(cat.id)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat.id
-                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                            : 'bg-slate-800/50 text-slate-400 border border-white/5 hover:bg-slate-800'
-                            }`}
-                        >
-                          {cat.icon}
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-                    {/* Featured Merchants (Premium) */}
-                    {selectedCategory === 'Todos' && !searchTerm && (
-                      <section className="mb-12">
-                        <div className="flex items-center justify-between mb-6">
-                          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-                            Destaques da Região
-                          </h2>
-                        </div>
-                        {/* TODO: Implement PremiumCarousel */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {/* Placeholder for Premium Merchants */}
-                          {merchants.filter(m => m.isPremium).slice(0, 3).map(merchant => (
-                            <div key={merchant.id} onClick={() => handleMerchantClick(merchant)} className="bg-slate-800/50 border border-white/5 rounded-2xl p-4 cursor-pointer hover:bg-slate-800 transition-all">
-                              <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden">
-                                <img src={merchant.image || `https://source.unsplash.com/random/800x600/?store,${merchant.category}`} alt={merchant.name} className="w-full h-full object-cover" />
-                              </div>
-                              <h3 className="font-bold text-lg">{merchant.name}</h3>
-                              <p className="text-slate-400 text-sm line-clamp-2">{merchant.description}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
-
-                    {/* All Merchants Grid */}
-                    <section>
-                      <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                        <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
-                        {searchTerm ? `Resultados para "${searchTerm}"` : `${selectedCategory}`}
-                      </h2>
-
-                      {loading ? (
-                        <div className="flex justify-center py-20">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                          {filteredMerchants.map(merchant => (
-                            <div
-                              key={merchant.id}
-                              onClick={() => handleMerchantClick(merchant)}
-                              className="group bg-slate-800/40 hover:bg-slate-800 border border-white/5 hover:border-indigo-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
-                            >
-                              <div className="aspect-video bg-slate-700/50 rounded-xl mb-4 overflow-hidden relative">
-                                <img
-                                  src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`}
-                                  alt={merchant.name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                  loading="lazy"
-                                />
-                                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-medium text-white border border-white/10">
-                                  {merchant.category}
-                                </div>
-                              </div>
-                              <h3 className="font-bold text-lg text-slate-100 mb-1 group-hover:text-indigo-400 transition-colors">{merchant.name}</h3>
-                              <p className="text-slate-400 text-sm line-clamp-2 mb-3">{merchant.description}</p>
-                              <div className="flex items-center gap-2 text-xs text-slate-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                Aberto agora
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {!loading && filteredMerchants.length === 0 && (
-                        <div className="text-center py-20 bg-slate-800/30 rounded-3xl border border-white/5 border-dashed">
-                          <div className="bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Search className="text-slate-500" size={32} />
-                          </div>
-                          <h3 className="text-xl font-bold text-white mb-2">Nenhum resultado encontrado</h3>
-                          <p className="text-slate-400 max-w-md mx-auto">
-                            Não encontramos nada para "{searchTerm}" na categoria {selectedCategory}.
-                            Tente buscar por outro termo.
-                          </p>
-                        </div>
-                      )}
-                    </section>
-                  </>
-                )}
-
-                {currentView === 'news' && (
-                  <NewsFeed user={user} />
-                )}
-
-                {currentView === 'ads' && (
-                  <AdsView user={user} onAdClick={setSelectedAd} />
-                )}
-
-                {currentView === 'donations' && (
-                  <DonationsView user={user} onCampaignClick={setSelectedCampaign} />
-                )}
-
-                {currentView === 'utility' && (
-                  <UtilityView onServiceClick={setSelectedService} />
-                )}
-
-                {currentView === 'history' && (
-                  <HistoryView />
-                )}
-
-                {currentView === 'suggestions' && (
-                  <SuggestionsView />
-                )}
-
-                {currentView === 'management' && (
-                  <ManagementView />
-                )}
-
-                {currentView === 'plans' && (
-                  <PlansView />
-                )}
-
-                {currentView === 'merchant-landing' && (
-                  <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />
-                )}
-
+                {renderView()}
               </div>
             </div>
           </main>
@@ -388,11 +399,9 @@ export default function App() {
 
         {isLoginOpen && (
           <LoginModal
+            isOpen={isLoginOpen}
             onClose={() => setIsLoginOpen(false)}
-            onSuccess={(user) => {
-              setUser(user);
-              setIsLoginOpen(false);
-            }}
+            onSuccess={() => setIsLoginOpen(false)}
           />
         )}
 
@@ -424,10 +433,15 @@ export default function App() {
           />
         )}
 
-        {/* Chatbot Widget - DISABLED FOR NOW */}
-        {/* <ChatbotWidget /> */}
-
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { X, LogIn } from 'lucide-react';
+import { X, LogIn, Shield, Store, User, Database } from 'lucide-react';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from './firebaseConfig';
+import { useAuth } from './context/AuthContext';
 
 export default function LoginModal({ onClose, onSuccess }) {
+    const { loginAsDev } = useAuth();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
@@ -38,6 +40,12 @@ export default function LoginModal({ onClose, onSuccess }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDevLogin = (role) => {
+        loginAsDev(role);
+        if (onSuccess) onSuccess({ uid: `dev_${role}`, displayName: `Dev ${role}` }); // Mock user for callback
+        onClose();
     };
 
     return (
@@ -95,7 +103,7 @@ export default function LoginModal({ onClose, onSuccess }) {
                             <input
                                 type="email"
                                 placeholder="Seu e-mail"
-                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -105,7 +113,7 @@ export default function LoginModal({ onClose, onSuccess }) {
                             <input
                                 type="password"
                                 placeholder="Sua senha"
-                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -127,6 +135,29 @@ export default function LoginModal({ onClose, onSuccess }) {
                         >
                             Continuar como Visitante
                         </button>
+                    </div>
+
+                    {/* Dev Mode Section */}
+                    <div className="mt-8 pt-6 border-t border-gray-100">
+                        <p className="text-xs font-bold text-gray-400 text-center mb-3 uppercase tracking-wider">Modo Desenvolvedor (Teste)</p>
+                        <div className="grid grid-cols-4 gap-2">
+                            <button onClick={() => handleDevLogin('master')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><Database size={16} /></div>
+                                <span className="text-[10px] font-bold text-gray-500">Master</span>
+                            </button>
+                            <button onClick={() => handleDevLogin('admin')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Shield size={16} /></div>
+                                <span className="text-[10px] font-bold text-gray-500">Admin</span>
+                            </button>
+                            <button onClick={() => handleDevLogin('merchant')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><Store size={16} /></div>
+                                <span className="text-[10px] font-bold text-gray-500">Loja</span>
+                            </button>
+                            <button onClick={() => handleDevLogin('resident')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><User size={16} /></div>
+                                <span className="text-[10px] font-bold text-gray-500">User</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

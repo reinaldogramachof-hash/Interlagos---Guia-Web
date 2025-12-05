@@ -34,12 +34,17 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
             await addDoc(collection(db, 'ads'), {
                 ...formData,
                 createdAt: serverTimestamp(),
-                status: 'active',
+                status: 'pending', // Changed to pending for moderation
                 userId: user.uid,
                 userName: user.displayName || 'Usuário Anônimo',
-                userPhoto: user.photoURL || null
+                userPhoto: user.photoURL || null,
+                author: { // Adding structured author object for consistency
+                    uid: user.uid,
+                    name: user.displayName,
+                    email: user.email
+                }
             });
-            alert("Anúncio publicado com sucesso!");
+            alert("Anúncio enviado para análise! Ele aparecerá após aprovação.");
             onClose();
             setStep(1);
             setFormData({ category: '', title: '', price: '', whatsapp: '', description: '', image: '' });
@@ -109,7 +114,7 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
                             <input
                                 type="text"
                                 placeholder="https://exemplo.com/imagem.jpg"
-                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                 value={formData.image}
                                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                             />
@@ -128,7 +133,7 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Título</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                     placeholder="Ex: Bicicleta Aro 29"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -140,7 +145,7 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
                                     <label className="block text-sm font-bold text-gray-700 mb-1">Preço</label>
                                     <input
                                         type="text"
-                                        className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                         placeholder="R$ 0,00"
                                         value={formData.price}
                                         onChange={e => setFormData({ ...formData, price: e.target.value })}
@@ -151,7 +156,7 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
                                     <label className="block text-sm font-bold text-gray-700 mb-1">WhatsApp</label>
                                     <input
                                         type="text"
-                                        className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                         placeholder="11999998888"
                                         value={formData.whatsapp}
                                         onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
@@ -162,7 +167,7 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Descrição</label>
                                 <textarea
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none"
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none text-gray-900"
                                     placeholder="Conte mais detalhes..."
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
