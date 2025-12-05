@@ -155,22 +155,42 @@ export default function AdminPanel({ onClose }) {
     };
 
     // Merchant Form Logic
-    const initialMerchantForm = { name: '', category: 'Alimentação', description: '', phone: '', whatsapp: '', address: '', plan: 'basic', promotion: '' };
+    const initialMerchantForm = {
+        name: '',
+        category: 'Alimentação',
+        description: '',
+        phone: '',
+        whatsapp: '',
+        address: '',
+        plan: 'free',
+        socialLinks: { instagram: '', facebook: '', site: '' },
+        gallery: []
+    };
     const [merchantForm, setMerchantForm] = useState(initialMerchantForm);
 
     const handleSaveMerchant = async (e) => {
         e.preventDefault();
         try {
-            const dataToSave = { ...merchantForm, isPremium: merchantForm.plan !== 'basic', updatedAt: serverTimestamp() };
+            // Sanitize WhatsApp (remove everything except numbers)
+            const cleanWhatsapp = merchantForm.whatsapp.replace(/\D/g, '');
+
+            const dataToSave = {
+                ...merchantForm,
+                whatsapp: cleanWhatsapp,
+                plan: merchantForm.plan,
+                isPremium: ['professional', 'premium'].includes(merchantForm.plan),
+                updatedAt: serverTimestamp()
+            };
+
             if (isCreating) {
                 await addDoc(collection(db, 'merchants'), { ...dataToSave, createdAt: serverTimestamp(), views: 0, rating: 0 });
             } else {
                 await updateDoc(doc(db, 'merchants', editingId), dataToSave);
             }
             setIsCreating(false); setEditingId(null); setMerchantForm(initialMerchantForm);
-            alert('Salvo com sucesso!');
+            alert('Comércio salvo com sucesso!');
             fetchMerchants();
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error(error); alert('Erro ao salvar.'); }
     };
 
     return (
@@ -268,9 +288,12 @@ export default function AdminPanel({ onClose }) {
                                     </div>
                                     <div className="flex-1 overflow-y-auto space-y-2">
                                         {merchants.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase())).map(m => (
-                                            <div key={m.id} onClick={() => { setEditingId(m.id); setIsCreating(false); setMerchantForm(m); }} className={`p-3 rounded-lg border cursor-pointer hover:bg-gray-50 ${editingId === m.id ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}>
-                                                <div className="font-bold text-sm">{m.name}</div>
-                                                <div className="text-xs text-gray-500">{m.category}</div>
+                                            <div key={m.id} onClick={() => { setEditingId(m.id); setIsCreating(false); setMerchantForm(m); }} className={`p-3 rounded-lg border cursor-pointer hover:bg-gray-50 flex justify-between items-center ${editingId === m.id ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}>
+                                                <div>
+                                                    <div className="font-bold text-sm text-slate-800">{m.name}</div>
+                                                    <div className="text-xs text-gray-500">{m.category}</div>
+                                                </div>
+                                                {m.isPremium && <Trophy size={14} className="text-amber-500" />}
                                             </div>
                                         ))}
                                     </div>
@@ -278,23 +301,118 @@ export default function AdminPanel({ onClose }) {
                                 {/* Form */}
                                 <div className="flex-1 pl-2">
                                     {(isCreating || editingId) ? (
-                                        <form onSubmit={handleSaveMerchant} className="space-y-4">
-                                            <h3 className="font-bold text-lg">{isCreating ? 'Novo Comércio' : 'Editando Comércio'}</h3>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <input className="border p-2 rounded text-slate-900" placeholder="Nome" value={merchantForm.name} onChange={e => setMerchantForm({ ...merchantForm, name: e.target.value })} required />
-                                                <select className="border p-2 rounded text-slate-900" value={merchantForm.category} onChange={e => setMerchantForm({ ...merchantForm, category: e.target.value })}>
-                                                    {['Alimentação', 'Saúde', 'Automotivo', 'Beleza', 'Serviços', 'Outros'].map(c => <option key={c} value={c}>{c}</option>)}
-                                                </select>
+                                        <form onSubmit={handleSaveMerchant} className="space-y-6">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="font-bold text-lg text-slate-800">{isCreating ? 'Novo Comércio' : 'Editando Comércio'}</h3>
+                                                <button type="button" onClick={() => { setIsCreating(false); setEditingId(null); }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                                             </div>
-                                            <textarea className="border p-2 rounded w-full text-slate-900" rows="2" placeholder="Descrição" value={merchantForm.description} onChange={e => setMerchantForm({ ...merchantForm, description: e.target.value })} />
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <input className="border p-2 rounded text-slate-900" placeholder="WhatsApp" value={merchantForm.whatsapp} onChange={e => setMerchantForm({ ...merchantForm, whatsapp: e.target.value })} />
-                                                <input className="border p-2 rounded text-slate-900" placeholder="Endereço" value={merchantForm.address} onChange={e => setMerchantForm({ ...merchantForm, address: e.target.value })} />
+
+                                            {/* Plan Selection */}
+                                            {/* Plan Selection */}
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {/* Free */}
+                                                <label className={`cursor-pointer border p-3 rounded-lg text-center transition-all ${merchantForm.plan === 'free' ? 'border-gray-500 bg-gray-50 ring-2 ring-gray-200' : 'border-gray-200 hover:border-gray-300'}`}>
+                                                    <input type="radio" name="plan" value="free" checked={merchantForm.plan === 'free'} onChange={e => setMerchantForm({ ...merchantForm, plan: e.target.value })} className="hidden" />
+                                                    <div className="font-bold text-gray-700 mb-1">Grátis</div>
+                                                    <div className="text-[10px] text-gray-500 leading-tight">Card simples, sem Zap linkado, prioridade baixa.</div>
+                                                </label>
+
+                                                {/* Basic */}
+                                                <label className={`cursor-pointer border p-3 rounded-lg text-center transition-all ${merchantForm.plan === 'basic' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300'}`}>
+                                                    <input type="radio" name="plan" value="basic" checked={merchantForm.plan === 'basic'} onChange={e => setMerchantForm({ ...merchantForm, plan: e.target.value })} className="hidden" />
+                                                    <div className="font-bold text-blue-700 mb-1">Básico</div>
+                                                    <div className="text-[10px] text-blue-600 leading-tight">Card com foto, botão Zap, prioridade normal.</div>
+                                                </label>
+
+                                                {/* Professional */}
+                                                <label className={`cursor-pointer border p-3 rounded-lg text-center transition-all ${merchantForm.plan === 'professional' ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300'}`}>
+                                                    <input type="radio" name="plan" value="professional" checked={merchantForm.plan === 'professional'} onChange={e => setMerchantForm({ ...merchantForm, plan: e.target.value })} className="hidden" />
+                                                    <div className="font-bold text-indigo-700 mb-1 flex items-center justify-center gap-1">Pro <Trophy size={12} /></div>
+                                                    <div className="text-[10px] text-indigo-600 leading-tight">Destaque, redes sociais, galeria de fotos.</div>
+                                                </label>
+
+                                                {/* Premium */}
+                                                <label className={`cursor-pointer border p-3 rounded-lg text-center transition-all ${merchantForm.plan === 'premium' ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-200' : 'border-gray-200 hover:border-gray-300'}`}>
+                                                    <input type="radio" name="plan" value="premium" checked={merchantForm.plan === 'premium'} onChange={e => setMerchantForm({ ...merchantForm, plan: e.target.value })} className="hidden" />
+                                                    <div className="font-bold text-amber-700 mb-1 flex items-center justify-center gap-1">Premium <Trophy size={14} className="fill-amber-500" /></div>
+                                                    <div className="text-[10px] text-amber-600 leading-tight">Super destaque, topo da lista, card expandido.</div>
+                                                </label>
                                             </div>
-                                            <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded font-bold"><Save size={16} className="inline mr-1" /> Salvar</button>
+
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-500 mb-1">Nome do Estabelecimento</label>
+                                                        <input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ex: Padaria Interlagos" value={merchantForm.name} onChange={e => setMerchantForm({ ...merchantForm, name: e.target.value })} required />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-500 mb-1">Categoria</label>
+                                                        <select className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" value={merchantForm.category} onChange={e => setMerchantForm({ ...merchantForm, category: e.target.value })}>
+                                                            {['Alimentação', 'Saúde', 'Automotivo', 'Beleza', 'Serviços', 'Tecnologia', 'Educação', 'Outros'].map(c => <option key={c} value={c}>{c}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Descrição Curta</label>
+                                                    <textarea className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" rows="2" placeholder="O que este comércio oferece?" value={merchantForm.description} onChange={e => setMerchantForm({ ...merchantForm, description: e.target.value })} />
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-500 mb-1">WhatsApp (Apenas Números)</label>
+                                                        <input
+                                                            className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                            placeholder="11999999999"
+                                                            value={merchantForm.whatsapp}
+                                                            onChange={e => setMerchantForm({ ...merchantForm, whatsapp: e.target.value })}
+                                                        />
+                                                        <p className="text-[10px] text-slate-400 mt-1">Será formatado automaticamente.</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label>
+                                                        <input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Rua..." value={merchantForm.address} onChange={e => setMerchantForm({ ...merchantForm, address: e.target.value })} />
+                                                    </div>
+                                                </div>
+
+                                                {/* Social Links (Professional & Premium) */}
+                                                {['professional', 'premium'].includes(merchantForm.plan) && (
+                                                    <div className="pt-2 border-t border-slate-100">
+                                                        <label className="block text-xs font-bold text-slate-500 mb-2">Redes Sociais (Opcional)</label>
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <input
+                                                                className="border p-2 rounded text-slate-900 text-xs"
+                                                                placeholder="Instagram (Ex: @loja)"
+                                                                value={merchantForm.socialLinks?.instagram || ''}
+                                                                onChange={e => setMerchantForm({ ...merchantForm, socialLinks: { ...merchantForm.socialLinks, instagram: e.target.value } })}
+                                                            />
+                                                            <input
+                                                                className="border p-2 rounded text-slate-900 text-xs"
+                                                                placeholder="Facebook (Link)"
+                                                                value={merchantForm.socialLinks?.facebook || ''}
+                                                                onChange={e => setMerchantForm({ ...merchantForm, socialLinks: { ...merchantForm.socialLinks, facebook: e.target.value } })}
+                                                            />
+                                                            <input
+                                                                className="border p-2 rounded text-slate-900 text-xs"
+                                                                placeholder="Site (Link)"
+                                                                value={merchantForm.socialLinks?.site || ''}
+                                                                onChange={e => setMerchantForm({ ...merchantForm, socialLinks: { ...merchantForm.socialLinks, site: e.target.value } })}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30">
+                                                <Save size={18} />
+                                                {isCreating ? 'Criar Comércio' : 'Salvar Alterações'}
+                                            </button>
                                         </form>
                                     ) : (
-                                        <div className="h-full flex items-center justify-center text-gray-400">Selecione para editar</div>
+                                        <div className="h-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                                            <Trophy size={48} className="mb-4 text-gray-200" />
+                                            <p>Selecione um comércio para editar ou <button onClick={() => { setIsCreating(true); setEditingId(null); setMerchantForm(initialMerchantForm); }} className="text-indigo-600 font-bold hover:underline">crie um novo</button>.</p>
+                                        </div>
                                     )}
                                 </div>
                             </div>

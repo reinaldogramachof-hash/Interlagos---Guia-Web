@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -23,7 +23,7 @@ import ManagementView from './ManagementView';
 import PlansView from './PlansView';
 import MerchantLandingView from './MerchantLandingView';
 import NotificationBell from './components/NotificationBell';
-import { Search, User, LogOut, PlusCircle, LayoutDashboard, Store, UserCircle, ChevronDown } from 'lucide-react';
+import { Search, User, LogOut, PlusCircle, LayoutDashboard, Store, UserCircle, ChevronDown, ChevronLeft, ChevronRight, Trophy, Star, CircleDashed } from 'lucide-react';
 import { categories } from './constants/categories';
 
 function AppContent() {
@@ -41,6 +41,86 @@ function AppContent() {
   const [selectedService, setSelectedService] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  // Carousel Refs and Auto-Scroll State
+  const premiumCarouselRef = useRef(null);
+  const proCarouselRef = useRef(null);
+  const [isPremiumPaused, setIsPremiumPaused] = useState(false);
+  const [isProPaused, setIsProPaused] = useState(false);
+
+  // Infinite Lists Configuration
+  // Note: merchants array changes on load. We need these derived arrays to be robust.
+  const premiumMerchants = merchants.filter(m => m.plan === 'premium').sort((a, b) => (a.plan === 'premium' ? -1 : 1));
+  const proMerchants = merchants.filter(m => m.plan === 'professional');
+
+  // Duplicate for seamless looping (6x for safety)
+  const infinitePremium = [...premiumMerchants, ...premiumMerchants, ...premiumMerchants, ...premiumMerchants, ...premiumMerchants, ...premiumMerchants].slice(0, 30);
+  // Pro: For CSS Marquee, we just need enough duplicate content to fill the screen + buffer.
+  const infinitePro = [...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants, ...proMerchants];
+
+  // Auto-scroll contínuo para Premium (velocidade moderada)
+  useEffect(() => {
+    let animationFrameId;
+    const scroll = () => {
+      if (!isPremiumPaused && premiumCarouselRef.current) {
+        const scroller = premiumCarouselRef.current;
+        // Loop infinito: reseta quando passa da metade
+        if (scroller.scrollLeft >= scroller.scrollWidth / 2) {
+          scroller.scrollLeft = scroller.scrollLeft - (scroller.scrollWidth / 2);
+        } else {
+          // Scroll contínuo suave
+          scroller.scrollLeft += 0.5;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+    animationFrameId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isPremiumPaused]);
+
+  // Auto-scroll contínuo para Pro (velocidade igual ao Premium para consistência)
+  useEffect(() => {
+    let animationFrameId;
+    const scroll = () => {
+      if (!isProPaused && proCarouselRef.current) {
+        const scroller = proCarouselRef.current;
+        // Loop infinito: reseta quando passa da metade
+        if (scroller.scrollLeft >= scroller.scrollWidth / 2) {
+          scroller.scrollLeft = scroller.scrollLeft - (scroller.scrollWidth / 2);
+        } else {
+          // Scroll contínuo suave (mesma velocidade do Premium)
+          scroller.scrollLeft += 0.5;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+    animationFrameId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isProPaused]);
+
+  // Handle manual scroll reset for Premium to ensure it never "ends" (infinite loop)
+  const handlePremiumScroll = () => {
+    if (!premiumCarouselRef.current) return;
+    const scroller = premiumCarouselRef.current;
+    const maxScroll = scroller.scrollWidth / 2;
+
+    // Se passou da metade, reseta invisivelmente para o início
+    if (scroller.scrollLeft >= maxScroll - 10) {
+      scroller.scrollLeft = scroller.scrollLeft - maxScroll;
+    }
+  };
+
+  // Handle manual scroll reset for Pro (same logic as Premium)
+  const handleProScroll = () => {
+    if (!proCarouselRef.current) return;
+    const scroller = proCarouselRef.current;
+    const maxScroll = scroller.scrollWidth / 2;
+
+    // Se passou da metade, reseta invisivelmente para o início
+    if (scroller.scrollLeft >= maxScroll - 10) {
+      scroller.scrollLeft = scroller.scrollLeft - maxScroll;
+    }
+  };
 
   // Carregar comerciantes do Firestore em tempo real
   useEffect(() => {
@@ -65,13 +145,21 @@ function AppContent() {
     return () => unsubscribe();
   }, []);
 
-  // Filtragem de comerciantes
-  const filteredMerchants = merchants.filter(merchant => {
-    const matchesCategory = selectedCategory === 'Todos' || merchant.category === selectedCategory;
-    const matchesSearch = merchant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      merchant.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Filtragem e Ordenação de comerciantes
+  const filteredMerchants = merchants
+    .filter(merchant => {
+      const matchesCategory = selectedCategory === 'Todos' || merchant.category === selectedCategory;
+      const matchesSearch = merchant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        merchant.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesCategory && matchesSearch;
+    })
+    .sort((a, b) => {
+      const planPriority = { 'premium': 4, 'professional': 3, 'basic': 2, 'free': 1 };
+      const priorityA = planPriority[a.plan] || (a.isPremium ? 4 : 2); // Fallback for old data
+      const priorityB = planPriority[b.plan] || (b.isPremium ? 4 : 2);
+
+      return priorityB - priorityA; // Descending order
+    });
 
   const handleMerchantClick = (merchant) => {
     setSelectedMerchant(merchant);
@@ -135,34 +223,143 @@ function AppContent() {
               ))}
             </div>
 
-            {/* Featured Merchants */}
+            {/* Premium Highlights Carousel (2 cards) */}
+            {selectedCategory === 'Todos' && !searchTerm && (
+              <section className="mb-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <span className="w-1 h-6 bg-amber-500 rounded-full"></span>
+                    Destaques Premium
+                  </h2>
+                  <div className="flex gap-2">
+                    <button
+                      onMouseEnter={() => setIsPremiumPaused(true)}
+                      onMouseLeave={() => setIsPremiumPaused(false)}
+                      onClick={() => premiumCarouselRef.current?.scrollBy({ left: -premiumCarouselRef.current.clientWidth, behavior: 'smooth' })}
+                      className="p-2 rounded-full bg-slate-800 border border-white/10 hover:bg-slate-700 hover:border-amber-500/50 transition-all text-slate-400 hover:text-amber-400"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onMouseEnter={() => setIsPremiumPaused(true)}
+                      onMouseLeave={() => setIsPremiumPaused(false)}
+                      onClick={() => premiumCarouselRef.current?.scrollBy({ left: premiumCarouselRef.current.clientWidth, behavior: 'smooth' })}
+                      className="p-2 rounded-full bg-slate-800 border border-white/10 hover:bg-slate-700 hover:border-amber-500/50 transition-all text-slate-400 hover:text-amber-400"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                </div>
+                {/* Simple manual carousel implementation for 2 cards */}
+                <div
+                  className="relative group"
+                  onMouseEnter={() => setIsPremiumPaused(true)}
+                  onMouseLeave={() => setIsPremiumPaused(false)}
+                >
+                  <div
+                    ref={premiumCarouselRef}
+                    id="premium-carousel"
+                    onScroll={handlePremiumScroll}
+                    className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide"
+                    style={{ scrollBehavior: 'auto' }}
+                  >
+                    {infinitePremium.map((merchant, index) => (
+                      <div
+                        key={`${merchant.id}-${index}`}
+                        onClick={() => handleMerchantClick(merchant)}
+                        className="premium-card min-w-[85%] md:min-w-[48%] bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-3xl p-6 cursor-pointer hover:shadow-2xl hover:shadow-amber-500/20 transition-all relative overflow-hidden group/card"
+                      >
+                        <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-white text-xs uppercase font-black px-4 py-1.5 rounded-bl-2xl shadow-lg z-10 flex items-center gap-1">
+                          Premium <Trophy size={12} className="fill-white" />
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-6">
+                          <div className="w-full md:w-1/2 h-48 md:h-full bg-slate-700 rounded-2xl overflow-hidden shadow-inner">
+                            <img src={merchant.image || `https://source.unsplash.com/random/800x600/?store,${merchant.category}`} alt={merchant.name} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" />
+                          </div>
+                          <div className="flex-1 flex flex-col justify-center">
+                            <span className="inline-block px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-bold mb-3 w-fit">{merchant.category}</span>
+                            <h3 className="font-bold text-2xl text-white mb-2">{merchant.name}</h3>
+                            <p className="text-slate-400 text-sm line-clamp-3 mb-4">{merchant.description}</p>
+                            <div className="mt-auto flex items-center gap-2 text-amber-400 text-xs font-bold">
+                              VEJA MAIS DETALHES <div className="p-1 bg-amber-500/20 rounded-full"><ChevronRight size={12} /></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Professional Highlights Carousel (3-4 cards) */}
             {selectedCategory === 'Todos' && !searchTerm && (
               <section className="mb-12">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-                    Destaques da Região
+                    Destaques Pro
                   </h2>
+                  <div className="flex gap-2">
+                    <button
+                      onMouseEnter={() => setIsProPaused(true)}
+                      onMouseLeave={() => setIsProPaused(false)}
+                      onClick={() => proCarouselRef.current?.scrollBy({ left: -200, behavior: 'smooth' })}
+                      className="p-1.5 rounded-full bg-slate-800/50 border border-white/5 hover:bg-slate-700 hover:border-indigo-500/50 transition-all text-slate-400 hover:text-indigo-400"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      onMouseEnter={() => setIsProPaused(true)}
+                      onMouseLeave={() => setIsProPaused(false)}
+                      onClick={() => proCarouselRef.current?.scrollBy({ left: 200, behavior: 'smooth' })}
+                      className="p-1.5 rounded-full bg-slate-800/50 border border-white/5 hover:bg-slate-700 hover:border-indigo-500/50 transition-all text-slate-400 hover:text-indigo-400"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {merchants.filter(m => m.isPremium).slice(0, 3).map(merchant => (
-                    <div key={merchant.id} onClick={() => handleMerchantClick(merchant)} className="bg-slate-800/50 border border-white/5 rounded-2xl p-4 cursor-pointer hover:bg-slate-800 transition-all">
-                      <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden">
-                        <img src={merchant.image || `https://source.unsplash.com/random/800x600/?store,${merchant.category}`} alt={merchant.name} className="w-full h-full object-cover" />
+                <div
+                  className="relative group"
+                  onMouseEnter={() => setIsProPaused(true)}
+                  onMouseLeave={() => setIsProPaused(false)}
+                >
+                  <div
+                    ref={proCarouselRef}
+                    id="pro-carousel"
+                    onScroll={handleProScroll}
+                    className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+                    style={{ scrollBehavior: 'auto' }}
+                  >
+                    {infinitePro.map((merchant, index) => (
+                      <div
+                        key={`${merchant.id}-${index}`}
+                        onClick={() => handleMerchantClick(merchant)}
+                        className="min-w-[280px] w-[280px] shrink-0 bg-slate-800/50 border border-indigo-500/20 rounded-2xl p-4 cursor-pointer hover:bg-slate-800/80 hover:border-indigo-500/60 transition-all duration-700 ease-out group/pro"
+                      >
+                        <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden relative">
+                          <img src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`} alt={merchant.name} className="w-full h-full object-cover" />
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 translate-y-full group-hover/pro:translate-y-0 transition-transform duration-500 ease-out flex justify-center">
+                            <span className="text-white text-xs font-bold flex items-center gap-1">Ver Perfil <ChevronRight size={14} /></span>
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-lg text-white mb-1 truncate">{merchant.name}</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-[10px] uppercase font-bold rounded flex items-center gap-1">Pro <Star size={10} className="fill-indigo-400" /></span>
+                          <span className="text-xs text-slate-500 truncate">{merchant.category}</span>
+                        </div>
                       </div>
-                      <h3 className="font-bold text-lg">{merchant.name}</h3>
-                      <p className="text-slate-400 text-sm line-clamp-2">{merchant.description}</p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
 
-            {/* All Merchants Grid */}
+            {/* Basic & Free Grid */}
             <section>
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
-                {searchTerm ? `Resultados para "${searchTerm}"` : `${selectedCategory}`}
+                Outros Estabelecimentos
               </h2>
 
               {loading ? (
@@ -170,32 +367,53 @@ function AppContent() {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredMerchants.map(merchant => (
-                    <div
-                      key={merchant.id}
-                      onClick={() => handleMerchantClick(merchant)}
-                      className="group bg-slate-800/40 hover:bg-slate-800 border border-white/5 hover:border-indigo-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
-                    >
-                      <div className="aspect-video bg-slate-700/50 rounded-xl mb-4 overflow-hidden relative">
-                        <img
-                          src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`}
-                          alt={merchant.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-medium text-white border border-white/10">
-                          {merchant.category}
+                <div className="space-y-8">
+                  {/* Basic Plans - Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredMerchants.filter(m => m.plan === 'basic').map(merchant => (
+                      <div
+                        key={merchant.id}
+                        onClick={() => handleMerchantClick(merchant)}
+                        className="group bg-slate-800/40 hover:bg-slate-800 border border-white/5 hover:border-white/20 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      >
+                        <div className="aspect-video bg-slate-700/50 rounded-xl mb-4 overflow-hidden relative">
+                          <img
+                            src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`}
+                            alt={merchant.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+                            loading="lazy"
+                          />
+                          <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-medium text-white flex items-center gap-1">
+                            <Store size={10} /> Básico
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-lg text-slate-300 group-hover:text-white mb-1 transition-colors">{merchant.name}</h3>
+                        <p className="text-slate-500 text-sm line-clamp-2 mb-3">{merchant.description}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Free Plans - Compact List Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {filteredMerchants.filter(m => m.plan === 'free').map(merchant => (
+                      <div
+                        key={merchant.id}
+                        onClick={() => handleMerchantClick(merchant)}
+                        className="bg-slate-800/20 hover:bg-slate-800/60 border border-dashed border-slate-700 hover:border-slate-600 rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] group flex flex-col justify-between h-full"
+                      >
+                        <div>
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors line-clamp-1">{merchant.name}</h3>
+                            <CircleDashed size={14} className="text-slate-600 group-hover:text-slate-500 mt-1" />
+                          </div>
+                          <p className="text-xs text-slate-500 mb-2 line-clamp-2">{merchant.description || 'Estabelecimento local.'}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase font-bold text-slate-600 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700 group-hover:border-slate-500 transition-colors">{merchant.category}</span>
                         </div>
                       </div>
-                      <h3 className="font-bold text-lg text-slate-100 mb-1 group-hover:text-indigo-400 transition-colors">{merchant.name}</h3>
-                      <p className="text-slate-400 text-sm line-clamp-2 mb-3">{merchant.description}</p>
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        Aberto agora
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
 

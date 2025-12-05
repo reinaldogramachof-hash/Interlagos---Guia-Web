@@ -20,7 +20,12 @@ export default function MerchantDetailModal({ merchant, onClose }) {
     const handleWhatsApp = () => {
         if (merchant?.id) incrementMerchantContactClick(merchant.id);
         const message = `Olá, vi sua loja no Guia Interlagos!`;
-        window.open(`https://wa.me/55${merchant.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+        const phone = merchant.whatsapp ? merchant.whatsapp.replace(/\D/g, '') : '';
+        if (phone) {
+            window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        } else {
+            alert('Número de WhatsApp não disponível.');
+        }
     };
 
     const handleToggleFavorite = async () => {
@@ -96,18 +101,64 @@ export default function MerchantDetailModal({ merchant, onClose }) {
                                 </p>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
-                                <button onClick={handleWhatsApp} className="flex-1 bg-green-500 text-white py-3.5 rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2">
-                                    <MessageCircle size={20} /> Chamar no Zap
-                                </button>
-                                <button className="flex-1 bg-indigo-50 text-indigo-700 py-3.5 rounded-xl font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
-                                    <Phone size={20} /> Ligar Agora
-                                </button>
-                            </div>
+                            {/* Contact Buttons - HIDDEN FOR FREE PLAN */}
+                            {merchant.plan !== 'free' && (
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={handleWhatsApp} className="flex-1 bg-green-500 text-white py-3.5 rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2">
+                                        <MessageCircle size={20} /> Chamar no Zap
+                                    </button>
+                                    <button className="flex-1 bg-indigo-50 text-indigo-700 py-3.5 rounded-xl font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
+                                        <Phone size={20} /> Ligar Agora
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Reviews - PREMIUM ONLY */}
+                            {merchant.plan === 'premium' && (
+                                <div className="mt-8 pt-6 border-t border-gray-100">
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Star size={18} className="text-amber-400 fill-amber-400" /> Avaliações
+                                    </h3>
+                                    {/* Mock Reviews for Premium */}
+                                    <div className="space-y-4">
+                                        <div className="bg-gray-50 p-4 rounded-xl">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-bold text-sm text-gray-800">Maria Silva</span>
+                                                <div className="flex text-amber-400"><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /></div>
+                                            </div>
+                                            <p className="text-xs text-gray-600">Adorei o atendimento! Recomendo muito.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Sidebar Info */}
                         <div className="space-y-6">
+                            {/* Social Links - PROFESSIONAL & PREMIUM */}
+                            {['professional', 'premium'].includes(merchant.plan) && merchant.socialLinks && (
+                                <div className="grid grid-cols-3 gap-2">
+                                    {merchant.socialLinks.instagram && (
+                                        <a href={`https://instagram.com/${merchant.socialLinks.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">
+                                            <Globe size={20} />
+                                            <span className="text-[10px] font-bold mt-1">Insta</span>
+                                        </a>
+                                    )}
+                                    {merchant.socialLinks.facebook && (
+                                        <a href={merchant.socialLinks.facebook} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                                            <Globe size={20} />
+                                            <span className="text-[10px] font-bold mt-1">Face</span>
+                                        </a>
+                                    )}
+                                    {merchant.socialLinks.site && (
+                                        <a href={merchant.socialLinks.site} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                                            <Globe size={20} />
+                                            <span className="text-[10px] font-bold mt-1">Site</span>
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
                                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <Clock size={18} className="text-gray-400" /> Horários
@@ -119,12 +170,14 @@ export default function MerchantDetailModal({ merchant, onClose }) {
                                 </div>
                             </div>
 
-                            <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
-                                <div className="flex items-center gap-2 mb-2 text-indigo-900 font-bold">
-                                    <Star size={18} className="text-amber-400 fill-amber-400" /> 4.8
+                            {['professional', 'premium'].includes(merchant.plan) && (
+                                <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
+                                    <div className="flex items-center gap-2 mb-2 text-indigo-900 font-bold">
+                                        <Star size={18} className="text-amber-400 fill-amber-400" /> 4.8
+                                    </div>
+                                    <p className="text-xs text-indigo-700">Baseado em 128 avaliações de clientes locais.</p>
                                 </div>
-                                <p className="text-xs text-indigo-700">Baseado em 128 avaliações de clientes locais.</p>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

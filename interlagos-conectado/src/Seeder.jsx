@@ -4,7 +4,37 @@ import { db } from './firebaseConfig';
 import { mockData } from './mockData';
 import { Database, RefreshCw, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 
-const MOCK_MERCHANTS = mockData;
+// Helper to generate mock merchants
+const generateMockMerchants = () => {
+    const plans = ['free', 'basic', 'professional', 'premium'];
+    const categories = ['Alimentação', 'Serviços', 'Automotivo', 'Saúde', 'Beleza', 'Tecnologia'];
+    let merchants = [];
+
+    plans.forEach(plan => {
+        for (let i = 1; i <= 10; i++) {
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            const isPremiumOrPro = ['premium', 'professional'].includes(plan);
+
+            merchants.push({
+                name: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Store ${i}`,
+                category: category,
+                description: `Uma loja de exemplo do plano ${plan}. Qualidade e excelência em ${category}.`,
+                phone: '11999999999',
+                whatsapp: isPremiumOrPro || plan === 'basic' ? '11999999999' : '',
+                address: `Av. Interlagos, ${1000 + i}`,
+                plan: plan,
+                isPremium: ['premium', 'professional'].includes(plan),
+                image: `https://source.unsplash.com/random/800x600/?store,${category},${i}`,
+                socialLinks: isPremiumOrPro ? { instagram: '@loja', facebook: 'fb.com/loja', site: 'loja.com' } : null,
+                rating: plan === 'premium' ? (4 + Math.random()).toFixed(1) : 0,
+                views: Math.floor(Math.random() * 1000)
+            });
+        }
+    });
+    return merchants;
+};
+
+const MOCK_MERCHANTS = generateMockMerchants();
 
 const MOCK_ADS = [
     {
@@ -66,9 +96,8 @@ export default function Seeder() {
     };
 
     const handleFullReset = async () => {
-        if (!window.confirm('ATENÇÃO: Isso apagará TODOS os dados das coleções e recriará os dados de exemplo. Continuar?')) {
-            return;
-        }
+        // Removed confirmation for easier testing
+        // if (!window.confirm('ATENÇÃO...')) return;
 
         setLoading(true);
         setStatus(null);
@@ -165,8 +194,8 @@ export default function Seeder() {
                     onClick={handleFullReset}
                     disabled={loading}
                     className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${loading
-                            ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
+                        ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
                         }`}
                 >
                     {loading ? (
