@@ -48,7 +48,7 @@ export default function SuggestionsView() {
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Obrigado pela sugestão!</h2>
                 <p className="text-slate-600 dark:text-slate-400 max-w-md">
-                    Sua opinião é fundamental para construirmos um Interlagos cada vez melhor. Nossa equipe irá analisar sua mensagem com carinho.
+                    Sua opinião é fundamental para construirmos um Bairro cada vez melhor. Nossa equipe irá analisar sua mensagem com carinho.
                 </p>
                 <button
                     onClick={() => setSubmitted(false)}

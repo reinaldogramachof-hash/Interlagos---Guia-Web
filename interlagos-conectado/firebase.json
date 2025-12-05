@@ -18,5 +18,19 @@
       "ALGOLIA_APP_ID": "secreto:algolia-app-id",
       "ALGOLIA_API_KEY": "secreto:algolia-api-key"
     }
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

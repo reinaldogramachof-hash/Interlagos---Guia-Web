@@ -11,7 +11,7 @@ export default function ManagementView() {
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Gestão & Transparência</h2>
                 <p className="text-slate-600 dark:text-slate-400 text-lg">
-                    Conheça a equipe dedicada a manter o Guia Digital Interlagos sempre atualizado e relevante para a nossa comunidade.
+                    Conheça a equipe dedicada a manter o TemNoBairro sempre atualizado e relevante para a nossa comunidade.
                 </p>
             </div>
 
@@ -43,7 +43,7 @@ export default function ManagementView() {
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Inovação</h3>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
-                        Buscamos constantemente novas tecnologias e soluções para facilitar a vida de quem vive e trabalha em Interlagos.
+                        Buscamos constantemente novas tecnologias e soluções para facilitar a vida de quem vive e trabalha no bairro.
                     </p>
                 </div>
             </div>
@@ -55,11 +55,11 @@ export default function ManagementView() {
                     <h3 className="text-2xl font-bold text-white mb-6">Precisa falar com a gente?</h3>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                         <a
-                            href="mailto:contato@interlagosconectado.com.br"
+                            href="mailto:contato@temnobairro.com.br"
                             className="flex items-center gap-3 bg-white/10 hover:bg-white/20 text-white px-6 py-4 rounded-xl backdrop-blur-sm transition-all w-full md:w-auto justify-center"
                         >
                             <Mail size={20} />
-                            <span>contato@interlagos.com</span>
+                            <span>contato@temnobairro.com</span>
                         </a>
                         <a
                             href="https://wa.me/5511999999999"

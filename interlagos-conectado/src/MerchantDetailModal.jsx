@@ -113,6 +113,22 @@ export default function MerchantDetailModal({ merchant, onClose }) {
                                 </div>
                             )}
 
+                            {/* Photo Gallery (Professional & Premium) */}
+                            {['professional', 'premium'].includes(merchant.plan) && merchant.gallery && merchant.gallery.length > 0 && (
+                                <div className="mt-8 pt-6 border-t border-gray-100">
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <div className="w-1 h-5 bg-indigo-600 rounded-full"></div> Galeria de Fotos
+                                    </h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        {merchant.gallery.map((url, index) => (
+                                            <div key={index} className="aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-sm group cursor-pointer hover:shadow-md transition-all">
+                                                <img src={url} alt={`Foto ${index + 1} de ${merchant.name}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Reviews - PREMIUM ONLY */}
                             {merchant.plan === 'premium' && (
                                 <div className="mt-8 pt-6 border-t border-gray-100">

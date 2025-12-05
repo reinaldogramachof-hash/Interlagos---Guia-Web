@@ -1,11 +1,11 @@
 {
-  "name": "Guia Digital Interlagos",
-  "short_name": "Interlagos",
+  "name": "TemNoBairro",
+  "short_name": "TemNoBairro",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4338ca",
-  "description": "O guia oficial do bairro Interlagos. Encontre comércios, serviços e novidades.",
+  "description": "O guia digital oficial do seu bairro. Encontre comércios, serviços e novidades.",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/1040/1040246.png",

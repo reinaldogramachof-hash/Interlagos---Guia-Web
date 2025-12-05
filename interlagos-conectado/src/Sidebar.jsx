@@ -17,8 +17,18 @@ export default function Sidebar({ currentView, setCurrentView, handleAdminClick,
     return (
         <aside className={className}>
             <div className="px-6 pb-6 pt-0 flex flex-col h-full">
-                <div className="flex items-center justify-center mb-0 mt-0">
-                    <img src="/logoIC.png" alt="Interlagos Conectado" className="h-44 w-auto object-contain drop-shadow-xl scale-110 transition-transform duration-300" />
+                <div className="flex items-center justify-center mb-8 mt-6">
+                    <div className="text-center group cursor-default">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            <div className="bg-indigo-600 p-2 rounded-lg transform -rotate-3 group-hover:rotate-0 transition-all duration-300 shadow-lg shadow-indigo-500/20">
+                                <Store className="text-white" size={24} />
+                            </div>
+                        </div>
+                        <h1 className="text-3xl font-light text-white tracking-tight leading-none">
+                            TemNo<span className="font-black text-indigo-500">Bairro</span>
+                        </h1>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] mt-1 font-medium group-hover:text-indigo-400 transition-colors">Guia Oficial</p>
+                    </div>
                 </div>
 
                 <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-hide -mt-6">

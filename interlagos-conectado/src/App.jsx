@@ -442,9 +442,9 @@ function AppContent() {
         <header className="lg:hidden bg-slate-900/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
-              <span className="font-bold text-white text-lg tracking-tight">IC</span>
+              <span className="font-bold text-white text-lg tracking-tight">TB</span>
             </div>
-            <h1 className="font-bold text-lg text-white">Interlagos</h1>
+            <h1 className="font-bold text-lg text-white">TemNoBairro</h1>
           </div>
           <div className="flex items-center gap-3">
             <NotificationBell />

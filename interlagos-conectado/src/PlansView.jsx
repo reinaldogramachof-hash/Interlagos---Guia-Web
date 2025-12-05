@@ -70,7 +70,7 @@ export default function PlansView() {
                     Escolha o plano ideal para o seu <span className="text-indigo-400">sucesso</span>
                 </h2>
                 <p className="text-slate-400 text-lg">
-                    Destaque seu negócio para milhares de moradores de Interlagos.
+                    Destaque seu negócio para milhares de moradores do Bairro.
                     Sem fidelidade, cancele quando quiser.
                 </p>
             </div>

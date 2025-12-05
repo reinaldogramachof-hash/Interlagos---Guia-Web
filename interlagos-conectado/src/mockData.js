@@ -4,7 +4,7 @@ export const mockData = [
         id: 'mock-1',
         name: "Supermercado Rosalina",
         category: "Comércio",
-        description: "O mercado da família no coração do Interlagos. Aceitamos Cartão Rosalina. Padaria, açougue e ofertas diárias.",
+        description: "O mercado da família no coração do Bairro. Aceitamos Cartão Rosalina. Padaria, açougue e ofertas diárias.",
         whatsapp: "12991002233",
         address: "R. Ubirajara Raimundo de Souza, 194",
         isPremium: true,
@@ -75,7 +75,7 @@ export const mockData = [
     },
     {
         id: 'mock-4',
-        name: "Interlagos Auto Center",
+        name: "Auto Center do Bairro",
         category: "Automotivo",
         description: "Mecânica geral, suspensão, freios e troca de óleo. Diagnóstico computadorizado.",
         whatsapp: "12997766554",
@@ -90,7 +90,7 @@ export const mockData = [
         category: "Alimentação",
         description: "A pizza mais recheada do bairro. Peça pelo App ou Zap. Promoção de Borda Recheada Grátis às terças.",
         whatsapp: "12981122334",
-        address: "Delivery - Parque Interlagos",
+        address: "Delivery - Parque do Bairro",
         isPremium: true,
         plan: 'premium',
         views: 150
@@ -108,7 +108,7 @@ export const mockData = [
     },
     {
         id: 'mock-20',
-        name: "Drogasil Interlagos",
+        name: "Drogasil do Bairro",
         category: "Saúde",
         description: "Medicamentos, perfumaria e dermocosméticos. Farmacêutico de plantão.",
         whatsapp: "1239312233",
@@ -156,7 +156,7 @@ export const mockData = [
         category: "Serviços",
         description: "Conserto de celulares e tablets. Troca de tela, bateria e conectores. Orçamento grátis.",
         whatsapp: "12998887766",
-        address: "Galeria Interlagos, Loja 4",
+        address: "Galeria Central, Loja 4",
         isPremium: true,
         plan: 'premium',
         views: 45
@@ -200,7 +200,7 @@ export const mockData = [
         id: 'mock-8',
         name: "Genaro Disk Marmitex",
         category: "Alimentação",
-        description: "Comida caseira de verdade. Entregamos em todo o Interlagos sem taxa. Almoço e Jantar.",
+        description: "Comida caseira de verdade. Entregamos em todo o Bairro sem taxa. Almoço e Jantar.",
         whatsapp: "12994433221",
         address: "R. João Miacci, 10",
         isPremium: false,
@@ -224,7 +224,7 @@ export const mockData = [
         category: "Educação",
         description: "Educação com amor. Do berçário ao pré. Matrículas abertas para 2026.",
         whatsapp: "12992211009",
-        address: "Parque Interlagos",
+        address: "Parque do Bairro",
         isPremium: false,
         plan: 'basic',
         views: 80
@@ -275,7 +275,7 @@ export const mockData = [
     },
     {
         id: 'mock-15',
-        name: "Bazar e Papelaria Interlagos",
+        name: "Bazar e Papelaria Central",
         category: "Comércio",
         description: "Material escolar, xerox, impressão e presentes. Recarga de celular.",
         whatsapp: "",
@@ -297,7 +297,7 @@ export const mockData = [
     },
     {
         id: 'mock-27',
-        name: "Chaveiro 24h Interlagos",
+        name: "Chaveiro 24h Express",
         category: "Serviços",
         description: "Abertura de portas, cópias de chaves e cadeados. Atendimento de emergência.",
         whatsapp: "12994445566",

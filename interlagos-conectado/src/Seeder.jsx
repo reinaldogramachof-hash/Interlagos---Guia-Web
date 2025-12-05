@@ -21,11 +21,16 @@ const generateMockMerchants = () => {
                 description: `Uma loja de exemplo do plano ${plan}. Qualidade e excelência em ${category}.`,
                 phone: '11999999999',
                 whatsapp: isPremiumOrPro || plan === 'basic' ? '11999999999' : '',
-                address: `Av. Interlagos, ${1000 + i}`,
+                address: `Av. Principal do Bairro, ${1000 + i}`,
                 plan: plan,
                 isPremium: ['premium', 'professional'].includes(plan),
                 image: `https://source.unsplash.com/random/800x600/?store,${category},${i}`,
                 socialLinks: isPremiumOrPro ? { instagram: '@loja', facebook: 'fb.com/loja', site: 'loja.com' } : null,
+                gallery: isPremiumOrPro ? [
+                    `https://source.unsplash.com/random/800x600/?${category},interior,${i}`,
+                    `https://source.unsplash.com/random/800x600/?${category},product,${i}`,
+                    `https://source.unsplash.com/random/800x600/?${category},service,${i}`
+                ] : [],
                 rating: plan === 'premium' ? (4 + Math.random()).toFixed(1) : 0,
                 views: Math.floor(Math.random() * 1000)
             });
@@ -42,7 +47,7 @@ const MOCK_ADS = [
         description: 'Venha conhecer nosso novo espaço e ganhe 20% de desconto!',
         price: 'R$ 0,00',
         category: 'Alimentação',
-        author: { uid: 'mock_user_1', name: 'Padaria Interlagos' },
+        author: { uid: 'mock_user_1', name: 'Padaria do Bairro' },
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 dias
     },
@@ -66,7 +71,7 @@ const MOCK_NEWS = [
         content: 'Venha prestigiar os artistas da nossa região...'
     },
     {
-        title: 'Nova Ciclofaixa na Av. Interlagos',
+        title: 'Nova Ciclofaixa na Avenida Principal',
         summary: 'Prefeitura anuncia início das obras para nova ciclofaixa.',
         category: 'Comunidade',
         publishDate: new Date(),

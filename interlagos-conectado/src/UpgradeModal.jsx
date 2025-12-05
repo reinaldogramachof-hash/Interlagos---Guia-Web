@@ -70,7 +70,7 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
                 <div className="p-6 flex justify-between items-center border-b border-slate-100 dark:border-slate-800">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Evolua seu Negócio</h2>
-                        <p className="text-slate-500">Escolha o plano ideal para vender mais em Interlagos.</p>
+                        <p className="text-slate-500">Escolha o plano ideal para vender mais no Bairro.</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                         <X />
