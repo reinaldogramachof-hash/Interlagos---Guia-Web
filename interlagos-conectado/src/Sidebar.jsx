@@ -1,5 +1,5 @@
 import React from 'react';
-import { Store, Newspaper, Megaphone, Heart, Siren, History, Lightbulb, Users, ShieldCheck, DollarSign, Star } from 'lucide-react';
+import { MapPin, Store, Newspaper, Megaphone, Heart, Siren, History, Lightbulb, Users, ShieldCheck, DollarSign, Star } from 'lucide-react';
 
 export default function Sidebar({ currentView, setCurrentView, handleAdminClick, className }) {
     const menuItems = [
@@ -21,7 +21,7 @@ export default function Sidebar({ currentView, setCurrentView, handleAdminClick,
                     <div className="text-center group cursor-default">
                         <div className="flex items-center justify-center gap-2 mb-2">
                             <div className="bg-indigo-600 p-2 rounded-lg transform -rotate-3 group-hover:rotate-0 transition-all duration-300 shadow-lg shadow-indigo-500/20">
-                                <Store className="text-white" size={24} />
+                                <MapPin className="text-white" size={24} />
                             </div>
                         </div>
                         <h1 className="text-3xl font-light text-white tracking-tight leading-none">

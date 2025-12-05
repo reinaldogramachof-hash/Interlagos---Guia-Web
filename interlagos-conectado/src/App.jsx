@@ -23,7 +23,7 @@ import ManagementView from './ManagementView';
 import PlansView from './PlansView';
 import MerchantLandingView from './MerchantLandingView';
 import NotificationBell from './components/NotificationBell';
-import { Search, User, LogOut, PlusCircle, LayoutDashboard, Store, UserCircle, ChevronDown, ChevronLeft, ChevronRight, Trophy, Star, CircleDashed } from 'lucide-react';
+import { MapPin, Search, Menu, X, ChevronRight, ChevronLeft, MapPin as MapIcon, Phone, Clock, Globe, Star, Filter, ArrowRight, Instagram, Facebook, Store, User, CircleDashed, PlusCircle, Trophy, LayoutDashboard, UserCircle, LogOut, ChevronDown } from 'lucide-react';
 import { categories } from './constants/categories';
 
 function AppContent() {
@@ -206,22 +206,7 @@ function AppContent() {
       default:
         return (
           <>
-            {/* Categories Tabs */}
-            <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-              {categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat.id
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                    : 'bg-slate-800/50 text-slate-400 border border-white/5 hover:bg-slate-800'
-                    }`}
-                >
-                  {cat.icon}
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+
 
             {/* Premium Highlights Carousel (2 cards) */}
             {selectedCategory === 'Todos' && !searchTerm && (
@@ -305,7 +290,7 @@ function AppContent() {
                       onMouseEnter={() => setIsProPaused(true)}
                       onMouseLeave={() => setIsProPaused(false)}
                       onClick={() => proCarouselRef.current?.scrollBy({ left: -200, behavior: 'smooth' })}
-                      className="p-1.5 rounded-full bg-slate-800/50 border border-white/5 hover:bg-slate-700 hover:border-indigo-500/50 transition-all text-slate-400 hover:text-indigo-400"
+                      className="p-3 rounded-full bg-slate-800/50 border border-white/5 hover:bg-slate-700 hover:border-indigo-500/50 transition-all text-slate-400 hover:text-indigo-400"
                     >
                       <ChevronLeft size={16} />
                     </button>
@@ -313,7 +298,7 @@ function AppContent() {
                       onMouseEnter={() => setIsProPaused(true)}
                       onMouseLeave={() => setIsProPaused(false)}
                       onClick={() => proCarouselRef.current?.scrollBy({ left: 200, behavior: 'smooth' })}
-                      className="p-1.5 rounded-full bg-slate-800/50 border border-white/5 hover:bg-slate-700 hover:border-indigo-500/50 transition-all text-slate-400 hover:text-indigo-400"
+                      className="p-3 rounded-full bg-slate-800/50 border border-white/5 hover:bg-slate-700 hover:border-indigo-500/50 transition-all text-slate-400 hover:text-indigo-400"
                     >
                       <ChevronRight size={16} />
                     </button>
@@ -434,15 +419,44 @@ function AppContent() {
     }
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+
+  // ... (existing helper functions)
+
+  // Filter Categories
+  const displayedCategories = showAllCategories ? categories : categories.slice(0, 8);
+
   return (
     <div className="dark">
       <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-500/30">
 
+        {/* Mobile Sidebar Overlay */}
+        {isSidebarOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+            <div className="absolute left-0 top-0 bottom-0 w-64 bg-slate-900 border-r border-white/10 shadow-2xl animate-in slide-in-from-left duration-300">
+              <div className="flex justify-between items-center p-4 border-b border-white/5">
+                <h2 className="font-bold text-lg text-white">Menu</h2>
+                <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-full"><X size={20} /></button>
+              </div>
+              <Sidebar
+                currentView={currentView}
+                setCurrentView={(view) => { setCurrentView(view); setIsSidebarOpen(false); }}
+                className="flex flex-col h-full"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Mobile Header */}
         <header className="lg:hidden bg-slate-900/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-slate-400 hover:text-white">
+              <Menu size={24} />
+            </button>
             <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
-              <span className="font-bold text-white text-lg tracking-tight">TB</span>
+              <MapPin className="text-white" size={20} />
             </div>
             <h1 className="font-bold text-lg text-white">TemNoBairro</h1>
           </div>
@@ -493,7 +507,7 @@ function AppContent() {
                 </div>
 
                 {/* Desktop User Actions */}
-                <div className="hidden lg:flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-4 shrink-0">
                   <NotificationBell />
 
                   {currentUser ? (
@@ -572,21 +586,32 @@ function AppContent() {
                 </div>
               </div>
 
-              {/* Mobile Categories (Horizontal Scroll) */}
-              <div className="lg:hidden mt-4 -mx-4 px-4 overflow-x-auto pb-2 scrollbar-hide flex gap-3">
-                {categories.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat.id
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                      : 'bg-slate-800/50 text-slate-400 border border-white/5'
-                      }`}
-                  >
-                    {cat.icon}
-                    {cat.label}
-                  </button>
-                ))}
+              {/* Mobile Categories (Horizontal Scroll with Toggle) */}
+              <div className="lg:hidden mt-4">
+                <div className={`flex flex-wrap gap-2 ${showAllCategories ? '' : 'overflow-x-auto pb-2 scrollbar-hide flex-nowrap'}`}>
+                  {displayedCategories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shrink-0 ${selectedCategory === cat.id
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                        : 'bg-slate-800/50 text-slate-400 border border-white/5'
+                        }`}
+                    >
+                      {cat.icon}
+                      {cat.label}
+                    </button>
+                  ))}
+                  {!showAllCategories ? (
+                    <button onClick={() => setShowAllCategories(true)} className="flex items-center gap-1 px-4 py-2 rounded-full bg-slate-800 text-slate-400 border border-white/5 text-sm font-medium shrink-0">
+                      <PlusCircle size={16} /> Mais
+                    </button>
+                  ) : (
+                    <button onClick={() => setShowAllCategories(false)} className="flex items-center gap-1 px-4 py-2 rounded-full bg-slate-800 text-slate-400 border border-white/5 text-sm font-medium shrink-0">
+                      <X size={16} /> Menos
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
