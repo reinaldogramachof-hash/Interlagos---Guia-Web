@@ -8,12 +8,12 @@
   "description": "O guia digital oficial do seu bairro. Encontre comércios, serviços e novidades.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1040/1040246.png",
+      "src": "/pwa-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1040/1040246.png",
+      "src": "/pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
