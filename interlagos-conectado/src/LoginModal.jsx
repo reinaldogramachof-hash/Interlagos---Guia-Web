@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { X, LogIn, Shield, Store, User, Database, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { X, LogIn, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from './firebaseConfig';
-import { useAuth } from './context/AuthContext';
 
 export default function LoginModal({ onClose, onSuccess }) {
-    const { loginAsDev } = useAuth();
     const [loginType, setLoginType] = useState('resident'); // 'resident' or 'partner'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [showDevMode, setShowDevMode] = useState(false);
 
     // Form State
     const [email, setEmail] = useState('');
@@ -45,12 +42,6 @@ export default function LoginModal({ onClose, onSuccess }) {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleDevLogin = (role) => {
-        loginAsDev(role);
-        if (onSuccess) onSuccess({ uid: `dev_${role}`, displayName: `Dev ${role}` });
-        onClose();
     };
 
     return (
@@ -183,39 +174,12 @@ export default function LoginModal({ onClose, onSuccess }) {
                         </button>
                     </form>
 
-                    {/* Developer Trigger */}
+                    {/* Versão */}
                     <div className="mt-8 text-center">
-                        <button
-                            onClick={() => setShowDevMode(!showDevMode)}
-                            className="text-[10px] text-slate-300 font-bold hover:text-slate-500 transition-colors uppercase tracking-widest"
-                        >
-                            {showDevMode ? 'Ocultar Ferramentas' : 'Versão Alpha 0.9'}
-                        </button>
+                        <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+                            Versão Beta 1.0
+                        </p>
                     </div>
-
-                    {/* Dev Mode Panel */}
-                    {showDevMode && (
-                        <div className="mt-4 pt-4 border-t border-dashed border-slate-200 animate-in slide-in-from-bottom-2">
-                            <div className="grid grid-cols-4 gap-2">
-                                <button onClick={() => handleDevLogin('master')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                                    <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><Database size={12} /></div>
-                                    <span className="text-[9px] font-bold text-slate-500">Master</span>
-                                </button>
-                                <button onClick={() => handleDevLogin('admin')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                                    <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Shield size={12} /></div>
-                                    <span className="text-[9px] font-bold text-slate-500">Admin</span>
-                                </button>
-                                <button onClick={() => handleDevLogin('merchant')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                                    <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><Store size={12} /></div>
-                                    <span className="text-[9px] font-bold text-slate-500">Loja</span>
-                                </button>
-                                <button onClick={() => handleDevLogin('resident')} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                                    <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><User size={12} /></div>
-                                    <span className="text-[9px] font-bold text-slate-500">User</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

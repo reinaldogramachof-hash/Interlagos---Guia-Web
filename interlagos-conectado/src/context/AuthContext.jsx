@@ -38,27 +38,11 @@ export function AuthProvider({ children }) {
         setUserRole(null);
     };
 
-    const loginAsDev = (role) => {
-        const devUsers = {
-            master: { uid: 'dev_master', email: 'master@dev.com', displayName: 'Dev Master', photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Master' },
-            admin: { uid: 'dev_admin', email: 'admin@dev.com', displayName: 'Dev Admin', photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin' },
-            merchant: { uid: 'dev_merchant', email: 'merchant@dev.com', displayName: 'Dev Merchant', photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Merchant' },
-            resident: { uid: 'dev_resident', email: 'resident@dev.com', displayName: 'Dev Resident', photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Resident' }
-        };
-
-        const user = devUsers[role];
-        if (user) {
-            setCurrentUser(user);
-            setUserRole(role);
-        }
-    };
-
     const value = {
         currentUser,
         userRole,
         loading,
         logout,
-        loginAsDev,
         isAdmin: userRole === 'admin' || userRole === 'master',
         isMaster: userRole === 'master',
         isMerchant: userRole === 'merchant',

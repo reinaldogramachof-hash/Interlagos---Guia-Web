@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, firebaseConfig } from './firebaseConfig';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { useAuth } from './context/AuthContext';
 import { Shield, AlertTriangle, CheckCircle, X, Trophy, Bell, Heart, User, Database, Search, Plus, Save, ClipboardList, FileText, Trash2 } from 'lucide-react';
@@ -139,9 +139,11 @@ export default function AdminPanel({ onClose }) {
 
     const handleCreateUser = async (e) => {
         e.preventDefault();
+        let secondaryApp;
+        
         try {
             // 1. Create Auth User using Secondary App (to avoid logging out admin)
-            const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+            secondaryApp = initializeApp(firebaseConfig, "Secondary");
             const secondaryAuth = getAuth(secondaryApp);
             const userCredential = await createUserWithEmailAndPassword(secondaryAuth, userForm.email, userForm.password);
             const newUser = userCredential.user;
@@ -157,9 +159,8 @@ export default function AdminPanel({ onClose }) {
                 favorites: [] // Initialize favorites
             });
 
-            // 3. Clean up
+            // 3. Clean up secondary auth session
             await signOut(secondaryAuth);
-            // Note: We can't easily delete the secondary app instance in JS SDK, but it's fine for this use case.
 
             alert(`Usuário ${userForm.name} criado com sucesso!`);
             setIsCreatingUser(false);
@@ -168,6 +169,15 @@ export default function AdminPanel({ onClose }) {
         } catch (error) {
             console.error("Error creating user:", error);
             alert("Erro ao criar usuário: " + error.message);
+        } finally {
+            // 4. Always cleanup secondary Firebase app instance
+            if (secondaryApp) {
+                try {
+                    await deleteApp(secondaryApp);
+                } catch (cleanupError) {
+                    console.error("Error cleaning up secondary app:", cleanupError);
+                }
+            }
         }
     };
 

@@ -1,51 +1,208 @@
-// firestore.rules - Regras de Segurança Aprimoradas
+// firestore.rules - Regras de Segurança Aprimoradas v2.0
+// Última atualização: 2026-01-07
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Regras para a coleção 'users'
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId; // Usuário só lê o próprio perfil
-      allow create: if request.auth != null && request.auth.uid == userId; // Criação apenas para o próprio usuário (no sign-up)
-      allow update: if request.auth != null && request.auth.uid == userId; // Update apenas para o próprio usuário
-      allow delete: if false; // Ninguém deleta usuários diretamente
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    // Regras para a coleção 'merchants'
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+
+    function isAdminOrMaster() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'master'];
+    }
+
+    // Validação de tamanho de string
+    function validString(text, maxLength) {
+      return text is string && text.size() > 0 && text.size() <= maxLength;
+    }
+
+    // Validação de email
+    function validEmail(email) {
+      return email is string && email.matches('^[^@]+@[^@]+\\.[^@]+$') && email.size() <= 254;
+    }
+
+    // ========================================
+    // COLEÇÃO: users
+    // ========================================
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdminOrMaster();
+      
+      allow create: if isOwner(userId) && 
+                       validString(request.resource.data.displayName, 100) &&
+                       validEmail(request.resource.data.email) &&
+                       request.resource.data.role in ['resident', 'merchant'] && // Apenas roles básicos na criação
+                       request.resource.data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'createdAt']);
+      
+      allow update: if isOwner(userId) &&
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid', 'email', 'role', 'createdAt']) &&
+                       validString(request.resource.data.displayName, 100);
+      
+      allow delete: if false; // Apenas admin via SDK
+
+      // Subcoleção: Favoritos
+      match /favorites/{favoriteId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Subcoleção: Notificações
+      match /notifications/{notificationId} {
+        allow read: if isOwner(userId);
+        allow create: if isAdminOrMaster();
+        allow update: if isOwner(userId) && 
+                         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow delete: if isOwner(userId) || isAdminOrMaster();
+      }
+
+      // Subcoleção: Histórico de Chat
+      match /chatHistory/{chatId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ========================================
+    // COLEÇÃO: merchants
+    // ========================================
     match /merchants/{merchantId} {
       allow read: if true; // Leitura pública
-      // Escrita restrita, permitindo apenas o 'ownerId' e BLOQUEANDO alterações em 'metrics'
-      allow update: if request.auth.uid == resource.data.ownerId &&
-                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['metrics']);
-      allow create: if request.auth != null; // Criação por usuários autenticados
-      allow delete: if false; // Ninguém deleta merchants diretamente
+
+      allow create: if isAuthenticated() && 
+                       hasRole('merchant') &&
+                       validString(request.resource.data.name, 200) &&
+                       validString(request.resource.data.description, 5000) &&
+                       request.resource.data.category is string &&
+                       request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isAuthenticated() && (
+                         request.auth.uid == resource.data.ownerId || 
+                         isAdminOrMaster()
+                       ) &&
+                       // Bloqueio de edição de métricas (views, clicks) por usuários
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['views', 'contactClicks', 'ownerId']) &&
+                       validString(request.resource.data.name, 200) &&
+                       validString(request.resource.data.description, 5000);
+
+      allow delete: if isAdminOrMaster();
+
+      // Subcoleção: Reviews
+      match /reviews/{reviewId} {
+        allow read: if true;
+        
+        allow create: if isAuthenticated() && 
+                         request.resource.data.authorUid == request.auth.uid &&
+                         validString(request.resource.data.text, 1000) &&
+                         request.resource.data.rating >= 1 && 
+                         request.resource.data.rating <= 5;
+        
+        allow update: if isAuthenticated() && resource.data.authorUid == request.auth.uid &&
+                         validString(request.resource.data.text, 1000);
+        
+        allow delete: if isAuthenticated() && 
+                         (resource.data.authorUid == request.auth.uid || isAdminOrMaster());
+      }
     }
 
-    // Regras para a coleção 'merchants/{merchantId}/reviews/{reviewId}'
-    match /merchants/{merchantId}/reviews/{reviewId} {
-      allow read: if true; // Leitura pública
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.authorUid; // Criar apenas se for o próprio autor
-      allow update: if request.auth != null && request.auth.uid == resource.data.authorUid; // Editar apenas o próprio review
-      allow delete: if request.auth != null && request.auth.uid == resource.data.authorUid; // Deletar apenas o próprio review
-    }
-
-    // Regras para a coleção 'ads'
+    // ========================================
+    // COLEÇÃO: ads (Classificados)
+    // ========================================
     match /ads/{adId} {
-      allow read: if true; // Leitura pública
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.author.uid; // Criação por usuários autenticados, se for o autor
-      allow update: if request.auth != null && request.auth.uid == resource.data.author.uid; // Editar apenas o próprio anúncio
-      allow delete: if request.auth != null && request.auth.uid == resource.data.author.uid; // Deletar apenas o próprio anúncio
+      allow read: if true; // Leitura pública (apenas approved devem ser exibidos no app)
+
+      allow create: if isAuthenticated() && 
+                       request.resource.data.author.uid == request.auth.uid &&
+                       validString(request.resource.data.title, 150) &&
+                       validString(request.resource.data.description, 2000) &&
+                       request.resource.data.category in ['Vendas', 'Empregos', 'Imóveis', 'Serviços'] &&
+                       request.resource.data.status == 'pending'; // Sempre pending na criação
+
+      allow update: if isAuthenticated() && (
+                         request.resource.data.author.uid == request.auth.uid ||
+                         isAdminOrMaster()
+                       ) &&
+                       validString(request.resource.data.title, 150) &&
+                       validString(request.resource.data.description, 2000);
+
+      allow delete: if isAuthenticated() && 
+                       (resource.data.author.uid == request.auth.uid || isAdminOrMaster());
     }
 
-    // Regras para as coleções 'news', 'campaigns', 'plans'
-    match /{collectionId} {
-      allow read: if collectionId in ['news', 'campaigns', 'plans']; // Leitura pública
-      allow write: if false; // Ninguém escreve diretamente (administrado por Cloud Functions/admin)
+    // ========================================
+    // COLEÇÃO: news
+    // ========================================
+    match /news/{newsId} {
+      allow read: if true;
+      allow create: if isAdminOrMaster() && 
+                       validString(request.resource.data.title, 200) &&
+                       validString(request.resource.data.content, 10000);
+      allow update: if isAdminOrMaster();
+      allow delete: if isAdminOrMaster();
     }
 
-    // Regras para 'processed_events' (usada para idempotência)
+    // ========================================
+    // COLEÇÃO: campaigns (Doações/Voluntários)
+    // ========================================
+    match /campaigns/{campaignId} {
+      allow read: if true;
+      
+      allow create: if isAuthenticated() && 
+                       validString(request.resource.data.title, 200) &&
+                       validString(request.resource.data.description, 3000) &&
+                       request.resource.data.type in ['donation', 'request', 'volunteer', 'campaign'] &&
+                       request.resource.data.status == 'pending';
+
+      allow update: if isAuthenticated() && (
+                         resource.data.authorUid == request.auth.uid ||
+                         isAdminOrMaster()
+                       );
+
+      allow delete: if isAdminOrMaster();
+    }
+
+    // ========================================
+    // COLEÇÃO: plans (Planos de Assinatura)
+    // ========================================
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if false; // Apenas Admin SDK
+    }
+
+    // ========================================
+    // COLEÇÃO: suggestions (Sugestões)
+    // ========================================
+    match /suggestions/{suggestionId} {
+      allow read: if isAdminOrMaster();
+      
+      allow create: if isAuthenticated() && 
+                       validString(request.resource.data.message, 2000) &&
+                       request.resource.data.userId == request.auth.uid;
+
+      allow update: if isAdminOrMaster(); // Admin marca como lido
+      allow delete: if isAdminOrMaster();
+    }
+
+    // ========================================
+    // COLEÇÃO: processed_events (Idempotência)
+    // ========================================
     match /processed_events/{eventId} {
-      allow read, write: if false; // Apenas Admin SDK (Cloud Functions)
+      allow read, write: if false; // Apenas Admin SDK
+    }
+
+    // ========================================
+    // FALLBACK: Bloqueio de tudo não especificado
+    // ========================================
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
