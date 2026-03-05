@@ -1,95 +1,136 @@
-# Interlagos Conectado - Guia Digital
+# 📱 Interlagos Conectado — TemNoBairro
 
-O **Interlagos Conectado** é uma plataforma digital comunitária desenvolvida para conectar moradores, comerciantes e serviços da região de Interlagos. O projeto visa fortalecer a economia local e promover o engajamento social através de um aplicativo web moderno, rápido e acessível.
+O **TemNoBairro** é uma plataforma digital comunitária PWA desenvolvida para conectar moradores, comerciantes e serviços da região de **Parque Interlagos, São José dos Campos/SP**.
 
-![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow)
-![Tech Stack](https://img.shields.io/badge/Stack-React_|_Firebase_|_Tailwind-blue)
+![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow)
+![Stack](https://img.shields.io/badge/Stack-React_19_|_Supabase_|_Vite_7-blue)
+![PWA](https://img.shields.io/badge/PWA-Habilitado-green)
 
-## 🚀 Funcionalidades Principais
+---
 
-*   **Guia Comercial:** Catálogo de comércios locais com busca avançada, filtros por categoria e destaque para parceiros Premium/Super.
-*   **Classificados:** Espaço para moradores anunciarem produtos e serviços.
-*   **Notícias Locais:** Feed de notícias focado em eventos e atualizações da região.
-*   **Ações Sociais:** Plataforma para divulgação de campanhas de doação e voluntariado.
-*   **Utilidade Pública:** Telefones e contatos de serviços essenciais.
-*   **Painel Administrativo:** Ferramenta de gestão para moderadores controlarem conteúdo, usuários e métricas.
+## 🚀 Funcionalidades
+
+- **📰 Jornal do Bairro** — Feed de notícias locais com categorias e moderação
+- **🏪 Guia Comercial** — Catálogo com planos Free, Pro e Premium
+- **📌 Classificados** — Anúncios de produtos e serviços por moradores
+- **🤝 Ações Sociais** — Campanhas de doação e voluntariado
+- **👤 Perfil e Planos** — Assinatura por plano com controle de acesso `PlanGate`
+- **🛡️ Painel Administrativo** — Gestão de usuários, comércios, notícias e tickets
+
+---
 
 ## 🛠️ Arquitetura Técnica
 
-O projeto utiliza uma arquitetura **Serverless** baseada no Google Firebase, garantindo escalabilidade e baixo custo operacional inicial.
+### Frontend
+- **React 19 + Vite 7** — Interface rápida e reativa
+- **Tailwind CSS 3** — Estilização mobile-first
+- **Zustand 5** — Estado global leve
+- **Lucide React** — Ícones consistentes
+- **vite-plugin-pwa** — Service Worker + instalação nativa
 
-### Front-end
-*   **React + Vite:** Para uma interface rápida e reativa.
-*   **Tailwind CSS:** Para estilização moderna e responsiva.
-*   **Lucide React:** Biblioteca de ícones leve e consistente.
+### Backend (Supabase)
+- **PostgreSQL** — Banco de dados relacional via Supabase
+- **Supabase Auth** — Autenticação (email/senha, OAuth)
+- **Realtime** — Atualizações ao vivo no feed
+- **Row Level Security (RLS)** — Segurança granular por tabela
 
-### Back-end (Firebase)
-*   **Firestore:** Banco de dados NoSQL para armazenamento de dados em tempo real.
-    *   *Segurança:* Regras de segurança granulares (`firestore.rules`).
-    *   *Performance:* Índices compostos otimizados (`firestore.indexes.json`).
-*   **Firebase Authentication:** Gestão de identidade e acesso.
-*   **Cloud Functions:** Lógica de backend para tarefas complexas (denormalização, agregação, limpeza de dados).
-*   **Algolia (Extensão):** Motor de busca "fuzzy" para resultados rápidos e relevantes.
+### Busca
+- **Algolia** (react-instantsearch) — Busca fuzzy de comércios
+
+---
 
 ## 📦 Estrutura do Projeto
 
 ```bash
 interlagos-conectado/
 ├── src/
-│   ├── components/      # Componentes UI reutilizáveis
-│   ├── constants/       # Definições estáticas (categorias, etc)
-│   ├── context/         # Context API (Auth, etc)
-│   ├── AdminPanel.jsx   # Painel de Gestão
-│   ├── App.jsx          # Componente Raiz e Roteamento
-│   ├── Seeder.jsx       # Ferramenta de População de Dados (Dev)
-│   └── ...              # Views (MerchantsView, AdsView, etc)
-├── functions/           # Cloud Functions (Backend)
-├── firestore.rules      # Regras de Segurança
-├── firestore.indexes.json # Índices do Banco
-└── firebase.json        # Configuração do Firebase
+│   ├── app/                  # Shell do app (AppHeader)
+│   ├── components/           # UI reutilizável (ChatbotWidget, PlanGate)
+│   ├── constants/            # Definições de planos (plans.js)
+│   ├── context/              # Context API (AuthContext)
+│   ├── features/
+│   │   ├── admin/            # Tabs do painel administrativo
+│   │   └── merchants/        # Views e carousels de comércios
+│   ├── hooks/                # Custom hooks (useMerchantPlan)
+│   ├── lib/                  # Clientes de serviços (supabaseClient.js)
+│   ├── panels/               # Painéis por perfil (MerchantPanel, ResidentPanel)
+│   ├── services/             # Integração com Supabase/APIs
+│   ├── stores/               # Estado global Zustand (authStore)
+│   ├── App.jsx               # Componente raiz e roteamento
+│   └── main.jsx              # Entry point
+├── scripts/                  # Scripts de seed (seedSupabase.mjs)
+├── public/                   # Assets estáticos
+├── .env.example              # Template de variáveis de ambiente
+├── vite.config.js
+└── package.json
 ```
+
+---
 
 ## 🔧 Configuração e Instalação
 
 ### Pré-requisitos
-*   Node.js (v18+)
-*   Conta no Google Firebase
+- Node.js v18+
+- Conta no [Supabase](https://supabase.com)
+- (Opcional) Conta no [Algolia](https://algolia.com) para busca
 
 ### Passo a Passo
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone https://github.com/reinaldogramachof-hash/Interlagos---Guia-Web.git
-    cd interlagos-conectado
-    ```
+**1. Clone e instale:**
+```bash
+git clone https://github.com/reinaldogramachof-hash/Interlagos---Guia-Web.git
+cd "Interlagos---Guia-Web/interlagos-conectado"
+npm install
+```
 
-2.  **Instale as dependências:**
-    ```bash
-    npm install
-    ```
+**2. Configure as variáveis de ambiente:**
+```bash
+cp .env.example .env.local
+```
 
-3.  **Configure o Firebase:**
-    *   Crie um projeto no Console do Firebase.
-    *   Crie um arquivo `.env` na raiz com suas credenciais:
-        ```env
-        VITE_API_KEY=sua_api_key
-        VITE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
-        VITE_PROJECT_ID=seu_project_id
-        VITE_STORAGE_BUCKET=seu_bucket.appspot.com
-        VITE_MESSAGING_SENDER_ID=seu_sender_id
-        VITE_APP_ID=seu_app_id
-        ```
+Edite `.env.local` com suas credenciais:
+```env
+# Supabase — Obrigatórias (Painel Supabase → Settings → API)
+VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_anon_key_aqui
 
-4.  **Execute o servidor de desenvolvimento:**
-    ```bash
-    npm run dev
-    ```
+# Algolia — Opcional (para busca)
+VITE_ALGOLIA_APP_ID=
+VITE_ALGOLIA_SEARCH_KEY=
+```
 
-## 🛡️ Painel Administrativo
+**3. Execute o servidor de desenvolvimento:**
+```bash
+npm run dev
+# Acesse: http://localhost:5173
+```
 
-Para acessar o Painel Admin em ambiente de desenvolvimento:
-1.  Clique no ícone de **Dashboard** no cabeçalho da aplicação.
-2.  Utilize a aba **"Banco de Dados"** para rodar o Seeder e popular o banco com dados de teste.
+**4. (Opcional) Popular banco com dados de teste:**
+```bash
+npm run seed
+```
 
 ---
-Desenvolvido com ❤️ para a comunidade de Interlagos.
+
+## 🛡️ Scripts Disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento (Vite HMR) |
+| `npm run build` | Build de produção |
+| `npm run preview` | Preview do build de produção |
+| `npm run lint` | Verificação de lint (ESLint) |
+| `npm run seed` | Popular Supabase com dados de exemplo |
+
+---
+
+## 🔐 Acesso ao Painel Administrativo
+
+Para acessar o Painel Admin em desenvolvimento:
+1. Faça login com uma conta com role `admin` ou `master`
+2. Acesse via ícone de Dashboard no cabeçalho
+3. Use a aba **"Banco de Dados"** para rodar o Seeder em desenvolvimento
+
+---
+
+Desenvolvido com ❤️ para a comunidade de Parque Interlagos, SJC.
