@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Heart, List, Settings, Star, Megaphone, PlusCircle } from 'lucide-react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { getFavorites } from '../services/favoritesService';
 
@@ -23,19 +22,14 @@ export default function ResidentPanel({ onClose }) {
     const fetchMyActivities = async () => {
         setLoading(true);
         try {
-            // Fetch user's donations/campaigns
-            const campaignsQ = query(collection(db, 'campaigns'), where('authorId', '==', currentUser.uid));
-            const campaignsSnap = await getDocs(campaignsQ);
-
-            // Fetch user's ads
-            const adsQ = query(collection(db, 'ads'), where('author.uid', '==', currentUser.uid));
-            const adsSnap = await getDocs(adsQ);
-
+            const [{ data: campaigns }, { data: ads }] = await Promise.all([
+                supabase.from('campaigns').select('*').eq('author_id', currentUser.uid),
+                supabase.from('ads').select('*').eq('user_id', currentUser.uid),
+            ]);
             const activities = [
-                ...campaignsSnap.docs.map(doc => ({ id: doc.id, type: 'Campanha', ...doc.data() })),
-                ...adsSnap.docs.map(doc => ({ id: doc.id, type: 'Anúncio', ...doc.data() }))
+                ...(campaigns || []).map(item => ({ ...item, type: 'Campanha' })),
+                ...(ads || []).map(item => ({ ...item, type: 'Anúncio' })),
             ];
-
             setMyActivities(activities);
         } catch (error) {
             console.error("Error fetching activities:", error);
@@ -119,7 +113,7 @@ export default function ResidentPanel({ onClose }) {
                                                     <h4 className="font-bold text-slate-900 dark:text-white">{item.title}</h4>
                                                 </div>
                                                 <div className="text-sm text-slate-500">
-                                                    {item.createdAt?.toDate ? item.createdAt.toDate().toLocaleDateString() : ''}
+                                                    {item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : ''}
                                                 </div>
                                             </div>
                                         ))}

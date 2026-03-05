@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Check } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { supabase } from './lib/supabaseClient';
 import Modal from './Modal';
 
 export default function CreateAdWizard({ isOpen, onClose, user }) {
@@ -31,18 +30,15 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
 
         setIsSubmitting(true);
         try {
-            await addDoc(collection(db, 'ads'), {
+            await supabase.from('ads').insert({
                 ...formData,
-                createdAt: serverTimestamp(),
-                status: 'pending', // Changed to pending for moderation
-                userId: user.uid,
-                userName: user.displayName || 'Usuário Anônimo',
-                userPhoto: user.photoURL || null,
-                author: { // Adding structured author object for consistency
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email
-                }
+                status: 'pending',
+                user_id: user.uid,
+                user_name: user.displayName || 'Usuário Anônimo',
+                user_photo: user.photoURL || null,
+                author_uid: user.uid,
+                author_name: user.displayName,
+                author_email: user.email,
             });
             alert("Anúncio enviado para análise! Ele aparecerá após aprovação.");
             onClose();

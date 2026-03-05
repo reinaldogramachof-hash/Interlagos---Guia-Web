@@ -1,68 +1,15 @@
-import { db } from '../firebaseConfig';
-import { doc, updateDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { supabase } from '../lib/supabaseClient';
 
-/**
- * Increments the view count for a merchant.
- * @param {string} merchantId - The ID of the merchant.
- */
-export const incrementMerchantView = async (merchantId) => {
-    if (!merchantId) return;
-    try {
-        const merchantRef = doc(db, 'merchants', merchantId);
-        await updateDoc(merchantRef, {
-            views: increment(1),
-            lastViewedAt: serverTimestamp()
-        });
-    } catch (error) {
-        console.error("Error incrementing merchant view:", error);
-    }
+const trackEvent = async (entityId, entityType) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  await supabase.from('click_events').insert({
+    entity_id: entityId,
+    entity_type: entityType,
+    user_id: session?.user?.id || null,
+  }).catch(console.error);
 };
 
-/**
- * Increments the click count for a merchant's WhatsApp/Contact.
- * @param {string} merchantId - The ID of the merchant.
- */
-export const incrementMerchantContactClick = async (merchantId) => {
-    if (!merchantId) return;
-    try {
-        const merchantRef = doc(db, 'merchants', merchantId);
-        await updateDoc(merchantRef, {
-            contactClicks: increment(1),
-            lastContactClickAt: serverTimestamp()
-        });
-    } catch (error) {
-        console.error("Error incrementing merchant contact click:", error);
-    }
-};
-
-/**
- * Increments the view count for an ad.
- * @param {string} adId - The ID of the ad.
- */
-export const incrementAdView = async (adId) => {
-    if (!adId) return;
-    try {
-        const adRef = doc(db, 'ads', adId);
-        await updateDoc(adRef, {
-            views: increment(1)
-        });
-    } catch (error) {
-        console.error("Error incrementing ad view:", error);
-    }
-};
-
-/**
- * Increments the click count for an ad's WhatsApp button.
- * @param {string} adId - The ID of the ad.
- */
-export const incrementAdClick = async (adId) => {
-    if (!adId) return;
-    try {
-        const adRef = doc(db, 'ads', adId);
-        await updateDoc(adRef, {
-            clicks: increment(1)
-        });
-    } catch (error) {
-        console.error("Error incrementing ad click:", error);
-    }
-};
+export const incrementMerchantView     = (id) => trackEvent(id, 'merchant_view');
+export const incrementMerchantContactClick = (id) => trackEvent(id, 'merchant_contact');
+export const incrementAdView           = (id) => trackEvent(id, 'ad_view');
+export const incrementAdClick          = (id) => trackEvent(id, 'ad_click');

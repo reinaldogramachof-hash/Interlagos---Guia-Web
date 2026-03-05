@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, MapPin, Clock, Filter, Search, PlusCircle, MessageCircle, Briefcase } from 'lucide-react';
-import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { Tag, Briefcase, PlusCircle, MessageCircle } from 'lucide-react';
+import { supabase } from './lib/supabaseClient';
 import { useAuth } from './context/AuthContext';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
@@ -10,7 +9,25 @@ import { incrementAdClick } from './services/statsService';
 
 const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Veículos', 'Eletrônicos', 'Doações'];
 
-export default function AdsView() {
+// Formata o preço vindo do banco (número ou null)
+function formatPrice(price) {
+    if (!price && price !== 0) return 'A combinar';
+    if (typeof price === 'number') {
+        return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    return price;
+}
+
+// Tempo relativo
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 3600) return `${Math.floor(diff / 60)}min`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    return `${Math.floor(diff / 86400)}d`;
+}
+
+export default function AdsView({ onRequireAuth }) {
     const { currentUser } = useAuth();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -19,23 +36,23 @@ export default function AdsView() {
     const [loading, setLoading] = useState(true);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
-    // Carregar Anúncios APROVADOS do Firestore
     useEffect(() => {
         setLoading(true);
-        const q = query(collection(db, 'ads'), where('status', '==', 'approved'), orderBy('createdAt', 'desc'));
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedAds = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setAds(fetchedAds);
+        const fetchAds = async () => {
+            const { data, error } = await supabase
+                .from('ads')
+                .select('*')
+                .eq('status', 'approved')
+                .order('created_at', { ascending: false });
+            if (error) console.error('Erro ao carregar anúncios:', error);
+            setAds(data || []);
             setLoading(false);
-        }, (error) => {
-            console.error("Erro ao carregar anúncios:", error);
-            setLoading(false);
-        });
-        return () => unsubscribe();
+        };
+        fetchAds();
+        const channel = supabase.channel('ads-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, fetchAds)
+            .subscribe();
+        return () => supabase.removeChannel(channel);
     }, []);
 
     const filteredAds = selectedCategory === 'Todos'
@@ -43,115 +60,128 @@ export default function AdsView() {
         : ads.filter(ad => ad.category === selectedCategory);
 
     const handleCreateClick = () => {
-        if (!currentUser) {
-            setShowLoginModal(true);
-        } else {
-            setIsWizardOpen(true);
-        }
+        if (!currentUser) { setShowLoginModal(true); }
+        else { setIsWizardOpen(true); }
     };
 
-    const handleWhatsAppClick = (ad) => {
+    const handleWppClick = (e, ad) => {
+        e.stopPropagation();
+        if (!ad.contact) return;
         incrementAdClick(ad.id);
-        const number = ad.contact.replace(/\D/g, '');
-        window.open(`https://wa.me/55${number}?text=Olá, vi seu anúncio ${ad.title} no App Interlagos!`, '_blank');
+        const number = String(ad.contact).replace(/\D/g, '');
+        window.open(`https://wa.me/55${number}?text=Olá! Vi seu anúncio "${ad.title}" no App Parque Interlagos.`, '_blank');
     };
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
+        <div className="pb-6 animate-in fade-in duration-300">
 
-            {/* Category Tabs */}
-            <div className="flex gap-3 overflow-x-auto pb-4 -mb-2 scrollbar-hide">
+            {/* ── Filtros de Categoria (OLX style chips) ── */}
+            <div className="overflow-x-auto whitespace-nowrap flex gap-2 px-3 py-3 border-b border-gray-100 bg-white">
                 {categories.map(cat => (
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${selectedCategory === cat
-                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategory === cat
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
-                        <Filter size={16} />
                         {cat}
                     </button>
                 ))}
             </div>
 
-            {/* Lista de Anúncios */}
+            {/* ── Grid de Anúncios ── */}
             {loading ? (
-                <div className="text-center py-10 text-slate-400">Carregando classificados...</div>
+                <div className="grid grid-cols-2 gap-3 px-3 pt-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm">
+                            <div className="aspect-square bg-gray-100 animate-pulse" />
+                            <div className="p-2 space-y-1.5">
+                                <div className="h-3 bg-gray-100 rounded animate-pulse w-3/4" />
+                                <div className="h-4 bg-gray-100 rounded animate-pulse w-1/2" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             ) : filteredAds.length === 0 ? (
-                <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-white/5 mx-4 lg:mx-0">
-                    <div className="bg-indigo-50 dark:bg-indigo-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Tag className="text-indigo-400" size={32} />
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                    <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+                        <Tag className="text-indigo-400" size={28} />
                     </div>
-                    <h3 className="text-slate-800 dark:text-white font-bold mb-1">Nenhum anúncio aqui</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Seja o primeiro a anunciar nesta categoria!</p>
+                    <h3 className="text-gray-800 font-bold mb-1">Nenhum anúncio aqui</h3>
+                    <p className="text-gray-500 text-sm mb-4">Seja o primeiro a anunciar nesta categoria!</p>
                     <button
                         onClick={handleCreateClick}
-                        className="text-indigo-600 dark:text-indigo-400 font-bold text-sm hover:underline"
+                        className="text-indigo-600 font-bold text-sm hover:underline"
                     >
                         Criar anúncio agora
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lg:px-0 mt-6">
+                <div className="grid grid-cols-2 gap-3 px-3 pt-4">
                     {filteredAds.map((ad) => (
                         <div
                             key={ad.id}
                             onClick={() => setSelectedAd(ad)}
-                            className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5 hover:shadow-md transition-all group cursor-pointer"
+                            className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow relative group"
                         >
-                            <div className="relative h-48 bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                                {ad.image ? (
+                            {/* Imagem quadrada */}
+                            <div className="aspect-square overflow-hidden bg-gray-50 relative">
+                                {ad.image_url || ad.image ? (
                                     <img
-                                        src={ad.image}
+                                        src={ad.image_url || ad.image}
                                         alt={ad.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        loading="lazy"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600">
-                                        <Briefcase size={48} />
+                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                        <Briefcase size={36} />
                                     </div>
                                 )}
-                                <span className="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-sm uppercase tracking-wider">
+                                {/* Badge de categoria */}
+                                <span className="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide backdrop-blur-sm">
                                     {ad.category}
                                 </span>
-                                <span className="absolute bottom-3 right-3 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm">
-                                    {ad.createdAt?.toDate ? ad.createdAt.toDate().toLocaleDateString() : 'Recente'}
+                                {/* Tempo */}
+                                <span className="absolute top-1.5 right-1.5 bg-white/80 text-gray-600 text-[9px] font-semibold px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                    {timeAgo(ad.created_at)}
                                 </span>
                             </div>
 
-                            <div className="p-4">
-                                <div className="flex justify-between items-start mb-2">
-                                    <h3 className="font-bold text-slate-800 dark:text-white text-lg leading-tight line-clamp-1">{ad.title}</h3>
-                                </div>
-                                <p className="text-indigo-600 dark:text-indigo-400 font-bold text-lg mb-2">{ad.price}</p>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-4 h-10">{ad.description}</p>
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleWhatsAppClick(ad);
-                                    }}
-                                    className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
-                                >
-                                    <MessageCircle size={18} />
-                                    Chamar no Zap
-                                </button>
+                            {/* Informações do card */}
+                            <div className="p-2.5 pb-3">
+                                {/* Preço — info principal em verde */}
+                                <p className="text-green-600 font-bold text-sm leading-tight mb-0.5">
+                                    {formatPrice(ad.price)}
+                                </p>
+                                {/* Título truncado */}
+                                <p className="truncate text-gray-800 text-xs font-medium mb-2">
+                                    {ad.title}
+                                </p>
+                                {/* Botão WhatsApp minimalista */}
+                                {ad.contact && (
+                                    <button
+                                        onClick={(e) => handleWppClick(e, ad)}
+                                        className="w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors"
+                                    >
+                                        <MessageCircle size={13} />
+                                        Zap
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Floating Action Button (FAB) - Anunciar */}
-            <button
-                onClick={handleCreateClick}
-                className="fixed bottom-24 right-4 bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all z-50 flex items-center gap-2 font-bold pr-6"
-            >
-                <PlusCircle size={24} />
-                Anunciar Grátis
-            </button>
+            {/* Contagem de resultados */}
+            {!loading && filteredAds.length > 0 && (
+                <p className="text-center text-xs text-gray-400 mt-4 mb-2">
+                    {filteredAds.length} anúncio{filteredAds.length !== 1 ? 's' : ''} encontrado{filteredAds.length !== 1 ? 's' : ''}
+                </p>
+            )}
 
             {/* Modais */}
             <AdDetailModal
@@ -159,14 +189,18 @@ export default function AdsView() {
                 onClose={() => setSelectedAd(null)}
                 ad={selectedAd}
             />
-
             <CreateAdWizard
                 isOpen={isWizardOpen}
                 onClose={() => setIsWizardOpen(false)}
                 user={currentUser}
             />
-
-            {showLoginModal && <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onSuccess={() => { setShowLoginModal(false); setIsWizardOpen(true); }} />}
+            {showLoginModal && (
+                <LoginModal
+                    isOpen={showLoginModal}
+                    onClose={() => setShowLoginModal(false)}
+                    onSuccess={() => { setShowLoginModal(false); setIsWizardOpen(true); }}
+                />
+            )}
         </div>
     );
 }

@@ -3,8 +3,7 @@ import { MessageCircle, X, Send, Loader2, ChevronRight } from 'lucide-react';
 import PlanCard from './PlanCard';
 import { sendMessageToGenkit } from '../services/genkitService';
 import { useChatContext } from '../context/ChatContext';
-import { auth, db } from '../firebaseConfig';
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { supabase } from '../lib/supabaseClient';
 
 export default function ChatbotWidget() {
     const [isOpen, setIsOpen] = useState(false);
@@ -16,34 +15,35 @@ export default function ChatbotWidget() {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        if (!auth) return;
-        const unsubscribe = auth.onAuthStateChanged((u) => {
-            setUser(u);
+        supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user || null);
         });
-        return () => unsubscribe();
+        return () => subscription.unsubscribe();
     }, []);
 
-    // Load History from Firestore
+    // Load History from Supabase
     useEffect(() => {
         if (!user || !isOpen) return;
 
-        const q = query(
-            collection(db, 'users', user.uid, 'chatHistory'),
-            orderBy('timestamp', 'desc'),
-            limit(20)
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const history = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })).reverse();
-
-            setMessages(history);
+        const fetchHistory = async () => {
+            const { data } = await supabase
+                .from('chat_history')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(20);
+            setMessages((data || []).reverse());
             scrollToBottom();
-        });
+        };
 
-        return () => unsubscribe();
+        fetchHistory();
+
+        const channel = supabase.channel(`chat-${user.id}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_history', filter: `user_id=eq.${user.id}` }, () => fetchHistory())
+            .subscribe();
+
+        return () => supabase.removeChannel(channel);
     }, [user, isOpen]);
 
     const scrollToBottom = () => {

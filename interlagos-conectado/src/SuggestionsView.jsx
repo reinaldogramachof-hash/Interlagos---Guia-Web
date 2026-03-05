@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Send, MessageSquare, ThumbsUp, AlertCircle, Lightbulb, User } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import LoginModal from './LoginModal';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { supabase } from './lib/supabaseClient';
 
 export default function SuggestionsView() {
     const { currentUser } = useAuth();
@@ -22,14 +21,13 @@ export default function SuggestionsView() {
         setIsSubmitting(true);
         const f = e.target;
         try {
-            await addDoc(collection(db, 'suggestions'), {
+            await supabase.from('suggestions').insert({
                 type: f.type.value,
                 message: f.message.value,
-                userId: currentUser.uid,
-                userName: currentUser.displayName,
-                userEmail: currentUser.email,
-                createdAt: serverTimestamp(),
-                status: 'unread'
+                user_id: currentUser.uid,
+                user_name: currentUser.displayName,
+                user_email: currentUser.email,
+                status: 'unread',
             });
             setSubmitted(true);
         } catch (error) {

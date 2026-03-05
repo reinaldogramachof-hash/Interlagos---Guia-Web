@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

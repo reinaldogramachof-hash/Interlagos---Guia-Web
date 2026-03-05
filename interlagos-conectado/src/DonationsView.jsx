@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, HandHeart, Gift, ChevronRight, MessageCircle, PlusCircle, Filter, Calendar, MapPin, Users, ArrowRight, X, AlertTriangle } from 'lucide-react';
-import { collection, query, orderBy, onSnapshot, where, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { supabase } from './lib/supabaseClient';
 import { useAuth } from './context/AuthContext';
 import CampaignDetailModal from './CampaignDetailModal';
 import LoginModal from './LoginModal';
@@ -24,19 +23,28 @@ export default function DonationsView() {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [newItemType, setNewItemType] = useState('donation');
 
-    // Carregar itens APROVADOS
+    // Carregar itens APROVADOS com realtime
     useEffect(() => {
         setLoading(true);
-        const q = query(collection(db, 'campaigns'), where('status', '==', 'approved'), orderBy('createdAt', 'desc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setItems(fetched);
+
+        const fetchItems = async () => {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*')
+                .eq('status', 'approved')
+                .order('created_at', { ascending: false });
+            if (error) console.error("Erro ao carregar itens:", error);
+            setItems(data || []);
             setLoading(false);
-        }, (error) => {
-            console.error("Erro ao carregar itens:", error);
-            setLoading(false);
-        });
-        return () => unsubscribe();
+        };
+
+        fetchItems();
+
+        const channel = supabase.channel('campaigns-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'campaigns' }, () => fetchItems())
+            .subscribe();
+
+        return () => supabase.removeChannel(channel);
     }, []);
 
     const filteredItems = selectedType === 'all'
@@ -120,7 +128,7 @@ export default function DonationsView() {
                                         {cat.label}
                                     </div>
                                     <span className="text-[10px] text-slate-400 font-medium">
-                                        {item.createdAt?.toDate ? item.createdAt.toDate().toLocaleDateString() : 'Recente'}
+                                        {item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : 'Recente'}
                                     </span>
                                 </div>
 
@@ -200,16 +208,15 @@ export default function DonationsView() {
                             e.preventDefault();
                             const f = e.target;
                             try {
-                                await addDoc(collection(db, 'campaigns'), {
+                                await supabase.from('campaigns').insert({
                                     title: f.title.value,
                                     description: f.description.value,
                                     whatsapp: f.whatsapp.value,
-                                    type: newItemType, // donation, request, volunteer, campaign
-                                    authorId: currentUser.uid,
-                                    authorName: currentUser.displayName,
+                                    type: newItemType,
+                                    author_id: currentUser.uid,
+                                    author_name: currentUser.displayName,
                                     status: 'pending',
-                                    createdAt: serverTimestamp(),
-                                    progress: 0
+                                    progress: 0,
                                 });
                                 alert('Sua ação foi enviada para análise da moderação!');
                                 setShowCreateModal(false);

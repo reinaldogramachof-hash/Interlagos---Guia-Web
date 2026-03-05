@@ -3,23 +3,27 @@ import { X, Phone, MapPin, Globe, Clock, Star, Heart, Share2, MessageCircle, Sto
 import { incrementMerchantView, incrementMerchantContactClick } from './services/statsService';
 import { toggleFavorite, checkIsFavorite } from './services/favoritesService';
 import { useAuth } from './context/AuthContext';
+import useAuthStore from './stores/authStore';
 
-export default function MerchantDetailModal({ merchant, onClose }) {
+export default function MerchantDetailModal({ merchant, onClose, onLoginRequired }) {
     const { currentUser } = useAuth();
     const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
-        if (merchant?.id) {
-            incrementMerchantView(merchant.id);
-            if (currentUser) {
-                checkIsFavorite(currentUser.uid, merchant.id).then(setIsFavorite);
-            }
+        if (merchant?.id) incrementMerchantView(merchant.id);
+    }, [merchant?.id]);
+
+    useEffect(() => {
+        if (merchant?.id && currentUser) {
+            checkIsFavorite(currentUser.uid, merchant.id).then(setIsFavorite);
+        } else {
+            setIsFavorite(false);
         }
-    }, [merchant, currentUser]);
+    }, [merchant?.id, currentUser?.uid]);
 
     const handleWhatsApp = () => {
         if (merchant?.id) incrementMerchantContactClick(merchant.id);
-        const message = `Olá, vi sua loja no Guia Interlagos!`;
+        const message = `Olá, vi sua loja no TemNoBairro! (Parque Interlagos, SJC)`;
         const phone = merchant.whatsapp ? merchant.whatsapp.replace(/\D/g, '') : '';
         if (phone) {
             window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -29,14 +33,16 @@ export default function MerchantDetailModal({ merchant, onClose }) {
     };
 
     const handleToggleFavorite = async () => {
-        if (!currentUser) {
-            alert("Faça login para favoritar!");
+        // Usa getState() para obter usuário fresco mesmo dentro de closures pós-login
+        const userId = useAuthStore.getState().session?.user?.id;
+        if (!userId) {
+            onLoginRequired?.(() => handleToggleFavorite());
             return;
         }
-        const newState = await toggleFavorite(currentUser.uid, merchant.id, 'merchant', {
+        const newState = await toggleFavorite(userId, merchant.id, 'merchant', {
             name: merchant.name,
             image: merchant.image || null,
-            category: merchant.category
+            category: merchant.category,
         });
         setIsFavorite(newState);
     };
@@ -69,7 +75,7 @@ export default function MerchantDetailModal({ merchant, onClose }) {
                                 <h2 className="text-4xl font-bold text-white mb-1 shadow-sm">{merchant.name}</h2>
                                 <div className="flex items-center gap-2 text-gray-200 text-sm">
                                     <MapPin size={14} className="text-indigo-400" />
-                                    <span>{merchant.address || 'Interlagos, SP'}</span>
+                                    <span>{merchant.address || 'Parque Interlagos, São José dos Campos - SP'}</span>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -97,7 +103,7 @@ export default function MerchantDetailModal({ merchant, onClose }) {
                                     <Store size={20} className="text-indigo-600" /> Sobre
                                 </h3>
                                 <p className="text-gray-600 leading-relaxed">
-                                    {merchant.description || 'Uma excelente opção em Interlagos com produtos de qualidade e ótimo atendimento.'}
+                                    {merchant.description || 'Uma excelente opção no Parque Interlagos, São José dos Campos, com produtos de qualidade e ótimo atendimento.'}
                                 </p>
                             </div>
 
@@ -152,22 +158,22 @@ export default function MerchantDetailModal({ merchant, onClose }) {
                         {/* Sidebar Info */}
                         <div className="space-y-6">
                             {/* Social Links - PROFESSIONAL & PREMIUM */}
-                            {['professional', 'premium'].includes(merchant.plan) && merchant.socialLinks && (
+                            {['professional', 'premium'].includes(merchant.plan) && merchant.social_links && (
                                 <div className="grid grid-cols-3 gap-2">
-                                    {merchant.socialLinks.instagram && (
-                                        <a href={`https://instagram.com/${merchant.socialLinks.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">
+                                    {merchant.social_links.instagram && (
+                                        <a href={`https://instagram.com/${merchant.social_links.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">
                                             <Globe size={20} />
                                             <span className="text-[10px] font-bold mt-1">Insta</span>
                                         </a>
                                     )}
-                                    {merchant.socialLinks.facebook && (
-                                        <a href={merchant.socialLinks.facebook} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                                    {merchant.social_links.facebook && (
+                                        <a href={merchant.social_links.facebook} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                                             <Globe size={20} />
                                             <span className="text-[10px] font-bold mt-1">Face</span>
                                         </a>
                                     )}
-                                    {merchant.socialLinks.site && (
-                                        <a href={merchant.socialLinks.site} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                                    {merchant.social_links.site && (
+                                        <a href={merchant.social_links.site} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
                                             <Globe size={20} />
                                             <span className="text-[10px] font-bold mt-1">Site</span>
                                         </a>

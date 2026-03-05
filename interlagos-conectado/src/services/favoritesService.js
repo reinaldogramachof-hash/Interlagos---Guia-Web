@@ -1,36 +1,42 @@
-import { db } from '../firebaseConfig';
-import { collection, doc, setDoc, deleteDoc, getDocs, query, where, getDoc } from 'firebase/firestore';
+import { supabase } from '../lib/supabaseClient';
 
-export const toggleFavorite = async (userId, itemId, type, itemData) => {
-    if (!userId || !itemId) return;
+export const toggleFavorite = async (userId, itemId, type, itemData = {}) => {
+  if (!userId || !itemId) return false;
 
-    const favRef = doc(db, 'users', userId, 'favorites', itemId);
-    const favSnap = await getDoc(favRef);
+  const { data: existing } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('entity_id', itemId)
+    .eq('entity_type', type)
+    .maybeSingle();
 
-    if (favSnap.exists()) {
-        await deleteDoc(favRef);
-        return false; // Removed
-    } else {
-        await setDoc(favRef, {
-            itemId,
-            type, // 'merchant', 'news', 'ad'
-            ...itemData,
-            savedAt: new Date()
-        });
-        return true; // Added
-    }
+  if (existing) {
+    await supabase.from('favorites').delete().eq('id', existing.id);
+    return false;
+  }
+  await supabase.from('favorites').insert({ user_id: userId, entity_id: itemId, entity_type: type });
+  return true;
 };
 
 export const checkIsFavorite = async (userId, itemId) => {
-    if (!userId || !itemId) return false;
-    const favRef = doc(db, 'users', userId, 'favorites', itemId);
-    const favSnap = await getDoc(favRef);
-    return favSnap.exists();
+  if (!userId || !itemId) return false;
+  const { data } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('entity_id', itemId)
+    .maybeSingle();
+  return !!data;
 };
 
 export const getFavorites = async (userId) => {
-    if (!userId) return [];
-    const q = query(collection(db, 'users', userId, 'favorites'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  if (!userId) return [];
+  const { data, error } = await supabase
+    .from('favorites')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('favoritesService.getFavorites:', error); return []; }
+  return data;
 };

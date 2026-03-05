@@ -1,7 +1,6 @@
 import React from 'react';
 import { Check, Star, Zap, Crown, X } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db, auth } from './firebaseConfig';
+import { supabase } from './lib/supabaseClient';
 import { createNotification } from './services/notificationService';
 
 export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId, onUpgrade }) {
@@ -10,14 +9,15 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
     const handleUpgrade = async (plan) => {
         if (!merchantId) return;
         try {
-            await updateDoc(doc(db, 'merchants', merchantId), {
+            await supabase.from('merchants').update({
                 plan: plan,
-                isPremium: plan !== 'basic'
-            });
+                is_premium: plan !== 'basic',
+            }).eq('id', merchantId);
 
-            if (auth.currentUser) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
                 await createNotification(
-                    auth.currentUser.uid,
+                    session.user.id,
                     'Plano Atualizado!',
                     `Parabéns! Seu plano foi atualizado para ${plan.toUpperCase()}. Aproveite os novos recursos!`,
                     'success'

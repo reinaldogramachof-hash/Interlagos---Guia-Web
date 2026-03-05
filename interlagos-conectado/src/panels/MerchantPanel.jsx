@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, LayoutDashboard, Tag, Store, Settings, PlusCircle, Trash2, Edit, Lock, TrendingUp, Eye, MousePointer } from 'lucide-react';
-import { collection, query, where, getDocs, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import CreateAdWizard from '../CreateAdWizard';
 import UpgradeModal from '../UpgradeModal';
@@ -18,35 +17,17 @@ export default function MerchantPanel({ onClose }) {
     // Fetch Merchant Profile
     useEffect(() => {
         if (!currentUser) return;
-        const q = query(collection(db, 'merchants'), where('uid', '==', currentUser.uid)); // Assuming 'uid' field exists or we query by ID if ID is UID
-        // Fallback: if merchant ID is not UID, we might need another way. 
-        // For now assuming we can find the merchant by some field or the user IS the merchant doc ID if we set it that way.
-        // Let's assume we query by a field 'ownerId' or similar, OR we try to get doc by UID.
-        // Based on previous code, 'loginAsDev' sets a mock user. 
-        // Let's try to find a merchant where `email` matches or `uid` matches.
-
-        // BETTER: The AuthContext should probably give us the merchantId. 
-        // But for now, let's query.
         const fetchMerchant = async () => {
             try {
-                // Try to find merchant by ownerId (uid)
-                // If not found, maybe create one? No, admin creates it.
-                // Let's assume for dev mode we might not have one, so we handle null.
-
-                // REAL IMPLEMENTATION:
-                const q = query(collection(db, 'merchants'), where('email', '==', currentUser.email));
-                const snapshot = await getDocs(q);
-                if (!snapshot.empty) {
-                    setMerchant({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() });
+                const { data } = await supabase
+                    .from('merchants')
+                    .select('*')
+                    .eq('email', currentUser.email)
+                    .maybeSingle();
+                if (data) {
+                    setMerchant(data);
                 } else {
-                    // Fallback for dev/testing if no merchant record exists
-                    setMerchant({
-                        id: 'temp_dev',
-                        name: currentUser.displayName,
-                        plan: 'basic',
-                        views: 0,
-                        clicks: 0
-                    });
+                    setMerchant({ id: 'temp_dev', name: currentUser.displayName, plan: 'basic', views: 0, clicks: 0 });
                 }
             } catch (err) {
                 console.error("Error fetching merchant:", err);
@@ -64,10 +45,8 @@ export default function MerchantPanel({ onClose }) {
     const fetchMyAds = async () => {
         setLoading(true);
         try {
-            const q = query(collection(db, 'ads'), where('authorId', '==', currentUser.uid));
-            const snapshot = await getDocs(q);
-            const adsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setMyAds(adsData);
+            const { data } = await supabase.from('ads').select('*').eq('user_id', currentUser.uid);
+            setMyAds(data || []);
         } catch (error) {
             console.error("Error fetching ads:", error);
         } finally {
@@ -78,7 +57,7 @@ export default function MerchantPanel({ onClose }) {
     const handleDeleteAd = async (adId) => {
         if (window.confirm('Tem certeza que deseja excluir este anúncio?')) {
             try {
-                await deleteDoc(doc(db, 'ads', adId));
+                await supabase.from('ads').delete().eq('id', adId);
                 setMyAds(prev => prev.filter(ad => ad.id !== adId));
             } catch (error) {
                 console.error("Error deleting ad:", error);
