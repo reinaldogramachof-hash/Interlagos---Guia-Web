@@ -96,7 +96,7 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 px-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 px-3">
           {filteredMerchants.map(merchant => {
             const plan = PLAN_LABEL[merchant.plan] ?? PLAN_LABEL.basic;
             return (

@@ -76,7 +76,7 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
             <div
               key={`${merchant.id}-${index}`}
               onClick={() => onMerchantClick(merchant)}
-              className="min-w-[280px] w-[280px] shrink-0 bg-slate-800/50 border border-indigo-500/20 rounded-2xl p-4 cursor-pointer hover:bg-slate-800/80 hover:border-indigo-500/60 transition-all duration-700 ease-out group/pro"
+              className="min-w-[280px] md:min-w-[320px] lg:min-w-[350px] shrink-0 bg-slate-800/50 border border-indigo-500/20 rounded-2xl p-4 cursor-pointer hover:bg-slate-800/80 hover:border-indigo-500/60 transition-all duration-700 ease-out group/pro"
             >
               <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden relative">
                 <img

@@ -40,23 +40,23 @@ const NAV_ITEMS = [
 
 function BottomNav({ currentView, onNavigate, onCreateAd }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
-      <div className="max-w-md mx-auto flex items-center justify-around h-16">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+      <div className="max-w-md md:max-w-2xl lg:max-w-5xl mx-auto flex items-center justify-around h-16">
         {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
           const isActive = currentView === id;
           return (
             <button
               key={id}
               onClick={() => onNavigate(id)}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${isActive ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all relative ${isActive ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
                 }`}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
-              <span className={`text-[10px] font-semibold ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}>
+              <Icon size={isActive ? 24 : 22} strokeWidth={isActive ? 2.5 : 2} />
+              <span className={`text-[10px] font-bold ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}>
                 {label}
               </span>
               {isActive && (
-                <span className="absolute bottom-0 w-8 h-0.5 bg-indigo-600 rounded-t-full" />
+                <span className="absolute bottom-0 w-8 h-1 bg-indigo-600 rounded-t-full shadow-[0_-2px_6px_rgba(79,70,229,0.3)]" />
               )}
             </button>
           );
@@ -85,12 +85,12 @@ function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
   const title = titles[currentView] || 'Interlagos Conectado';
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm">
-      <div className="max-w-md mx-auto flex items-center justify-between px-4 h-14">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <div className="max-w-md md:max-w-2xl lg:max-w-5xl mx-auto flex items-center justify-between px-4 h-14">
         {/* Botão Hamburguer */}
         <button
           onClick={onSidebarOpen}
-          className="p-2 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+          className="p-2 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-all active:scale-95"
           aria-label="Abrir menu"
         >
           <Menu size={22} />
@@ -99,7 +99,7 @@ function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
         {/* Logo + Título centralizados */}
         <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
           <img src="/logoIC.png" alt="Logo" className="w-7 h-7 rounded-lg object-contain" onError={e => e.target.style.display = 'none'} />
-          <h1 className="text-base font-bold text-gray-900">{title}</h1>
+          <h1 className="text-base md:text-lg font-black text-gray-900 tracking-tight">{title}</h1>
         </div>
 
         {/* Botão de Login (só quando deslogado) */}
@@ -367,35 +367,34 @@ function AppContent() {
         onLoginOpen={() => setIsLoginOpen(true)}
       />
 
-      {/* Shell máximo mobile: max-w-md centralizado */}
-      <div className="max-w-md mx-auto relative min-h-screen bg-gray-50 shadow-xl shadow-black/5">
-
+      {/* Shell centralizado responsivo: usa larguras fluidas em tablets (md/lg) para eliminar espaços vazios */}
+      <div className="max-w-md md:max-w-[95%] lg:max-w-[92%] xl:max-w-7xl 2xl:max-w-[1440px] mx-auto relative min-h-screen bg-gray-50 shadow-2xl shadow-black/5 flex flex-col">
+        
         <AppHeader
           currentView={currentView}
           onLoginOpen={() => setIsLoginOpen(true)}
           onSidebarOpen={() => setIsSidebarOpen(true)}
         />
 
-        {/* Conteúdo principal com padding-bottom para Bottom Nav */}
-        <main className="pb-20">
-          <div className="animate-in fade-in duration-300">
+        {/* Conteúdo principal com flex-1 para empurrar Bottom Nav se necessário */}
+        <main className="flex-1 pb-20">
+          <div className="animate-in fade-in duration-300 h-full">
             {renderView()}
           </div>
         </main>
 
-        {/* FAB de classificados — só aparece na aba de ads */}
+        {/* FAB de classificados — responsivo no canto do container */}
         {currentView === 'ads' && (
           <button
             onClick={() => requireAuth(() => setShowCreateAd(true))}
-            className="fixed bottom-20 right-4 bg-indigo-600 text-white flex items-center gap-2 px-4 py-3 rounded-full shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all z-30 font-bold text-sm"
-            style={{ maxWidth: 'calc(24rem + 1rem)' }}
+            className="fixed bottom-20 md:bottom-24 right-4 md:right-auto md:ml-[calc(100%-10rem)] bg-indigo-600 text-white flex items-center gap-2 px-6 py-3.5 rounded-full shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all z-30 font-bold text-sm"
           >
             <PlusCircle size={20} />
             Anunciar Grátis
           </button>
         )}
 
-        {/* Bottom Navigation */}
+        {/* Bottom Navigation centralizado no shell */}
         {showBottomNav && (
           <BottomNav
             currentView={currentView === 'merchants' ? 'merchants' : currentView}

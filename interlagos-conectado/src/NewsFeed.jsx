@@ -265,7 +265,7 @@ export default function NewsFeed() {
                     <p className="text-gray-400 text-sm">Novas publicações aparecerão aqui em breve.</p>
                 </div>
             ) : (
-                <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-x-4 px-1">
                     {filteredNews.map(item => (
                         <NewsCard
                             key={item.id}

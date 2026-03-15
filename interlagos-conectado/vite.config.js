@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      disabled: process.env.VITE_DISABLE_PWA === 'true',
       registerType: 'autoUpdate',
       includeAssets: ['capa.jpg', 'logoIC.png'],
       manifest: {
