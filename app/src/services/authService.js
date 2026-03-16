@@ -40,3 +40,15 @@ export const createUserProfile = async (user, additionalData = {}) => {
   if (error) throw new Error('Falha ao criar perfil: ' + error.message);
   return data.role;
 };
+
+export const updateUserProfile = async (userId, data) => {
+  const { data: result, error } = await supabase
+    .from('profiles')
+    .update(data)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return result;
+};

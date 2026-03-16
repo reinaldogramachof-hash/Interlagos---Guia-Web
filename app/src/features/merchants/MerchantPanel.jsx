@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, LayoutDashboard, Tag, Store, Settings, PlusCircle, Trash2, Edit, Lock, TrendingUp, Eye, MousePointer } from 'lucide-react';
-import { fetchMerchantByEmail } from '../../services/merchantService';
+import { X, LayoutDashboard, Tag, Store, Settings, TrendingUp } from 'lucide-react';
+import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../../context/AuthContext';
 import CreateAdWizard from '../ads/CreateAdWizard';
 import UpgradeModal from './UpgradeModal';
+
+// Tabs
+import DashboardTab from './merchant-panel/tabs/DashboardTab';
+import AdsTab from './merchant-panel/tabs/AdsTab';
+import SettingsTab from './merchant-panel/tabs/SettingsTab';
 
 export default function MerchantPanel({ onClose }) {
     const { currentUser } = useAuth();
@@ -20,7 +25,7 @@ export default function MerchantPanel({ onClose }) {
         if (!currentUser) return;
         const loadMerchant = async () => {
             try {
-                const data = await fetchMerchantByEmail(currentUser.email);
+                const data = await getMerchantByOwner(currentUser.uid);
                 if (data) {
                     setMerchant(data);
                 } else {
@@ -34,10 +39,10 @@ export default function MerchantPanel({ onClose }) {
     }, [currentUser]);
 
     useEffect(() => {
-        if (activeTab === 'ads') {
+        if (activeTab === 'ads' && currentUser) {
             fetchMyAds();
         }
-    }, [activeTab]);
+    }, [activeTab, currentUser]);
 
     const fetchMyAds = async () => {
         setLoading(true);
@@ -62,17 +67,8 @@ export default function MerchantPanel({ onClose }) {
         }
     };
 
-    const getPlanLimit = (plan) => {
-        switch (plan) {
-            case 'basic': return 1;
-            case 'pro': return 5;
-            case 'premium': return 999;
-            default: return 1;
-        }
-    };
-
     const handleCreateAdClick = () => {
-        const limit = getPlanLimit(merchant?.plan);
+        const limit = merchant?.plan === 'premium' ? 999 : merchant?.plan === 'pro' ? 5 : 1;
         if (myAds.length >= limit) {
             setShowUpgradeModal(true);
         } else {
@@ -99,7 +95,7 @@ export default function MerchantPanel({ onClose }) {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setShowUpgradeModal(true)} className="bg-amber-400 text-amber-900 px-4 py-2 rounded-full font-bold text-sm hover:bg-amber-300 transition-colors flex items-center gap-1">
+                        <button onClick={() => setShowUpgradeModal(true)} className="bg-amber-400 text-amber-900 px-4 py-2 rounded-full font-bold text-sm hover:bg-amber-300 transition-colors flex items-center gap-1 shadow-lg shadow-amber-400/20">
                             <TrendingUp size={16} /> Fazer Upgrade
                         </button>
                         <button onClick={onClose} className="bg-white/10 text-white p-2 rounded-full hover:bg-white/20 transition-colors">
@@ -111,141 +107,43 @@ export default function MerchantPanel({ onClose }) {
                 <div className="flex flex-1 overflow-hidden">
                     {/* Sidebar */}
                     <div className="w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col">
-                        <button onClick={() => setActiveTab('dashboard')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 ${activeTab === 'dashboard' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                        <button onClick={() => setActiveTab('dashboard')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'dashboard' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
                             <LayoutDashboard size={18} /> Visão Geral
                         </button>
-                        <button onClick={() => setActiveTab('ads')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 ${activeTab === 'ads' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                        <button onClick={() => setActiveTab('ads')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'ads' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
                             <Tag size={18} /> Meus Anúncios
                         </button>
-                        <button onClick={() => setActiveTab('settings')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 ${activeTab === 'settings' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                        <button onClick={() => setActiveTab('settings')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'settings' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
                             <Settings size={18} /> Configurações
                         </button>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 bg-white dark:bg-slate-900 overflow-y-auto p-6">
-
+                    <div className="flex-1 bg-white dark:bg-slate-900 overflow-y-auto p-8">
                         {activeTab === 'dashboard' && (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600"><Eye size={20} /></div>
-                                            <h3 className="text-indigo-900 dark:text-indigo-100 font-bold">Visualizações</h3>
-                                        </div>
-                                        <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{merchant?.views || 0}</p>
-                                    </div>
-                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600"><Tag size={20} /></div>
-                                            <h3 className="text-emerald-900 dark:text-emerald-100 font-bold">Anúncios Ativos</h3>
-                                        </div>
-                                        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{myAds.length} / {getPlanLimit(merchant?.plan)}</p>
-                                    </div>
-                                    <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-2xl border border-amber-100 dark:border-amber-500/20">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 bg-amber-100 rounded-lg text-amber-600"><MousePointer size={20} /></div>
-                                            <h3 className="text-amber-900 dark:text-amber-100 font-bold">Cliques no Zap</h3>
-                                        </div>
-                                        {merchant?.plan === 'basic' ? (
-                                            <div className="flex flex-col items-start">
-                                                <div className="flex items-center gap-2 text-slate-400 font-bold text-lg">
-                                                    <Lock size={16} /> Bloqueado
-                                                </div>
-                                                <button onClick={() => setShowUpgradeModal(true)} className="text-xs text-indigo-600 font-bold hover:underline">Fazer Upgrade</button>
-                                            </div>
-                                        ) : (
-                                            <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">{merchant?.clicks || 0}</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Advanced Stats (Locked for Basic) */}
-                                <div className="border border-slate-200 rounded-2xl p-6 relative overflow-hidden">
-                                    <h3 className="font-bold text-lg mb-4">Desempenho Mensal</h3>
-                                    {merchant?.plan === 'basic' && (
-                                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-                                            <Lock className="text-slate-400 mb-2" size={32} />
-                                            <h4 className="font-bold text-slate-800">Recurso Premium</h4>
-                                            <p className="text-slate-500 text-sm mb-4">Veja gráficos detalhados de acesso.</p>
-                                            <button onClick={() => setShowUpgradeModal(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-indigo-700">
-                                                Liberar Estatísticas
-                                            </button>
-                                        </div>
-                                    )}
-                                    <div className="h-48 bg-slate-50 rounded-xl flex items-end justify-around p-4 items-end gap-2">
-                                        {[40, 60, 30, 80, 50, 90, 70].map((h, i) => (
-                                            <div key={i} className="w-full bg-indigo-200 rounded-t-lg" style={{ height: `${h}%` }}></div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+                            <DashboardTab 
+                                merchant={merchant} 
+                                myAds={myAds} 
+                                onUpgrade={() => setShowUpgradeModal(true)} 
+                            />
                         )}
 
                         {activeTab === 'ads' && (
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Gerenciar Anúncios</h3>
-                                    <button
-                                        onClick={handleCreateAdClick}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-colors"
-                                    >
-                                        <PlusCircle size={18} /> Novo Anúncio
-                                    </button>
-                                </div>
-
-                                {loading ? (
-                                    <p className="text-center text-slate-400">Carregando...</p>
-                                ) : myAds.length === 0 ? (
-                                    <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                                        <p className="text-slate-500">Você ainda não tem anúncios.</p>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-4">
-                                        {myAds.map(ad => (
-                                            <div key={ad.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center shadow-sm">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden">
-                                                        {ad.image && <img src={ad.image} alt={ad.title} className="w-full h-full object-cover" />}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-slate-900 dark:text-white">{ad.title}</h4>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ad.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                                                                ad.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-700'
-                                                                }`}>
-                                                                {ad.status === 'approved' ? 'Ativo' : ad.status === 'pending' ? 'Em Análise' : 'Inativo'}
-                                                            </span>
-                                                            <span className="text-xs text-slate-500">{ad.price}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <button className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                                                        <Edit size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteAd(ad.id)}
-                                                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                            <AdsTab 
+                                myAds={myAds} 
+                                loading={loading} 
+                                onCreateClick={handleCreateAdClick} 
+                                onDeleteClick={handleDeleteAd} 
+                            />
                         )}
 
                         {activeTab === 'settings' && (
-                            <div className="text-center py-20">
-                                <Settings size={48} className="mx-auto text-slate-300 mb-4" />
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Configurações da Loja</h3>
-                                <p className="text-slate-500">Em breve você poderá editar horário de funcionamento, logo e contatos.</p>
-                            </div>
+                            <SettingsTab 
+                                merchant={merchant} 
+                                currentUser={currentUser} 
+                                onUpdate={(updated) => setMerchant(updated)} 
+                            />
                         )}
-
                     </div>
                 </div>
             </div>
