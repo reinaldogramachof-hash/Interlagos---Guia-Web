@@ -11,48 +11,74 @@ const useAuthStore = create((set, get) => ({
   loading: true,
 
   init: () => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      set({ session });
-      if (session) get()._fetchProfile(session.user.id);
-      else set({ loading: false });
-    });
+    // Safety: se após 10s loading ainda for true (ex: sem rede), força false
+    const safetyTimer = setTimeout(() => {
+      if (get().loading) set({ loading: false });
+    }, 10000);
+
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        clearTimeout(safetyTimer);
+        set({ session });
+        if (session) get()._fetchProfile(session.user.id);
+        else set({ loading: false });
+      })
+      .catch(() => {
+        clearTimeout(safetyTimer);
+        set({ loading: false });
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      set({ session });
-      if (session) await get()._fetchProfile(session.user.id);
-      else set({ profile: null, loading: false });
+      try {
+        set({ session });
+        if (session) await get()._fetchProfile(session.user.id);
+        else set({ profile: null, loading: false });
+      } catch (err) {
+        console.error('[authStore] onAuthStateChange error:', err);
+        set({ loading: false });
+      }
     });
 
     return () => subscription.unsubscribe();
   },
 
   _fetchProfile: async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    const queryWithTimeout = (query, ms = 6000) =>
+      Promise.race([
+        query,
+        new Promise((_, rej) => setTimeout(() => rej(new Error('query_timeout')), ms)),
+      ]);
 
-    if (!data) {
-      // Perfil não existe — criar automaticamente
-      const user = get().session?.user;
-      if (user) {
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            display_name: user.user_metadata?.full_name || user.email?.split('@')[0],
-            photo_url: user.user_metadata?.avatar_url || null,
-            role: 'resident',
-          })
-          .select()
-          .single();
-        set({ profile: newProfile, loading: false });
+    try {
+      const { data } = await queryWithTimeout(
+        supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+      );
+
+      if (!data) {
+        const user = get().session?.user;
+        if (user) {
+          const { data: newProfile } = await queryWithTimeout(
+            supabase
+              .from('profiles')
+              .upsert({
+                id: user.id,
+                display_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+                photo_url: user.user_metadata?.avatar_url || null,
+                role: 'resident',
+              })
+              .select()
+              .single()
+          );
+          set({ profile: newProfile || null, loading: false });
+        } else {
+          set({ loading: false });
+        }
       } else {
-        set({ loading: false });
+        set({ profile: data, loading: false });
       }
-    } else {
-      set({ profile: data, loading: false });
+    } catch (err) {
+      console.error('[authStore] _fetchProfile error:', err.message);
+      set({ loading: false });
     }
   },
 

@@ -9,6 +9,7 @@ export default defineConfig({
     VitePWA({
       disabled: process.env.VITE_DISABLE_PWA === 'true',
       registerType: 'autoUpdate',
+      devOptions: { enabled: false },
       includeAssets: ['capa.jpg', 'logoIC.png'],
       manifest: {
         name: 'TemNoBairro',

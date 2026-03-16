@@ -177,6 +177,7 @@ export default function NewsFeed() {
     const [selectedCategory, setSelectedCategory] = useState('Todos');
 
     useEffect(() => {
+        let cancelled = false;
         const fetchNews = async () => {
             try {
                 const { data, error } = await supabase
@@ -184,15 +185,17 @@ export default function NewsFeed() {
                     .select('*')
                     .order('created_at', { ascending: false })
                     .limit(20);
+                if (cancelled) return;
                 if (error) throw error;
                 setNews(data?.length ? data : mockNews);
             } catch {
-                setNews(mockNews);
+                if (!cancelled) setNews(mockNews);
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         };
         fetchNews();
+        return () => { cancelled = true; };
     }, []);
 
     const filteredNews = selectedCategory === 'Todos'

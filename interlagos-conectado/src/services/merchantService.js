@@ -49,9 +49,9 @@ export const getMerchantByOwner = async (ownerId) => {
 };
 
 export const incrementMerchantView = async (merchantId) => {
-  await supabase.rpc('increment_merchant_view', { merchant_id: merchantId }).catch(console.error);
+  await supabase.rpc('increment_merchant_view', { p_merchant_id: merchantId }).catch(console.error);
 };
 
 export const incrementMerchantContactClick = async (merchantId) => {
-  await supabase.rpc('increment_merchant_contact', { merchant_id: merchantId }).catch(console.error);
+  await supabase.rpc('increment_merchant_contact', { p_merchant_id: merchantId }).catch(console.error);
 };
