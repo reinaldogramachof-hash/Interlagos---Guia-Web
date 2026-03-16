@@ -15,15 +15,15 @@ import {
     ChevronRight,
     MapPin,
     CreditCard,
+    User,
 } from 'lucide-react';
 
 // ─── Seções do menu ───────────────────────────────────────────────────────────
 const COMMUNITY_ITEMS = [
-    { id: 'news', label: 'Jornal do Bairro', icon: Newspaper, desc: 'Notícias e novidades' },
     { id: 'utility', label: 'Utilidade Pública', icon: Zap, desc: 'Serviços e emergências' },
     { id: 'history', label: 'História do Bairro', icon: History, desc: 'Conheça Interlagos' },
-    { id: 'donations', label: 'Doações e Campanhas', icon: Heart, desc: 'Solidariedade em ação' },
     { id: 'suggestions', label: 'Sugestões', icon: Lightbulb, desc: 'Dê sua opinião' },
+    { id: 'profile', label: 'Meu Perfil', icon: User, desc: 'Informações e configurações', requireAuth: false },
 ];
 
 const MERCHANT_ITEMS = [
@@ -93,7 +93,10 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
 
                     {/* Info do usuário */}
                     {currentUser ? (
-                        <div className="flex items-center gap-3">
+                        <div 
+                            className="flex items-center gap-3 cursor-pointer hover:bg-white/10 p-1 rounded-xl transition-colors"
+                            onClick={() => handleNav('profile')}
+                        >
                             <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-lg shrink-0">
                                 {currentUser.email?.[0]?.toUpperCase() ?? '?'}
                             </div>

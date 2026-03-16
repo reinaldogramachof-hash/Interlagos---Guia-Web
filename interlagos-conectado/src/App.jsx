@@ -28,14 +28,14 @@ import ServiceDetailModal from './ServiceDetailModal';
 import CampaignDetailModal from './CampaignDetailModal';
 import LoginModal from './LoginModal';
 
-import { Home, Store, Tag, User, PlusCircle, Menu } from 'lucide-react';
+import { Home, Store, Tag, User, PlusCircle, Menu, Newspaper, Heart } from 'lucide-react';
 
 // ─── Bottom Navigation ────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { id: 'news', label: 'Home', icon: Home },
-  { id: 'merchants', label: 'Comércios', icon: Store },
+  { id: 'merchants', label: 'Home', icon: Home },
+  { id: 'news', label: 'Jornal', icon: Newspaper },
   { id: 'ads', label: 'Classificados', icon: Tag },
-  { id: 'profile', label: 'Perfil', icon: User },
+  { id: 'donations', label: 'Campanhas', icon: Heart },
 ];
 
 function BottomNav({ currentView, onNavigate, onCreateAd }) {
@@ -274,7 +274,7 @@ function ProfileView({ onLoginOpen, onNavigate }) {
 function AppContent() {
   const { currentUser } = useAuth();
 
-  const [currentView, setCurrentView] = useState('news');
+  const [currentView, setCurrentView] = useState('merchants');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [merchants, setMerchants] = useState([]);
@@ -397,7 +397,7 @@ function AppContent() {
         {/* Bottom Navigation centralizado no shell */}
         {showBottomNav && (
           <BottomNav
-            currentView={currentView === 'merchants' ? 'merchants' : currentView}
+            currentView={currentView}
             onNavigate={setCurrentView}
             onCreateAd={() => requireAuth(() => setShowCreateAd(true))}
           />

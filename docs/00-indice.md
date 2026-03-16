@@ -17,6 +17,7 @@
 | 07 | [User Stories](07-user-stories.md) | 80 stories por módulo com critérios de aceite testáveis (US-001 a US-080) |
 | 08 | [Schema SQL](08-schema-sql.md) | 15 tabelas, RLS completo, RPCs, storage buckets e cron jobs — pronto para execução |
 | 09 | [Migração SQL (Delta)](09-migracao-sql.md) | Script incremental: colunas faltantes, RPCs, RLS e trigger de perfil — sem apagar dados |
+| 10 | [Guia de Execução](10-guia-de-execucao.md) | Mapa vivo do projeto: o que foi planejado, executado e está previsto — atualizado a cada sessão |
 
 ---
 
