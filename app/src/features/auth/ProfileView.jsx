@@ -1,5 +1,10 @@
 import { useAuth } from '../../context/AuthContext';
 import useMerchantPlan from '../../hooks/useMerchantPlan';
+import { uploadImage } from '../../services/storageService';
+import { updateUserProfile } from '../../services/authService';
+import { useToast } from '../../components/Toast';
+import ImageUpload from '../../components/ImageUpload';
+import useAuthStore from '../../stores/authStore';
 
 function QuickAction({ emoji, label, onClick }) {
   return (
@@ -17,6 +22,21 @@ function QuickAction({ emoji, label, onClick }) {
 export default function ProfileView({ onLoginOpen, onNavigate }) {
   const { currentUser, isMerchant, isAdmin, isMaster, logout } = useAuth();
   const { planId, plan } = useMerchantPlan();
+  const { showToast } = useToast();
+
+  const handleAvatarChange = async (file) => {
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `avatars/${currentUser.uid}/${Date.now()}.${ext}`;
+      const url = await uploadImage('avatars', file, path);
+      await updateUserProfile(currentUser.uid, { photo_url: url });
+      showToast('Foto atualizada!', 'success');
+      await useAuthStore.getState().refreshProfile();
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao atualizar foto.', 'error');
+    }
+  };
 
   // ── Visitante (sem login) ──────────────────────────────────────────────────
   if (!currentUser) {
@@ -73,8 +93,12 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
 
       <div className="px-4 -mt-12 flex flex-col items-center gap-4">
         {/* Avatar */}
-        <div className="w-20 h-20 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-2xl font-bold text-indigo-600">
-          {initials}
+        <div className="relative">
+          <ImageUpload
+            preview={currentUser.photoURL}
+            onFileSelect={handleAvatarChange}
+            label=""
+          />
         </div>
 
         {/* Nome + Role */}

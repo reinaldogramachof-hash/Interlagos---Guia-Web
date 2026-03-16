@@ -41,6 +41,13 @@ import { supabase } from '../../lib/supabaseClient'; // dentro de features/
 - Sem `console.log` de debug em commits
 - LCP target: < 2.5s em 4G lento
 
+## Regras de Segurança e Ambiente
+
+- **NUNCA ler ou usar `.env.local`** — variáveis de ambiente são exclusivas do processo Vite em runtime. Nunca ler o arquivo diretamente, nunca usar as chaves em scripts Node.js de terminal.
+- **NUNCA usar a service role key** (`sb_secret_...`) em nenhum script, mesmo que local. Essa chave bypassa todas as RLS policies.
+- **Para criar usuários de teste:** usar o Supabase Dashboard (Authentication → Users → Invite) ou pedir ao usuário. Nunca via script de terminal.
+- **Para verificar dados do banco em debug:** solicitar ao usuário que verifique no Supabase Dashboard diretamente.
+
 ## Anti-Padrões Proibidos
 
 ```jsx

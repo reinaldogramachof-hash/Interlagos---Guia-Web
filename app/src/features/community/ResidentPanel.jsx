@@ -52,8 +52,8 @@ export default function ResidentPanel({ onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-white dark:bg-slate-900 w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
+        <div className="flex-1 animate-in fade-in">
+            <div className="bg-white dark:bg-slate-900 w-full min-h-[calc(100vh-160px)] flex flex-col overflow-hidden">
 
                 {/* Header */}
                 <div className="bg-emerald-600 p-6 flex justify-between items-center shrink-0">

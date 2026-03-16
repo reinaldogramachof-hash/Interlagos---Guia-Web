@@ -104,6 +104,11 @@ const useAuthStore = create((set, get) => ({
     return data;
   },
 
+  refreshProfile: () => {
+    const userId = get().session?.user?.id;
+    if (userId) get()._fetchProfile(userId);
+  },
+
   logout: async () => {
     await supabase.auth.signOut();
     set({ session: null, profile: null });

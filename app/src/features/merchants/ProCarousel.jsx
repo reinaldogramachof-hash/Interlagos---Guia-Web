@@ -7,9 +7,8 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
 
   const infinite = [
     ...merchants, ...merchants, ...merchants, ...merchants,
-    ...merchants, ...merchants, ...merchants, ...merchants,
     ...merchants, ...merchants,
-  ];
+  ].slice(0, 30);
 
   useEffect(() => {
     let animId;
@@ -39,7 +38,7 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
   if (merchants.length === 0) return null;
 
   return (
-    <section className="mb-12">
+    <section className="mb-6 bg-slate-900 rounded-2xl mx-3 p-5">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <span className="w-1 h-6 bg-indigo-500 rounded-full" />
@@ -83,6 +82,7 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
                   src={merchant.image_url || merchant.image || '/capa.jpg'}
                   alt={merchant.name}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 translate-y-full group-hover/pro:translate-y-0 transition-transform duration-500 ease-out flex justify-center">
                   <span className="text-white text-xs font-bold flex items-center gap-1">Ver Perfil <ChevronRight size={14} /></span>

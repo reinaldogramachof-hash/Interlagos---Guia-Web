@@ -39,7 +39,7 @@ export default function PremiumCarousel({ merchants, onMerchantClick }) {
   if (merchants.length === 0) return null;
 
   return (
-    <section className="mb-12">
+    <section className="mb-6 bg-slate-900 rounded-2xl mx-3 p-5">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <span className="w-1 h-6 bg-amber-500 rounded-full" />
@@ -87,6 +87,7 @@ export default function PremiumCarousel({ merchants, onMerchantClick }) {
                     src={merchant.image_url || merchant.image || '/capa.jpg'}
                     alt={merchant.name}
                     className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                    loading="lazy"
                   />
                 </div>
                 <div className="flex-1 flex flex-col justify-center">

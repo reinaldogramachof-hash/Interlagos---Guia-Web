@@ -39,15 +39,13 @@ export default function AdminPanel({ onClose }) {
 
   if (!currentUser || (!isMaster && !isAdmin)) {
     return (
-      <div className="fixed inset-0 z-[60] bg-gray-900/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl max-w-md text-center shadow-2xl">
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield size={32} />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Acesso Negado</h2>
-          <p className="text-gray-500 mb-6">Você não tem permissão de Administrador.</p>
-          <button onClick={onClose} className="bg-gray-900 text-white px-6 py-2 rounded-xl font-bold hover:bg-gray-800 transition-colors">Voltar</button>
+      <div className="flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+          <Shield size={32} />
         </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Acesso Negado</h2>
+        <p className="text-gray-500 mb-6">Você não tem permissão de Administrador.</p>
+        <button onClick={onClose} className="bg-gray-900 text-white px-6 py-2 rounded-xl font-bold hover:bg-gray-800 transition-colors">Voltar</button>
       </div>
     );
   }
@@ -88,8 +86,8 @@ export default function AdminPanel({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-white w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="flex-1 animate-in fade-in">
+      <div className="bg-white w-full min-h-[calc(100vh-160px)] flex flex-col overflow-hidden">
 
         {/* Header */}
         <div className="bg-slate-900 text-white p-6 flex justify-between items-center shrink-0">

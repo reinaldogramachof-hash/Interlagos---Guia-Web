@@ -82,16 +82,7 @@ function AppContent() {
     return <CreateAdWizard onClose={() => setShowCreateAd(false)} user={currentUser} isOpen />;
   }
 
-  // Views que não usam o app shell padrão (full-screen)
-  const fullScreenViews = ['admin', 'merchant-panel', 'resident-panel'];
-  if (fullScreenViews.includes(currentView)) {
-    const viewMap = {
-      'admin': <AdminPanel onClose={() => setCurrentView('news')} />,
-      'merchant-panel': <MerchantPanel onClose={() => setCurrentView('profile')} />,
-      'resident-panel': <ResidentPanel />,
-    };
-    return viewMap[currentView];
-  }
+  // Views que não usam o app shell padrão (full-screen) - Removido para unificar navegação
 
   const renderView = () => {
     const view = (() => {
@@ -106,6 +97,9 @@ function AppContent() {
         case 'plans': return <PlansView />;
         case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />;
         case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
+        case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
+        case 'merchant-panel': return <MerchantPanel onClose={() => setCurrentView('profile')} />;
+        case 'resident-panel': return <ResidentPanel />;
         case 'merchants':
         default:
           return (
@@ -119,10 +113,10 @@ function AppContent() {
           );
       }
     })();
-    return <div className="pb-24">{view}</div>;
+    return <div>{view}</div>;
   };
 
-  const showBottomNav = NAV_ITEMS.some(n => n.id === currentView) || currentView === 'merchants';
+  const showBottomNav = true;
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
