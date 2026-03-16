@@ -43,7 +43,7 @@
 ### Estrutura de Pastas Alvo
 
 ```
-interlagos-conectado/src/
+app/src/
 ├── app/
 │   ├── App.jsx               # Shell: layout + routing apenas
 │   └── Router.jsx            # Switch de views (extraído de App.jsx)

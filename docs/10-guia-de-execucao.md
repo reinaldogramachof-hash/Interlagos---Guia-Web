@@ -1,10 +1,10 @@
 # Tem No Bairro — Guia de Execução do Projeto
 
-> **Versão:** 1.0
+> **Versão:** 1.2
 > **Data de criação:** Março/2026
 > **Última atualização:** 16/03/2026
 > **Lançamento previsto:** Maio/2026
-> **Status geral:** 🟡 Em andamento — Fase 0 concluída, Fase 1 iniciada
+> **Status geral:** 🟡 Em andamento — Fase 0 concluída, Fase 1 em andamento
 
 ---
 
@@ -145,6 +145,28 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 | `vite.config.js` | Adicionado `devOptions: { enabled: false }` no VitePWA (desabilita SW em dev) |
 
 **Resultado:** Console limpo. Sem erros `removeChild`. Sem warnings de lock.
+
+---
+
+### Sessão 4 — Reestruturação da Navegação (UX)
+**Data:** 16/03/2026
+
+**Contexto:** Após leitura da pesquisa de mercado (Levantamento de Comércios), a equipe identificou que os módulos mais relevantes para o bairro (Comércios, Jornal, Classificados, Campanhas Sociais) precisavam estar acessíveis na navegação principal para maximizar a descoberta por novos usuários.
+
+**Executado:**
+
+| Elemento | Antes | Depois |
+|---|---|---|
+| Bottom Nav — Aba 1 | Home genérica | **Comércios** (listagem como tela principal) |
+| Bottom Nav — Aba 2 | — | **Jornal** (feed de notícias) |
+| Bottom Nav — Aba 3 | Classificados | **Classificados** (mantida) |
+| Bottom Nav — Aba 4 | — | **Campanhas** (Doações e Ação Social) |
+| Sidebar — Perfil | Em posição avulsa | **Após "Sugestões"** (seção Comunidade) |
+| Sidebar — Jornal | Presente (duplicado) | **Removido** (já na bottom nav) |
+| Sidebar — Doações | Presente (duplicado) | **Removido** (já na bottom nav) |
+| Header do Sidebar | Clicável | Mantido — leva ao perfil |
+
+**Resultado:** Navegação sem duplicatas. Os 4 módulos de maior impacto acessíveis com 1 toque. Perfil migrado para o sidebar sem perder acesso fácil.
 
 ---
 
@@ -347,7 +369,79 @@ PWA:      12 entradas pré-cacheadas ✅
 
 ---
 
-## 7. DECISÕES TÉCNICAS ABERTAS
+## 7. INTELIGÊNCIA DE MERCADO — PARQUE INTERLAGOS
+
+> Fonte: *"Radiografia Econômica e Comercial de São José dos Campos: O Ecossistema Empreendedor e a Dinâmica do Bairro Parque Interlagos"* — Março/2026
+> Arquivo: `Levantamento de Comércios em Parque Interlagos.pdf` (raiz do projeto)
+
+### Contexto Macroeconômico de SJC
+
+| Indicador | Dado |
+|---|---|
+| População | 737.310 habitantes |
+| Renda per capita | R$ 60.194,93 (acima da média nacional) |
+| IDH | 0,807 — desenvolvimento muito alto |
+| Posição continental | Top 6 das melhores cidades das Américas (custo-benefício para investimentos) |
+| Vocação econômica | Aeroespacial + inovação → transição para serviços e smart city |
+
+### Perfil Comercial do Parque Interlagos
+
+O bairro opera como uma **"área funcional" autossuficiente** — um shopping a céu aberto erguido pelo capital privado. O modelo predominante é o **"porta de rua"**: imóveis residenciais convertidos em pontos comerciais.
+
+**Três pilares do comércio local:**
+1. **Alimentação e lazer noturno** — bares, restaurantes e músicos. Âncora principal de sociabilidade e fluxo de caixa
+2. **Serviços automotivos** — oficinas, funilarias, autopeças. Espinha dorsal da economia masculina local
+3. **Beleza e estética** — salões, barbearias, esmalterias. Principal porta de entrada do empreendedorismo feminino via MEI
+
+### Densidade de MEIs na Região
+
+| Dado | Número |
+|---|---|
+| MEIs ativos no Vale do Paraíba (2025) | **247.226** |
+| Crescimento ano a ano | **+1,84%** (4.463 novos registros) |
+| SJC | Maior volume absoluto da região |
+
+Mudança cultural relevante: **o MEI deixou de ser "saída para o desemprego" e virou escolha consciente de carreira.** Empreendedores buscam formalização por segurança jurídica e acesso a crédito.
+
+### Matriz Setorial — Os Segmentos Mais Quentes (SJC)
+
+| Setor | Empresas | Prioridade para captação |
+|---|---|---|
+| Saúde | 2.859 | Alta |
+| Alimentação | 2.327 | **Crítica** — âncora do bairro |
+| Veículos/Auto | 2.105 | Alta |
+| Casa e Decoração | 1.668 | Média |
+| Beleza e Estética | 1.266 | **Crítica** — forte presença local |
+| Educação | 1.256 | Média |
+| Vestuário | 977 | Média |
+| Eventos e Lazer | 851 + 516 | Alta — noturno do bairro |
+| Pets | 375 | Média |
+
+### Calendário Comercial — Sazonalidade
+
+O pequeno lojista do bairro organiza seu planejamento financeiro anual em torno destas datas:
+
+| Data | Impacto | Setor mais beneficiado |
+|---|---|---|
+| **Dia das Mães** | ~80% dos consumidores planejam comprar | Vestuário, casa, beleza |
+| **Páscoa** | +14 a 15% nas vendas de alimentos | Alimentação, confeitaria |
+| **Dia dos Namorados** | Pico em gastronomia e lazer | Restaurantes, bares |
+| **Natal** | Principal ciclo anual | Todos os setores |
+| **Dia das Crianças / Pais** | Ciclos secundários relevantes | Vestuário, brinquedos, serviços |
+
+### Decisões de Produto Derivadas desta Pesquisa
+
+| Decisão | Justificativa | Status |
+|---|---|---|
+| **Bottom Nav com Comércios como tela principal** | Comércios são o core product e o módulo de maior valor para o bairro | ✅ Implementado (Sessão 4) |
+| **Campanhas Sociais na Bottom Nav** | Forte presença comunitária e senso de solidariedade no perfil socioeconômico do bairro | ✅ Implementado (Sessão 4) |
+| **Categorias prioritárias para captação de comerciantes** | Alimentação, Beleza e Auto dominam o bairro — focar o esforço comercial nestas categorias no lançamento | ⏳ Planejar com equipe |
+| **Módulo "Datas Especiais" no AdminPanel** | O calendário sazonal é o principal motor de marketing do MEI. A equipe pré-agenda campanhas temáticas (Dia das Mães, Páscoa etc.) notificando comerciantes com antecedência | ⏳ A implementar (Fase 4/5) |
+| **Conteúdo inicial do Jornal focado em lazer noturno** | Bares, eventos e música local são a âncora de engajamento orgânico — primeiras notícias devem cobrir este universo | ⏳ Estratégia editorial |
+
+---
+
+## 8. DECISÕES TÉCNICAS ABERTAS
 
 | Decisão | Opções | Prazo |
 |---|---|---|
