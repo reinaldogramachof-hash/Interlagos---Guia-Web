@@ -7,7 +7,15 @@
       "Bash(node -e \":*)",
       "Bash(python3 -c \"import os; os.rename\\(r''C:\\\\Users\\\\reina\\\\OneDrive\\\\Desktop\\\\Projetos\\\\Guia Digital Interlagos\\\\interlagos-conectado'', r''C:\\\\Users\\\\reina\\\\OneDrive\\\\Desktop\\\\Projetos\\\\Guia Digital Interlagos\\\\app''\\); print\\(''OK''\\)\")",
       "Bash(grep -n \"from ''\\\\.\\\\/\" \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/app/src/features/admin/Seeder.jsx\")",
-      "Bash(git -C \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos\" log --oneline -5)"
+      "Bash(git -C \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos\" log --oneline -5)",
+      "Bash(mkdir -p \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/.claude/skills/pr-description\")",
+      "Bash(mkdir -p \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/.claude/skills/new-service\")",
+      "Bash(mkdir -p \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/.claude/skills/new-feature\")",
+      "Bash(mkdir -p \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/.claude/skills/audit-component\")",
+      "Bash(mkdir -p \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/.claude/skills/add-table\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\reina\\OneDrive\\Desktop\\Projetos\\Guia Digital Interlagos\\.claude"
     ]
   }
 }
