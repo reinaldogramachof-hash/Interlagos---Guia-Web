@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Send, MessageSquare, ThumbsUp, AlertCircle, Lightbulb, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
-import { supabase } from '../../lib/supabaseClient';
+import { createSuggestion } from '../../services/communityService';
 
 export default function SuggestionsView() {
     const { currentUser } = useAuth();
@@ -21,13 +21,11 @@ export default function SuggestionsView() {
         setIsSubmitting(true);
         const f = e.target;
         try {
-            await supabase.from('suggestions').insert({
-                type: f.type.value,
-                message: f.message.value,
-                user_id: currentUser.uid,
-                user_name: currentUser.displayName,
-                user_email: currentUser.email,
-                status: 'unread',
+            await createSuggestion({
+                title: f.type.value,
+                description: f.message.value,
+                author_id: currentUser.uid,
+                status: 'pending',
             });
             setSubmitted(true);
         } catch (error) {

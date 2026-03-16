@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { adminGetMerchants, createMerchant, updateMerchant } from '../../../services/merchantService';
 import { Trophy, Search, Plus, Save, X } from 'lucide-react';
 
 const INITIAL_FORM = { name: '', category: 'Alimentação', description: '', phone: '', whatsapp: '', address: '', plan: 'free', socialLinks: { instagram: '', facebook: '', site: '' }, gallery: [] };
@@ -19,8 +19,8 @@ export default function MerchantsTab() {
   const [form, setForm] = useState(INITIAL_FORM);
 
   const fetchMerchants = async () => {
-    const { data } = await supabase.from('merchants').select('*').order('created_at', { ascending: false });
-    setMerchants(data || []);
+    const data = await adminGetMerchants();
+    setMerchants(data);
   };
 
   useEffect(() => { fetchMerchants(); }, []);
@@ -34,9 +34,9 @@ export default function MerchantsTab() {
       is_active: true,
     };
     if (isCreating) {
-      await supabase.from('merchants').insert(payload);
+      await createMerchant(payload);
     } else {
-      await supabase.from('merchants').update(payload).eq('id', editingId);
+      await updateMerchant(editingId, payload);
     }
     setIsCreating(false); setEditingId(null); setForm(INITIAL_FORM);
     alert('Comércio salvo!'); fetchMerchants();

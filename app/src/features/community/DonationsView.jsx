@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, HandHeart, Gift, ChevronRight, MessageCircle, PlusCircle, Filter, Calendar, MapPin, Users, ArrowRight, X, AlertTriangle } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
+import { fetchCampaigns, createCampaign } from '../../services/communityService';
 import { useAuth } from '../../context/AuthContext';
 import CampaignDetailModal from '../merchants/CampaignDetailModal';
 import LoginModal from '../auth/LoginModal';
@@ -25,26 +25,19 @@ export default function DonationsView() {
 
     // Carregar itens APROVADOS com realtime
     useEffect(() => {
-        setLoading(true);
-
-        const fetchItems = async () => {
-            const { data, error } = await supabase
-                .from('campaigns')
-                .select('*')
-                .eq('status', 'approved')
-                .order('created_at', { ascending: false });
-            if (error) console.error("Erro ao carregar itens:", error);
-            setItems(data || []);
-            setLoading(false);
+        let cancelled = false;
+        const loadItems = async () => {
+            try {
+                const data = await fetchCampaigns();
+                if (!cancelled) setItems(data);
+            } catch (error) {
+                console.error("Erro ao carregar itens:", error);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
         };
 
-        fetchItems();
-
-        const channel = supabase.channel('campaigns-realtime')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'campaigns' }, () => fetchItems())
-            .subscribe();
-
-        return () => supabase.removeChannel(channel);
+        loadItems();
     }, []);
 
     const filteredItems = selectedType === 'all'
@@ -208,7 +201,7 @@ export default function DonationsView() {
                             e.preventDefault();
                             const f = e.target;
                             try {
-                                await supabase.from('campaigns').insert({
+                                await createCampaign({
                                     title: f.title.value,
                                     description: f.description.value,
                                     whatsapp: f.whatsapp.value,
@@ -216,7 +209,6 @@ export default function DonationsView() {
                                     author_id: currentUser.uid,
                                     author_name: currentUser.displayName,
                                     status: 'pending',
-                                    progress: 0,
                                 });
                                 alert('Sua ação foi enviada para análise da moderação!');
                                 setShowCreateModal(false);

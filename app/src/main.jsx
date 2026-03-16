@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { ToastProvider } from './components/Toast.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import useAuthStore from './stores/authStore.js'
 
@@ -9,6 +10,8 @@ useAuthStore.getState().init();
 
 createRoot(document.getElementById('root')).render(
   <ErrorBoundary>
-    <App />
+    <ToastProvider>
+      <App />
+    </ToastProvider>
   </ErrorBoundary>,
 )

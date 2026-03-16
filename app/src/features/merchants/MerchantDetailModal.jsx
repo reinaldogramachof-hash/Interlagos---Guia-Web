@@ -4,10 +4,12 @@ import { incrementMerchantView, incrementMerchantContactClick } from '../../serv
 import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService';
 import { useAuth } from '../../context/AuthContext';
 import useAuthStore from '../../stores/authStore';
+import { useToast } from '../../components/Toast';
 
 export default function MerchantDetailModal({ merchant, onClose, onLoginRequired }) {
     const { currentUser } = useAuth();
     const [isFavorite, setIsFavorite] = useState(false);
+    const toast = useToast();
 
     useEffect(() => {
         if (merchant?.id) incrementMerchantView(merchant.id);
@@ -45,6 +47,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
             category: merchant.category,
         });
         setIsFavorite(newState);
+        toast(newState ? 'Adicionado aos favoritos!' : 'Removido dos favoritos', newState ? 'success' : 'info');
     };
 
     if (!merchant) return null;
@@ -54,9 +57,9 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
             <div className="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
 
                 {/* Header Image */}
-                <div className="h-64 bg-gray-200 relative shrink-0">
+                <div className="h-48 sm:h-64 bg-gray-200 relative shrink-0">
                     <img
-                        src={merchant.image || `https://source.unsplash.com/800x600/?${merchant.category}`}
+                        src={merchant.image_url || merchant.image || '/capa.jpg'}
                         alt={merchant.name}
                         className="w-full h-full object-cover"
                     />
@@ -72,7 +75,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                 <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full mb-3 shadow-lg">
                                     {merchant.category}
                                 </span>
-                                <h2 className="text-4xl font-bold text-white mb-1 shadow-sm">{merchant.name}</h2>
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{merchant.name}</h2>
                                 <div className="flex items-center gap-2 text-gray-200 text-sm">
                                     <MapPin size={14} className="text-indigo-400" />
                                     <span>{merchant.address || 'Parque Interlagos, São José dos Campos - SP'}</span>

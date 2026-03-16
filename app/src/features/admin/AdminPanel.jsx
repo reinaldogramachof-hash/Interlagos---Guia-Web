@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { escalateItem } from '../../services/adminService';
 import { useAuth } from '../../context/AuthContext';
 import { Shield, Database, CheckCircle, Trophy, Bell, Heart, User, FileText, ClipboardList, X, Lock } from 'lucide-react';
 
@@ -55,7 +55,7 @@ export default function AdminPanel({ onClose }) {
   const handleEscalate = async () => {
     if (!escalationReason.trim()) return alert('Por favor, informe o motivo.');
     try {
-      await supabase.from('tickets').insert({
+      await escalateItem({
         type: 'escalation',
         target_id: escalationTarget.id,
         target_collection: escalationTarget.collection,
@@ -63,8 +63,8 @@ export default function AdminPanel({ onClose }) {
         status: 'open',
         body: escalationReason,
         resolved_by: currentUser.email,
-      });
-      await supabase.from(escalationTarget.collection).update({ status: 'escalated' }).eq('id', escalationTarget.id);
+      }, escalationTarget.collection, escalationTarget.id);
+      
       alert('Item escalado com sucesso para a Torre de Controle!');
       setEscalationTarget(null);
     } catch (error) {

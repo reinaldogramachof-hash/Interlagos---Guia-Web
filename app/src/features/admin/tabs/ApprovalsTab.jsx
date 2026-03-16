@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { fetchPendingItems, approveItem, rejectItem } from '../../../services/adminService';
 import { createNotification } from '../../../services/notificationService';
 import { useAuth } from '../../../context/AuthContext';
 import { Shield, CheckCircle, AlertTriangle, X } from 'lucide-react';
@@ -66,23 +66,20 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
   const [pending, setPending] = useState([]);
 
   const fetchPending = async () => {
-    const [{ data: ads }, { data: campaigns }] = await Promise.all([
-      supabase.from('ads').select('*').eq('status', 'pending'),
-      supabase.from('campaigns').select('*').eq('status', 'pending'),
-    ]);
-    const all = [
-      ...(ads || []).map(a => ({ ...a, _table: 'ads' })),
-      ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns' })),
-    ];
-    setPending(all);
-    onCountChange?.(all.length);
+    try {
+      const all = await fetchPendingItems();
+      setPending(all);
+      onCountChange?.(all.length);
+    } catch (error) {
+      console.error("Error fetching pending:", error);
+    }
   };
 
   useEffect(() => { fetchPending(); }, []);
 
   const handleApprove = async (table, id) => {
     const item = pending.find(i => i.id === id);
-    await supabase.from(table).update({ status: 'approved' }).eq('id', id);
+    await approveItem(table, id);
     if (item?.seller_id || item?.author_id) {
       await createNotification(
         item.seller_id || item.author_id,
@@ -97,7 +94,7 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
   const handleReject = async (table, id) => {
     if (!window.confirm('Rejeitar e excluir este item?')) return;
     const item = pending.find(i => i.id === id);
-    await supabase.from(table).delete().eq('id', id);
+    await rejectItem(table, id);
     if (item?.seller_id || item?.author_id) {
       await createNotification(
         item.seller_id || item.author_id,

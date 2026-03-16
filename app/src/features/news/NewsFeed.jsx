@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Share2, Newspaper, Filter } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
+import { fetchNews, subscribeNews } from '../../services/newsService';
 import NewsDetailModal from './NewsDetailModal';
+import EmptyState from '../../components/EmptyState';
+import { SkeletonNewsCard } from '../../components/SkeletonCard';
 
 // ── Mock de fallback ──────────────────────────────────────────────────────────
 const mockNews = [
@@ -178,24 +180,24 @@ export default function NewsFeed() {
 
     useEffect(() => {
         let cancelled = false;
-        const fetchNews = async () => {
+        const loadNews = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('news')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(20);
+                const data = await fetchNews();
                 if (cancelled) return;
-                if (error) throw error;
                 setNews(data?.length ? data : mockNews);
-            } catch {
+            } catch (err) {
+                console.error("Erro ao buscar notícias:", err);
                 if (!cancelled) setNews(mockNews);
             } finally {
                 if (!cancelled) setLoading(false);
             }
         };
-        fetchNews();
-        return () => { cancelled = true; };
+
+        const unsubscribe = subscribeNews(loadNews);
+        return () => {
+            cancelled = true;
+            unsubscribe();
+        };
     }, []);
 
     const filteredNews = selectedCategory === 'Todos'
@@ -245,28 +247,13 @@ export default function NewsFeed() {
 
             {/* ── Feed ── */}
             {loading ? (
-                <div className="space-y-0">
-                    {[...Array(3)].map((_, i) => (
-                        <div key={i} className="bg-white border-b border-gray-100 p-4">
-                            <div className="flex gap-2 mb-3">
-                                <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
-                                <div className="flex-1 space-y-1.5">
-                                    <div className="h-3 bg-gray-100 rounded animate-pulse w-1/3" />
-                                    <div className="h-2.5 bg-gray-100 rounded animate-pulse w-1/4" />
-                                </div>
-                            </div>
-                            <div className="h-3.5 bg-gray-100 rounded animate-pulse w-3/4 mb-2" />
-                            <div className="h-3 bg-gray-100 rounded animate-pulse mb-2" />
-                            <div className="w-full h-40 bg-gray-100 rounded animate-pulse" />
-                        </div>
-                    ))}
-                </div>
+                <SkeletonNewsCard count={3} />
             ) : filteredNews.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <Newspaper className="text-gray-300 mb-3" size={40} />
-                    <h3 className="text-gray-700 font-bold mb-1">Nenhuma notícia aqui</h3>
-                    <p className="text-gray-400 text-sm">Novas publicações aparecerão aqui em breve.</p>
-                </div>
+                <EmptyState
+                    icon={<Newspaper className="text-gray-300" size={40} />}
+                    title="Nenhuma notícia aqui"
+                    description="Novas publicações aparecerão aqui em breve."
+                />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-x-4 px-1">
                     {filteredNews.map(item => (

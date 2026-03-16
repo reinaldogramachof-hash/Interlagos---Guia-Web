@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Tag, Briefcase, PlusCircle, MessageCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
+import { fetchAds, subscribeAds } from '../../services/adsService';
 import { useAuth } from '../../context/AuthContext';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
+import EmptyState from '../../components/EmptyState';
 import LoginModal from '../auth/LoginModal';
 import { incrementAdClick } from '../../services/statsService';
 
@@ -37,22 +38,23 @@ export default function AdsView({ onRequireAuth }) {
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     useEffect(() => {
-        setLoading(true);
-        const fetchAds = async () => {
-            const { data, error } = await supabase
-                .from('ads')
-                .select('*')
-                .eq('status', 'approved')
-                .order('created_at', { ascending: false });
-            if (error) console.error('Erro ao carregar anúncios:', error);
-            setAds(data || []);
-            setLoading(false);
+        let cancelled = false;
+        const loadAds = async () => {
+            try {
+                const data = await fetchAds();
+                if (!cancelled) setAds(data);
+            } catch (error) {
+                console.error('Erro ao carregar anúncios:', error);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
         };
-        fetchAds();
-        const channel = supabase.channel('ads-realtime')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, fetchAds)
-            .subscribe();
-        return () => supabase.removeChannel(channel);
+
+        const unsubscribe = subscribeAds(loadAds);
+        return () => {
+            cancelled = true;
+            unsubscribe();
+        };
     }, []);
 
     const filteredAds = selectedCategory === 'Todos'
@@ -95,39 +97,35 @@ export default function AdsView({ onRequireAuth }) {
             {loading ? (
                 <div className="grid grid-cols-2 gap-3 px-3 pt-4">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm">
-                            <div className="aspect-square bg-gray-100 animate-pulse" />
-                            <div className="p-2 space-y-1.5">
-                                <div className="h-3 bg-gray-100 rounded animate-pulse w-3/4" />
-                                <div className="h-4 bg-gray-100 rounded animate-pulse w-1/2" />
+                        <div key={i} className="bg-white rounded-card overflow-hidden shadow-card border border-gray-100">
+                            <div className="h-40 bg-gray-100 animate-pulse" />
+                            <div className="p-4 space-y-2">
+                                <div className="h-3 bg-gray-100 rounded-pill animate-pulse w-3/4" />
+                                <div className="h-4 bg-gray-100 rounded-pill animate-pulse w-1/2" />
                             </div>
                         </div>
                     ))}
                 </div>
             ) : filteredAds.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                    <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
-                        <Tag className="text-indigo-400" size={28} />
-                    </div>
-                    <h3 className="text-gray-800 font-bold mb-1">Nenhum anúncio aqui</h3>
-                    <p className="text-gray-500 text-sm mb-4">Seja o primeiro a anunciar nesta categoria!</p>
-                    <button
-                        onClick={handleCreateClick}
-                        className="text-indigo-600 font-bold text-sm hover:underline"
-                    >
-                        Criar anúncio agora
-                    </button>
-                </div>
+                <EmptyState
+                    icon={<Tag className="text-indigo-400" size={28} />}
+                    title="Nenhum anúncio aqui"
+                    description="Seja o primeiro a anunciar nesta categoria!"
+                    action={{
+                        label: "Criar anúncio agora",
+                        onClick: handleCreateClick
+                    }}
+                />
             ) : (
                 <div className="grid grid-cols-2 gap-3 px-3 pt-4">
                     {filteredAds.map((ad) => (
                         <div
                             key={ad.id}
                             onClick={() => setSelectedAd(ad)}
-                            className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow relative group"
+                            className="bg-white rounded-card overflow-hidden shadow-card border border-gray-100 cursor-pointer hover:shadow-md transition-shadow relative group flex flex-col"
                         >
-                            {/* Imagem quadrada */}
-                            <div className="aspect-square overflow-hidden bg-gray-50 relative">
+                            {/* Imagem */}
+                            <div className="h-40 overflow-hidden bg-gray-50 relative shrink-0">
                                 {ad.image_url || ad.image ? (
                                     <img
                                         src={ad.image_url || ad.image}
@@ -137,36 +135,38 @@ export default function AdsView({ onRequireAuth }) {
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                        <Briefcase size={36} />
+                                        <Briefcase size={32} />
                                     </div>
                                 )}
-                                {/* Badge de categoria */}
-                                <span className="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide backdrop-blur-sm">
-                                    {ad.category}
-                                </span>
-                                {/* Tempo */}
-                                <span className="absolute top-1.5 right-1.5 bg-white/80 text-gray-600 text-[9px] font-semibold px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                {/* Tempo (Badge discreta) */}
+                                <span className="absolute top-2 right-2 bg-white/80 text-gray-600 text-micro px-2 py-0.5 rounded-pill backdrop-blur-sm">
                                     {timeAgo(ad.created_at)}
                                 </span>
                             </div>
 
                             {/* Informações do card */}
-                            <div className="p-2.5 pb-3">
-                                {/* Preço — info principal em verde */}
-                                <p className="text-green-600 font-bold text-sm leading-tight mb-0.5">
+                            <div className="p-4 flex-1 flex flex-col">
+                                <div className="mb-2">
+                                    <span className="bg-brand-50 text-brand-600 text-micro px-2 py-0.5 rounded-pill uppercase font-bold tracking-wider">
+                                        {ad.category}
+                                    </span>
+                                </div>
+                                
+                                <h4 className="text-gray-900 text-xs font-semibold mb-1 line-clamp-1">
+                                    {ad.title}
+                                </h4>
+
+                                <p className="text-brand-600 font-black text-lg leading-tight mb-3">
                                     {formatPrice(ad.price)}
                                 </p>
-                                {/* Título truncado */}
-                                <p className="truncate text-gray-800 text-xs font-medium mb-2">
-                                    {ad.title}
-                                </p>
+
                                 {/* Botão WhatsApp minimalista */}
                                 {ad.contact && (
                                     <button
                                         onClick={(e) => handleWppClick(e, ad)}
-                                        className="w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors"
+                                        className="mt-auto w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 py-2 rounded-xl text-xs font-bold hover:bg-green-100 transition-colors"
                                     >
-                                        <MessageCircle size={13} />
+                                        <MessageCircle size={14} />
                                         Zap
                                     </button>
                                 )}

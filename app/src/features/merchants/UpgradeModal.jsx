@@ -1,23 +1,24 @@
 import React from 'react';
 import { Check, Star, Zap, Crown, X } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
+import { updateMerchant } from '../../services/merchantService';
 import { createNotification } from '../../services/notificationService';
+import { useAuth } from '../../context/AuthContext';
 
 export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId, onUpgrade }) {
+    const { currentUser } = useAuth();
     if (!isOpen) return null;
 
     const handleUpgrade = async (plan) => {
         if (!merchantId) return;
         try {
-            await supabase.from('merchants').update({
+            await updateMerchant(merchantId, {
                 plan: plan,
                 is_premium: plan !== 'basic',
-            }).eq('id', merchantId);
+            });
 
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
+            if (currentUser) {
                 await createNotification(
-                    session.user.id,
+                    currentUser.uid,
                     'Plano Atualizado!',
                     `Parabéns! Seu plano foi atualizado para ${plan.toUpperCase()}. Aproveite os novos recursos!`,
                     'success'

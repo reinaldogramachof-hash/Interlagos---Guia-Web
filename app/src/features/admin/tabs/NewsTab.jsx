@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { adminFetchNews, createNews, deleteNews } from '../../../services/newsService';
 import { useAuth } from '../../../context/AuthContext';
 import { Bell, Trash2 } from 'lucide-react';
 
@@ -8,8 +8,12 @@ export default function NewsTab() {
   const [newsList, setNewsList] = useState([]);
 
   const fetchNews = async () => {
-    const { data } = await supabase.from('news').select('*').order('created_at', { ascending: false });
-    setNewsList(data || []);
+    try {
+      const data = await adminFetchNews();
+      setNewsList(data);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
   };
 
   useEffect(() => { fetchNews(); }, []);
@@ -17,12 +21,12 @@ export default function NewsTab() {
   const handlePublish = async (e) => {
     e.preventDefault();
     const f = e.target;
-    await supabase.from('news').insert({
+    await createNews({
       title: f.title.value,
       content: f.summary.value,
       category: f.category.value,
       author_id: currentUser.uid,
-      status: 'approved',
+      status: 'active',
     });
     f.reset();
     alert('Notícia publicada!');
@@ -31,7 +35,7 @@ export default function NewsTab() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Excluir esta notícia?')) return;
-    await supabase.from('news').delete().eq('id', id);
+    await deleteNews(id);
     fetchNews();
   };
 

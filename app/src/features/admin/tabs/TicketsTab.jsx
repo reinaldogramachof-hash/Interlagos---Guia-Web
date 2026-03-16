@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { fetchOpenTickets, resolveTicket } from '../../../services/adminService';
 import { useAuth } from '../../../context/AuthContext';
 import { FileText, CheckCircle } from 'lucide-react';
 
@@ -8,20 +8,24 @@ export default function TicketsTab({ onCountChange }) {
   const [tickets, setTickets] = useState([]);
 
   const fetchTickets = async () => {
-    const { data } = await supabase.from('tickets').select('*').eq('status', 'open').order('created_at', { ascending: false });
-    setTickets(data || []);
-    onCountChange?.(data?.length || 0);
+    try {
+      const data = await fetchOpenTickets();
+      setTickets(data);
+      onCountChange?.(data.length);
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
   };
 
   useEffect(() => { fetchTickets(); }, []);
 
   const handleResolve = async (ticketId, resolution) => {
     if (!window.confirm(`Marcar como ${resolution}?`)) return;
-    await supabase.from('tickets').update({
+    await resolveTicket(ticketId, {
       status: resolution,
       resolved_at: new Date().toISOString(),
       resolved_by: currentUser.email,
-    }).eq('id', ticketId);
+    });
     fetchTickets();
   };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Check } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
+import { createAd } from '../../services/adsService';
 import Modal from '../../components/Modal';
 
 export default function CreateAdWizard({ isOpen, onClose, user }) {
@@ -30,15 +30,15 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
 
         setIsSubmitting(true);
         try {
-            await supabase.from('ads').insert({
-                ...formData,
+            await createAd({
+                category: formData.category,
+                title: formData.title,
+                price: parseFloat(formData.price.replace(/[^\d.,]/g, '').replace(',', '.')) || null,
+                description: formData.description,
+                image_url: formData.image,
+                whatsapp: formData.whatsapp,
                 status: 'pending',
-                user_id: user.uid,
-                user_name: user.displayName || 'Usuário Anônimo',
-                user_photo: user.photoURL || null,
-                author_uid: user.uid,
-                author_name: user.displayName,
-                author_email: user.email,
+                seller_id: user.uid,
             });
             alert("Anúncio enviado para análise! Ele aparecerá após aprovação.");
             onClose();

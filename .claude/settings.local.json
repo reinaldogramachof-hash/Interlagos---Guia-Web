@@ -6,7 +6,8 @@
       "Bash(curl:*)",
       "Bash(node -e \":*)",
       "Bash(python3 -c \"import os; os.rename\\(r''C:\\\\Users\\\\reina\\\\OneDrive\\\\Desktop\\\\Projetos\\\\Guia Digital Interlagos\\\\interlagos-conectado'', r''C:\\\\Users\\\\reina\\\\OneDrive\\\\Desktop\\\\Projetos\\\\Guia Digital Interlagos\\\\app''\\); print\\(''OK''\\)\")",
-      "Bash(grep -n \"from ''\\\\.\\\\/\" \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/app/src/features/admin/Seeder.jsx\")"
+      "Bash(grep -n \"from ''\\\\.\\\\/\" \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos/app/src/features/admin/Seeder.jsx\")",
+      "Bash(git -C \"/c/Users/reina/OneDrive/Desktop/Projetos/Guia Digital Interlagos\" log --oneline -5)"
     ]
   }
 }

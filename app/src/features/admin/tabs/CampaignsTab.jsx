@@ -1,21 +1,29 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { adminFetchCampaigns, deleteCampaign } from '../../../services/communityService';
 import { Heart, Trash2 } from 'lucide-react';
 
 export default function CampaignsTab() {
   const [campaigns, setCampaigns] = useState([]);
 
   const fetchCampaigns = async () => {
-    const { data } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
-    setCampaigns(data || []);
+    try {
+      const data = await adminFetchCampaigns();
+      setCampaigns(data);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+    }
   };
 
   useEffect(() => { fetchCampaigns(); }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Excluir esta campanha permanentemente?')) return;
-    await supabase.from('campaigns').delete().eq('id', id);
-    fetchCampaigns();
+    try {
+      await deleteCampaign(id);
+      fetchCampaigns();
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+    }
   };
 
   return (

@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import { ClipboardList } from 'lucide-react';
-
-// TODO Fase 2: substituir por query real ao Supabase (tabela audit_logs)
-const MOCK_LOGS = [
-  { id: 1, action: 'User Login', details: 'Admin user logged in', timestamp: new Date(), user: 'admin@temnobairro.com' },
-  { id: 2, action: 'Merchant Created', details: 'New merchant "Padaria X" created', timestamp: new Date(Date.now() - 3600000), user: 'master@temnobairro.com' },
-  { id: 3, action: 'Ad Approved', details: 'Ad "Promoção Relâmpago" approved', timestamp: new Date(Date.now() - 7200000), user: 'master@temnobairro.com' },
-];
+import { fetchAuditLogs } from '../../../services/adminService';
 
 export default function AuditTab() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    setLogs(MOCK_LOGS);
+    const loadLogs = async () => {
+      try {
+        const data = await fetchAuditLogs();
+        setLogs(data);
+      } catch (error) {
+        console.error("Error fetching audit logs:", error);
+      }
+    };
+    loadLogs();
   }, []);
 
   return (
@@ -34,10 +36,10 @@ export default function AuditTab() {
           <tbody className="divide-y divide-slate-100">
             {logs.map(log => (
               <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                <td className="p-4 text-slate-500 font-mono text-xs">{log.timestamp.toLocaleString()}</td>
+                <td className="p-4 text-slate-500 font-mono text-xs">{new Date(log.created_at).toLocaleString()}</td>
                 <td className="p-4 font-bold text-slate-700">{log.action}</td>
                 <td className="p-4 text-slate-600">{log.details}</td>
-                <td className="p-4 text-slate-500 text-xs">{log.user}</td>
+                <td className="p-4 text-slate-500 text-xs">{log.profiles?.display_name || log.user_id}</td>
               </tr>
             ))}
             {logs.length === 0 && (

@@ -84,7 +84,7 @@ export default function PremiumCarousel({ merchants, onMerchantClick }) {
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-1/2 h-48 md:h-full bg-slate-700 rounded-2xl overflow-hidden shadow-inner">
                   <img
-                    src={merchant.image || `https://source.unsplash.com/random/800x600/?store,${merchant.category}`}
+                    src={merchant.image_url || merchant.image || '/capa.jpg'}
                     alt={merchant.name}
                     className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
                   />

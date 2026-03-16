@@ -10,6 +10,15 @@ export const getMerchants = async () => {
   return data;
 };
 
+export const adminGetMerchants = async () => {
+  const { data, error } = await supabase
+    .from('merchants')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('merchantService.adminGetMerchants:', error); return []; }
+  return data;
+};
+
 export const subscribeMerchants = (callback) => {
   getMerchants().then(callback);
 
@@ -54,4 +63,25 @@ export const incrementMerchantView = async (merchantId) => {
 
 export const incrementMerchantContactClick = async (merchantId) => {
   await supabase.rpc('increment_merchant_contact', { p_merchant_id: merchantId }).catch(console.error);
+};
+
+export const fetchMerchantByEmail = async (email) => {
+  const { data, error } = await supabase
+    .from('merchants')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+  if (error) { console.error('merchantService.fetchMerchantByEmail:', error); return null; }
+  return data;
+};
+
+export const toggleMerchantActive = async (id, isActive) => {
+  const { data, error } = await supabase
+    .from('merchants')
+    .update({ is_active: isActive })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 };

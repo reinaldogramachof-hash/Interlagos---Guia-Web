@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Heart, List, Settings, Star, Megaphone, PlusCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { getFavorites } from '../../services/favoritesService';
+import { fetchCampaignsByUser } from '../../services/communityService';
+import { fetchAdsByUser } from '../../services/adsService';
 
 export default function ResidentPanel({ onClose }) {
     const { currentUser } = useAuth();
@@ -22,13 +23,13 @@ export default function ResidentPanel({ onClose }) {
     const fetchMyActivities = async () => {
         setLoading(true);
         try {
-            const [{ data: campaigns }, { data: ads }] = await Promise.all([
-                supabase.from('campaigns').select('*').eq('author_id', currentUser.uid),
-                supabase.from('ads').select('*').eq('user_id', currentUser.uid),
+            const [campaigns, ads] = await Promise.all([
+                fetchCampaignsByUser(currentUser.uid),
+                fetchAdsByUser(currentUser.uid),
             ]);
             const activities = [
-                ...(campaigns || []).map(item => ({ ...item, type: 'Campanha' })),
-                ...(ads || []).map(item => ({ ...item, type: 'Anúncio' })),
+                ...campaigns.map(item => ({ ...item, type: 'Campanha' })),
+                ...ads.map(item => ({ ...item, type: 'Anúncio' })),
             ];
             setMyActivities(activities);
         } catch (error) {
@@ -104,10 +105,11 @@ export default function ResidentPanel({ onClose }) {
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <span className="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">{item.type}</span>
-                                                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${item.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                                                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                                            item.status === 'active' || item.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
                                                             item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-700'
                                                             }`}>
-                                                            {item.status === 'approved' ? 'Aprovado' : item.status === 'pending' ? 'Em Análise' : 'Inativo'}
+                                                            {item.status === 'active' || item.status === 'approved' ? 'Aprovado' : item.status === 'pending' ? 'Em Análise' : 'Inativo'}
                                                         </span>
                                                     </div>
                                                     <h4 className="font-bold text-slate-900 dark:text-white">{item.title}</h4>
@@ -154,8 +156,8 @@ export default function ResidentPanel({ onClose }) {
                                                     <div>
                                                         <h4 className="font-bold text-slate-900 dark:text-white">{ad.title}</h4>
                                                         <div className="flex items-center gap-2 mt-1">
-                                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ad.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
-                                                                {ad.status === 'approved' ? 'Ativo' : 'Inativo'}
+                                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-pill ${ad.status === 'active' || ad.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                                                                {ad.status === 'active' || ad.status === 'approved' ? 'Ativo' : 'Inativo'}
                                                             </span>
                                                             {ad.isHighlighted && <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1"><Star size={10} fill="currentColor" /> Destaque</span>}
                                                         </div>

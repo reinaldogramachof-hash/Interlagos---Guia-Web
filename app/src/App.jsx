@@ -76,7 +76,7 @@ function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
     ads: 'Classificados',
     profile: 'Meu Perfil',
     utility: 'Utilidade Pública',
-    history: 'História do Bairro',
+    history: 'Historia do Bairro',
     donations: 'Doações e Campanhas',
     suggestions: 'Sugestões',
     plans: 'Planos e Preços',
@@ -85,34 +85,42 @@ function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
   const title = titles[currentView] || 'Interlagos Conectado';
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="max-w-md md:max-w-2xl lg:max-w-5xl mx-auto flex items-center justify-between px-4 h-14">
-        {/* Botão Hamburguer */}
+    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto flex items-center justify-between px-4 h-14 gap-2">
+
+        {/* Esquerda */}
         <button
           onClick={onSidebarOpen}
-          className="p-2 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-all active:scale-95"
+          className="flex-shrink-0 p-2 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-all active:scale-95"
           aria-label="Abrir menu"
         >
           <Menu size={22} />
         </button>
 
-        {/* Logo + Título centralizados */}
-        <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <img src="/logoIC.png" alt="Logo" className="w-7 h-7 rounded-lg object-contain" onError={e => e.target.style.display = 'none'} />
-          <h1 className="text-base md:text-lg font-black text-gray-900 tracking-tight">{title}</h1>
+        {/* Centro — flex-1 com min-w-0 para truncar se necessário */}
+        <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
+          <img
+            src="/logoIC.png"
+            alt="Logo"
+            className="w-7 h-7 rounded-lg object-contain flex-shrink-0"
+            onError={e => e.target.style.display = 'none'}
+          />
+          <h1 className="text-base font-black text-gray-900 tracking-tight truncate">
+            {title}
+          </h1>
         </div>
 
-        {/* Botão de Login (só quando deslogado) */}
-        {!currentUser && (
-          <button
-            onClick={onLoginOpen}
-            className="text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors"
-          >
-            Entrar
-          </button>
-        )}
-        {/* Espaço reservado quando logado para manter alinhamento */}
-        {currentUser && <div className="w-10" />}
+        {/* Direita — largura fixa para balancear */}
+        <div className="flex-shrink-0 w-16 flex justify-end">
+          {!currentUser ? (
+            <button
+              onClick={onLoginOpen}
+              className="text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-pill hover:bg-brand-100 transition-colors whitespace-nowrap"
+            >
+              Entrar
+            </button>
+          ) : null}
+        </div>
       </div>
     </header>
   );
@@ -330,29 +338,32 @@ function AppContent() {
   }
 
   const renderView = () => {
-    switch (currentView) {
-      case 'news': return <NewsFeed />;
-      case 'ads': return <AdsView onRequireAuth={requireAuth} />;
-      case 'donations': return <DonationsView />;
-      case 'utility': return <UtilityView onServiceClick={setSelectedService} />;
-      case 'history': return <HistoryView />;
-      case 'suggestions': return <SuggestionsView />;
-      case 'management': return <ManagementView />;
-      case 'plans': return <PlansView />;
-      case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />;
-      case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
-      case 'merchants':
-      default:
-        return (
-          <MerchantsView
-            merchants={merchants}
-            loading={loading}
-            selectedCategory={selectedCategory}
-            searchTerm={searchTerm}
-            onMerchantClick={setSelectedMerchant}
-          />
-        );
-    }
+    const view = (() => {
+      switch (currentView) {
+        case 'news': return <NewsFeed />;
+        case 'ads': return <AdsView onRequireAuth={requireAuth} />;
+        case 'donations': return <DonationsView />;
+        case 'utility': return <UtilityView onServiceClick={setSelectedService} />;
+        case 'history': return <HistoryView />;
+        case 'suggestions': return <SuggestionsView />;
+        case 'management': return <ManagementView />;
+        case 'plans': return <PlansView />;
+        case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />;
+        case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
+        case 'merchants':
+        default:
+          return (
+            <MerchantsView
+              merchants={merchants}
+              loading={loading}
+              selectedCategory={selectedCategory}
+              searchTerm={searchTerm}
+              onMerchantClick={setSelectedMerchant}
+            />
+          );
+      }
+    })();
+    return <div className="pb-24">{view}</div>;
   };
 
   const showBottomNav = NAV_ITEMS.some(n => n.id === currentView) || currentView === 'merchants';
@@ -368,7 +379,7 @@ function AppContent() {
       />
 
       {/* Shell centralizado responsivo: usa larguras fluidas em tablets (md/lg) para eliminar espaços vazios */}
-      <div className="max-w-md md:max-w-[95%] lg:max-w-[92%] xl:max-w-7xl 2xl:max-w-[1440px] mx-auto relative min-h-screen bg-gray-50 shadow-2xl shadow-black/5 flex flex-col">
+      <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto relative min-h-screen bg-gray-50 shadow-2xl shadow-black/5 flex flex-col">
         
         <AppHeader
           currentView={currentView}
@@ -387,7 +398,7 @@ function AppContent() {
         {currentView === 'ads' && (
           <button
             onClick={() => requireAuth(() => setShowCreateAd(true))}
-            className="fixed bottom-20 md:bottom-24 right-4 md:right-auto md:ml-[calc(100%-10rem)] bg-indigo-600 text-white flex items-center gap-2 px-6 py-3.5 rounded-full shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all z-30 font-bold text-sm"
+            className="fixed bottom-24 right-4 z-30 bg-brand-600 text-white flex items-center gap-2 px-5 py-3.5 rounded-pill shadow-fab hover:bg-brand-700 hover:scale-105 transition-all font-bold text-sm"
           >
             <PlusCircle size={20} />
             Anunciar Grátis

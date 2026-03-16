@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, LayoutDashboard, Tag, Store, Settings, PlusCircle, Trash2, Edit, Lock, TrendingUp, Eye, MousePointer } from 'lucide-react';
-import { supabase } from '../../lib/supabaseClient';
+import { fetchMerchantByEmail } from '../../services/merchantService';
+import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../../context/AuthContext';
 import CreateAdWizard from '../ads/CreateAdWizard';
 import UpgradeModal from './UpgradeModal';
@@ -17,13 +18,9 @@ export default function MerchantPanel({ onClose }) {
     // Fetch Merchant Profile
     useEffect(() => {
         if (!currentUser) return;
-        const fetchMerchant = async () => {
+        const loadMerchant = async () => {
             try {
-                const { data } = await supabase
-                    .from('merchants')
-                    .select('*')
-                    .eq('email', currentUser.email)
-                    .maybeSingle();
+                const data = await fetchMerchantByEmail(currentUser.email);
                 if (data) {
                     setMerchant(data);
                 } else {
@@ -33,7 +30,7 @@ export default function MerchantPanel({ onClose }) {
                 console.error("Error fetching merchant:", err);
             }
         };
-        fetchMerchant();
+        loadMerchant();
     }, [currentUser]);
 
     useEffect(() => {
@@ -45,8 +42,8 @@ export default function MerchantPanel({ onClose }) {
     const fetchMyAds = async () => {
         setLoading(true);
         try {
-            const { data } = await supabase.from('ads').select('*').eq('user_id', currentUser.uid);
-            setMyAds(data || []);
+            const data = await fetchAdsByUser(currentUser.uid);
+            setMyAds(data);
         } catch (error) {
             console.error("Error fetching ads:", error);
         } finally {
@@ -57,7 +54,7 @@ export default function MerchantPanel({ onClose }) {
     const handleDeleteAd = async (adId) => {
         if (window.confirm('Tem certeza que deseja excluir este anúncio?')) {
             try {
-                await supabase.from('ads').delete().eq('id', adId);
+                await deleteAd(adId);
                 setMyAds(prev => prev.filter(ad => ad.id !== adId));
             } catch (error) {
                 console.error("Error deleting ad:", error);

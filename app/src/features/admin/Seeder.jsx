@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { seedDatabase } from '../../services/adminService';
 import { Database, RefreshCw, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 
 // Helper to generate mock merchants
@@ -106,64 +106,53 @@ export default function Seeder() {
 
         try {
             addLog('Inserindo Comércios...');
-            const { error: e1 } = await supabase.from('merchants').insert(
-                MOCK_MERCHANTS.map(m => ({
-                    name: m.name,
-                    category: m.category,
-                    description: m.description,
-                    phone: m.phone,
-                    whatsapp: m.whatsapp,
-                    address: m.address,
-                    plan: m.plan,
-                    is_premium: m.isPremium,
-                    image: m.image,
-                    social_links: m.socialLinks || {},
-                    gallery: m.gallery || [],
-                    rating: m.isPremium ? 4.8 : 0,
-                    views: m.views,
-                    is_active: true,
-                }))
-            );
-            if (e1) throw e1;
+            const merchantData = MOCK_MERCHANTS.map(m => ({
+                name: m.name,
+                category: m.category,
+                description: m.description,
+                phone: m.phone,
+                whatsapp: m.whatsapp,
+                address: m.address,
+                plan: m.plan,
+                is_premium: m.isPremium,
+                image: m.image,
+                social_links: m.socialLinks || {},
+                gallery: m.gallery || [],
+                rating: m.isPremium ? 4.8 : 0,
+                views: m.views,
+                is_active: true,
+            }));
 
             addLog('Inserindo Anúncios...');
-            const { error: e2 } = await supabase.from('ads').insert(
-                MOCK_ADS.map(ad => ({
-                    title: ad.title,
-                    description: ad.description,
-                    price: ad.price,
-                    category: ad.category,
-                    user_id: ad.author.uid,
-                    user_name: ad.author.name,
-                    status: 'approved',
-                }))
-            );
-            if (e2) throw e2;
+            const adData = MOCK_ADS.map(ad => ({
+                title: ad.title,
+                description: ad.description,
+                price: parseFloat(ad.price.replace(/[^\d.,]/g, '').replace(',', '.')) || null,
+                category: ad.category,
+                seller_id: ad.author.uid,
+                status: 'active',
+            }));
 
             addLog('Inserindo Notícias...');
-            const { error: e3 } = await supabase.from('news').insert(
-                MOCK_NEWS.map(n => ({
-                    title: n.title,
-                    content: n.content,
-                    category: n.category,
-                    status: 'approved',
-                }))
-            );
-            if (e3) throw e3;
+            const newsData = MOCK_NEWS.map(n => ({
+                title: n.title,
+                content: n.content,
+                category: n.category,
+                status: 'active',
+            }));
 
             addLog('Inserindo Campanhas...');
-            const { error: e4 } = await supabase.from('campaigns').insert(
-                MOCK_CAMPAIGNS.map(c => ({
-                    title: c.title,
-                    description: c.description,
-                    organizer: c.organizer,
-                    goal: c.goal,
-                    raised: c.raised,
-                    progress: c.progress,
-                    status: 'approved',
-                }))
-            );
-            if (e4) throw e4;
+            const campaignData = MOCK_CAMPAIGNS.map(c => ({
+                title: c.title,
+                description: c.description,
+                organizer: c.organizer,
+                goal: c.goal,
+                raised: c.raised,
+                progress: c.progress,
+                status: 'active',
+            }));
+
+            await seedDatabase(merchantData, adData, newsData, campaignData);
 
             addLog('Sucesso! Banco de dados populado.');
             setStatus('success');

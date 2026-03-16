@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabaseClient';
+import { fetchUsers, updateUserRole } from '../../../services/adminService';
 import { User, Search, X } from 'lucide-react';
 
 // Nota: criação de usuário via Supabase Admin requer Edge Function (service_role key).
@@ -9,23 +9,27 @@ export default function UsersTab() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchUsers = async () => {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-    setUsers(data || []);
+  const loadUsers = async () => {
+    try {
+      const data = await fetchUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { loadUsers(); }, []);
 
   const handleRoleChange = async (userId, newRole) => {
     if (!window.confirm(`Alterar cargo para ${newRole}?`)) return;
-    await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
-    fetchUsers();
+    await updateUserRole(userId, newRole);
+    loadUsers();
   };
 
   const handleBan = async (userId) => {
     if (!window.confirm('Banir este usuário?')) return;
-    await supabase.from('profiles').update({ role: 'banned' }).eq('id', userId);
-    fetchUsers();
+    await updateUserRole(userId, 'banned');
+    loadUsers();
   };
 
   const filtered = users.filter(u =>

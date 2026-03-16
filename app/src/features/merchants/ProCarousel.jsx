@@ -80,7 +80,7 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
             >
               <div className="h-40 bg-slate-700 rounded-xl mb-4 overflow-hidden relative">
                 <img
-                  src={merchant.image || `https://source.unsplash.com/random/400x300/?${merchant.category}`}
+                  src={merchant.image_url || merchant.image || '/capa.jpg'}
                   alt={merchant.name}
                   className="w-full h-full object-cover"
                 />

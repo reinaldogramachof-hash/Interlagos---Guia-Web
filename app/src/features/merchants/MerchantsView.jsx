@@ -1,4 +1,6 @@
 import { Search, Store, MapPin, Phone } from 'lucide-react';
+import { SkeletonCard } from '../../components/SkeletonCard';
+import EmptyState from '../../components/EmptyState';
 import PremiumCarousel from './PremiumCarousel';
 import ProCarousel from './ProCarousel';
 
@@ -72,29 +74,13 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
 
       {/* ── Lista estilo iFood ── */}
       {loading ? (
-        <div className="flex flex-col gap-3 px-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-3 flex gap-3 shadow-sm border border-gray-100">
-              <div className="w-16 h-16 rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
-              <div className="flex-1 space-y-2 py-1">
-                <div className="h-3.5 bg-gray-100 rounded animate-pulse w-2/3" />
-                <div className="h-3 bg-gray-100 rounded animate-pulse w-full" />
-                <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <SkeletonCard count={5} />
       ) : filteredMerchants.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <Search className="text-gray-400" size={28} />
-          </div>
-          <h3 className="text-gray-800 font-bold mb-1">Nenhum resultado</h3>
-          <p className="text-gray-500 text-sm">
-            Não encontramos nada para{' '}
-            <span className="font-semibold">"{searchTerm || selectedCategory}"</span>.
-          </p>
-        </div>
+        <EmptyState
+          icon={<Search className="text-gray-400" size={28} />}
+          title="Nenhum resultado"
+          description={`Não encontramos nada para "${searchTerm || selectedCategory}".`}
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 px-3">
           {filteredMerchants.map(merchant => {
