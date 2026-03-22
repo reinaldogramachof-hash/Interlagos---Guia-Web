@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { createCampaign } from '../../services/communityService';
+import { useToast } from '../../components/Toast';
 
 export default function CreateCampaignForm({ 
     categories, 
@@ -8,6 +9,7 @@ export default function CreateCampaignForm({
     onClose 
 }) {
     const [newItemType, setNewItemType] = useState('donation');
+    const { showToast } = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,11 +24,11 @@ export default function CreateCampaignForm({
                 author_name: currentUser.displayName,
                 status: 'pending',
             });
-            alert('Sua ação foi enviada para análise da moderação!');
+            showToast('Sua ação foi enviada para análise da moderação!', 'success');
             onClose();
         } catch (err) {
             console.error(err);
-            alert('Erro ao enviar.');
+            showToast('Erro ao enviar.', 'error');
         }
     };
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { escalateItem } from '../../services/adminService';
 import { useAuth } from '../auth/AuthContext';
 import { Shield, Database, CheckCircle, Trophy, Bell, Heart, User, FileText, ClipboardList, X, Lock } from 'lucide-react';
+import { useToast } from '../../components/Toast';
 
 import ApprovalsTab  from './tabs/ApprovalsTab';
 import MerchantsTab  from './tabs/MerchantsTab';
@@ -32,6 +33,7 @@ export default function AdminPanel({ onClose }) {
   const [activeTab, setActiveTab] = useState('approvals');
   const [pendingCount, setPendingCount] = useState(0);
   const [ticketsCount, setTicketsCount] = useState(0);
+  const { showToast } = useToast();
 
   // Escalation state (gerenciado aqui pois o dialog flutua sobre o shell)
   const [escalationTarget, setEscalationTarget] = useState(null);
@@ -51,7 +53,7 @@ export default function AdminPanel({ onClose }) {
   }
 
   const handleEscalate = async () => {
-    if (!escalationReason.trim()) return alert('Por favor, informe o motivo.');
+    if (!escalationReason.trim()) return showToast('Por favor, informe o motivo.', 'warning');
     try {
       await escalateItem({
         type: 'escalation',
@@ -63,11 +65,11 @@ export default function AdminPanel({ onClose }) {
         resolved_by: currentUser.email,
       }, escalationTarget.collection, escalationTarget.id);
       
-      alert('Item escalado com sucesso para a Torre de Controle!');
+      showToast('Item escalado com sucesso para a Torre de Controle!', 'success');
       setEscalationTarget(null);
     } catch (error) {
       console.error('Error escalating:', error);
-      alert('Erro ao escalar: ' + error.message);
+      showToast('Erro ao escalar: ' + error.message, 'error');
     }
   };
 

@@ -10,7 +10,7 @@ import { useToast } from '../../components/Toast';
 export default function MerchantDetailModal({ merchant, onClose, onLoginRequired }) {
     const { currentUser } = useAuth();
     const [isFavorite, setIsFavorite] = useState(false);
-    const toast = useToast();
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (merchant?.id) incrementMerchantView(merchant.id);
@@ -31,7 +31,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
         if (phone) {
             window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(message)}`, '_blank');
         } else {
-            alert('Número de WhatsApp não disponível.');
+            showToast('Número de WhatsApp não disponível.', 'warning');
         }
     };
 
@@ -48,7 +48,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
             category: merchant.category,
         });
         setIsFavorite(newState);
-        toast(newState ? 'Adicionado aos favoritos!' : 'Removido dos favoritos', newState ? 'success' : 'info');
+        showToast(newState ? 'Adicionado aos favoritos!' : 'Removido dos favoritos', newState ? 'success' : 'info');
     };
 
     if (!merchant) return null;

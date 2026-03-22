@@ -1,14 +1,16 @@
 import React from 'react';
 import { Heart, MapPin, Calendar, Share2, Copy, CheckCircle } from 'lucide-react';
 import Modal from '../../components/Modal';
+import { useToast } from '../../components/Toast';
 
 export default function CampaignDetailModal({ isOpen, onClose, campaign }) {
+    const { showToast } = useToast();
     if (!campaign) return null;
 
     const handleCopyPix = () => {
         if (campaign.pix) {
             navigator.clipboard.writeText(campaign.pix);
-            alert('Chave PIX copiada!');
+            showToast('Chave PIX copiada!', 'success');
         }
     };
 
@@ -21,7 +23,7 @@ export default function CampaignDetailModal({ isOpen, onClose, campaign }) {
             })
                 .catch((error) => console.log('Error sharing', error));
         } else {
-            alert('Compartilhamento não suportado neste navegador.');
+            showToast('Compartilhamento não suportado neste navegador.', 'warning');
         }
     };
 

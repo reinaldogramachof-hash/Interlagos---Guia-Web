@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminGetMerchants, createMerchant, updateMerchant } from '../../../services/merchantService';
 import { Trophy, Search, Plus, Save, X } from 'lucide-react';
+import { useToast } from '../../../components/Toast';
 
 const INITIAL_FORM = { name: '', category: 'Alimentação', description: '', phone: '', whatsapp: '', address: '', plan: 'free', socialLinks: { instagram: '', facebook: '', site: '' }, gallery: [] };
 const CATEGORIES = ['Alimentação', 'Saúde', 'Automotivo', 'Beleza', 'Serviços', 'Tecnologia', 'Educação', 'Outros'];
@@ -17,6 +18,7 @@ export default function MerchantsTab() {
   const [editingId, setEditingId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
+  const { showToast } = useToast();
 
   const fetchMerchants = async () => {
     const data = await adminGetMerchants();
@@ -39,7 +41,7 @@ export default function MerchantsTab() {
       await updateMerchant(editingId, payload);
     }
     setIsCreating(false); setEditingId(null); setForm(INITIAL_FORM);
-    alert('Comércio salvo!'); fetchMerchants();
+    showToast('Comércio salvo!', 'success'); fetchMerchants();
   };
 
   const setField = (f, v) => setForm(p => ({ ...p, [f]: v }));

@@ -3,9 +3,11 @@ import { Check, Star, Zap, Crown, X } from 'lucide-react';
 import { updateMerchant } from '../../services/merchantService';
 import { createNotification } from '../../services/notificationService';
 import { useAuth } from '../auth/AuthContext';
+import { useToast } from '../../components/Toast';
 
 export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId, onUpgrade }) {
     const { currentUser } = useAuth();
+    const { showToast } = useToast();
     if (!isOpen) return null;
 
     const handleUpgrade = async (plan) => {
@@ -27,10 +29,10 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
 
             if (onUpgrade) onUpgrade(plan);
             onClose();
-            alert(`Parabéns! Você agora é ${plan.toUpperCase()}!`);
+            showToast(`Parabéns! Você agora é ${plan.toUpperCase()}!`, 'success');
         } catch (error) {
             console.error("Error upgrading:", error);
-            alert("Erro ao atualizar plano.");
+            showToast("Erro ao atualizar plano.", "error");
         }
     };
 
