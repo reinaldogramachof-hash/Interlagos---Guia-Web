@@ -45,3 +45,23 @@ export async function deleteNews(id) {
   if (error) throw error;
   return true;
 }
+
+export async function updateNews(id, data) {
+  const { data: updatedData, error } = await supabase
+    .from('news')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return updatedData;
+}
+
+export async function updateNewsStatus(id, status) {
+  const { error } = await supabase
+    .from('news')
+    .update({ status })
+    .eq('id', id);
+  if (error) throw error;
+  return true;
+}

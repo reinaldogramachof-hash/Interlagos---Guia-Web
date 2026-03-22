@@ -14,7 +14,7 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
             })
                 .catch((error) => console.log('Error sharing', error));
         } else {
-            alert('Compartilhamento não suportado neste navegador.');
+            navigator.clipboard?.writeText(window.location.href);
         }
     };
 
@@ -24,7 +24,7 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                 {/* Imagem de Capa */}
                 <div className="-mx-4 -mt-4 mb-4 relative h-64">
                     <img
-                        src={news.image}
+                        src={news.image_url}
                         alt={news.title}
                         className="w-full h-full object-cover"
                     />
@@ -42,7 +42,7 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
                         <div className="flex items-center gap-1">
                             <Clock size={14} />
-                            <span>{news.date}</span>
+                            <span>{news.created_at ? new Date(news.created_at).toLocaleDateString('pt-BR') : ''}</span>
                         </div>
                         {news.location && (
                             <div className="flex items-center gap-1 text-blue-600 font-medium">
@@ -52,23 +52,16 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                         )}
                         <div className="flex items-center gap-1">
                             <User size={14} />
-                            <span>Redação Interlagos</span>
+                            <span>{news.author_name || 'Redação Interlagos'}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Conteúdo */}
                 <div className="prose prose-blue max-w-none text-gray-700 leading-relaxed">
-                    <p className="font-medium text-lg text-gray-800 mb-4">
-                        {news.summary}
-                    </p>
-                    <p>
-                        {/* Simulação de conteúdo longo - em um app real viria do backend */}
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    </p>
-                    <p>
-                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                    </p>
+                    <p className="font-medium text-lg text-gray-800 mb-4">{news.summary || news.content}</p>
+                    {news.content && news.summary && news.content !== news.summary && (
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{news.content}</p>
+                    )}
                 </div>
 
                 {/* Ações */}

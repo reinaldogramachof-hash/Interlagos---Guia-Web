@@ -69,9 +69,15 @@ export default function NewsCard({ item, onClick }) {
                     <p className="text-sm font-semibold text-gray-900 truncate">{author}</p>
                     <p className="text-xs text-gray-400">{timeAgo(item.date || item.created_at)}</p>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${catColor}`}>
-                    {item.category}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${catColor}`}>
+                        {item.category}
+                    </span>
+                    {item.author_name
+                        ? <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full ml-auto">📰 {item.author_name}</span>
+                        : <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-auto">✏️ Redação</span>
+                    }
+                </div>
             </div>
 
             {/* ── Título + resumo ── */}
