@@ -2,7 +2,7 @@ import React from 'react';
 import { Check, Star, Zap, Crown, X } from 'lucide-react';
 import { updateMerchant } from '../../services/merchantService';
 import { createNotification } from '../../services/notificationService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 
 export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId, onUpgrade }) {
     const { currentUser } = useAuth();

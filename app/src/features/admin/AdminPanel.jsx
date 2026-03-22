@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { escalateItem } from '../../services/adminService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import { Shield, Database, CheckCircle, Trophy, Bell, Heart, User, FileText, ClipboardList, X, Lock } from 'lucide-react';
 
 import ApprovalsTab  from './tabs/ApprovalsTab';

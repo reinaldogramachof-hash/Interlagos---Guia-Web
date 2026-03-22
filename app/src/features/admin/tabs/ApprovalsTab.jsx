@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchPendingItems, approveItem, rejectItem } from '../../../services/adminService';
 import { createNotification } from '../../../services/notificationService';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 import { Shield, CheckCircle, AlertTriangle, X } from 'lucide-react';
 
 function ModerationCard({ item, onApprove, onReject, onEscalate }) {

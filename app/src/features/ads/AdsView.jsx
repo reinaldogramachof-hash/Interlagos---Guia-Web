@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Tag, PlusCircle } from 'lucide-react';
 import AdCard from './AdCard';
 import { fetchAds, subscribeAds } from '../../services/adsService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
 import EmptyState from '../../components/EmptyState';

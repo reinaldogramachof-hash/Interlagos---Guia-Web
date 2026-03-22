@@ -1,4 +1,4 @@
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../features/auth/AuthContext';
 import { Menu } from 'lucide-react';
 
 export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {

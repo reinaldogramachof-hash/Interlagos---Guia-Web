@@ -3,7 +3,7 @@ import { X, Clock, Star, Heart, Share2, Store } from 'lucide-react';
 import { MerchantAddress, MerchantContactButtons, MerchantSocialLinks } from './MerchantContactInfo';
 import { incrementMerchantView, incrementMerchantContactClick } from '../../services/statsService';
 import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import useAuthStore from '../../stores/authStore';
 import { useToast } from '../../components/Toast';
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminFetchNews, createNews, deleteNews } from '../../../services/newsService';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 import { Bell, Trash2 } from 'lucide-react';
 import { uploadImage } from '../../../services/storageService';
 import { useToast } from '../../../components/Toast';

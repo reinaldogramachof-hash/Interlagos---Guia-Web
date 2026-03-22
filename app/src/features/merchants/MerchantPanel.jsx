@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, LayoutDashboard, Tag, Store, Settings, TrendingUp } from 'lucide-react';
 import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import CreateAdWizard from '../ads/CreateAdWizard';
 import UpgradeModal from './UpgradeModal';
 

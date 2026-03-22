@@ -11,7 +11,7 @@ import useAuthStore, {
   selectIsMaster,
   selectIsMerchant,
   selectIsResident,
-} from '../stores/authStore';
+} from '../../stores/authStore';
 
 export function useAuth() {
   const session  = useAuthStore(s => s.session);

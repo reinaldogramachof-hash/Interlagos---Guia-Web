@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Send, MessageSquare, ThumbsUp, AlertCircle, Lightbulb, User } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import LoginModal from '../auth/LoginModal';
 import { createSuggestion } from '../../services/communityService';
+import { useToast } from '../../components/Toast';
 
 export default function SuggestionsView() {
     const { currentUser } = useAuth();
     const [submitted, setSubmitted] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const { showToast } = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,7 +33,7 @@ export default function SuggestionsView() {
             setSubmitted(true);
         } catch (error) {
             console.error("Error sending suggestion:", error);
-            alert("Erro ao enviar sugestão.");
+            showToast('Erro ao enviar sugestão.', 'error');
         } finally {
             setIsSubmitting(false);
         }

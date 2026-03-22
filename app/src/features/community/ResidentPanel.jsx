@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Heart, List, Settings, Megaphone } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import { getFavorites } from '../../services/favoritesService';
 import { fetchCampaignsByUser } from '../../services/communityService';
 import { fetchAdsByUser } from '../../services/adsService';

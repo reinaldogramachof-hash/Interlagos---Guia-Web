@@ -68,3 +68,9 @@ export async function deleteCampaign(id) {
   if (error) throw error;
   return true;
 }
+
+export async function voteSuggestion(id) {
+  const { error } = await supabase.rpc('increment_suggestion_votes', { suggestion_id: id });
+  if (error) throw error;
+  return true;
+}

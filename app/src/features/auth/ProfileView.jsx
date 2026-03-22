@@ -1,4 +1,4 @@
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from './AuthContext';
 import useMerchantPlan from '../../hooks/useMerchantPlan';
 import { uploadImage } from '../../services/storageService';
 import { updateUserProfile } from '../../services/authService';

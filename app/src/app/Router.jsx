@@ -1,6 +1,5 @@
-import React from 'react';
 import useUiStore, { selectCurrentView } from '../stores/uiStore';
-import useMerchantStore from '../stores/merchantStore';
+import useMerchantStore, { selectMerchants, selectMerchantsLoading, selectSelectedCategory, selectSearchTerm } from '../stores/merchantStore';
 
 import MerchantsView from '../features/merchants/MerchantsView';
 import AdminPanel from '../features/admin/AdminPanel';
@@ -23,7 +22,10 @@ export default function AppRouter({ requireAuth }) {
   const setIsLoginOpen = useUiStore(state => state.setIsLoginOpen);
   const setSelectedMerchant = useUiStore(state => state.setSelectedMerchant);
   const setSelectedService = useUiStore(state => state.setSelectedService);
-  const { merchants, loading, selectedCategory, searchTerm } = useMerchantStore();
+  const merchants = useMerchantStore(selectMerchants);
+  const loading = useMerchantStore(selectMerchantsLoading);
+  const selectedCategory = useMerchantStore(selectSelectedCategory);
+  const searchTerm = useMerchantStore(selectSearchTerm);
 
   switch (currentView) {
     case 'news': return <NewsFeed />;

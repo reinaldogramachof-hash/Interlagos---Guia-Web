@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchOpenTickets, resolveTicket } from '../../../services/adminService';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 import { FileText, CheckCircle } from 'lucide-react';
 
 export default function TicketsTab({ onCountChange }) {

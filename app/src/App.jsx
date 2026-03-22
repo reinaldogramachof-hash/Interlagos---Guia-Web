@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import BottomNav from './components/BottomNav';
 import AppHeader from './components/AppHeader';
 

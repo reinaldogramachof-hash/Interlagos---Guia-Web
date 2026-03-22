@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, HandHeart, Gift, ChevronRight, MessageCircle, PlusCircle, Filter, Calendar, MapPin, Users, ArrowRight, X, AlertTriangle } from 'lucide-react';
 import { fetchCampaigns } from '../../services/communityService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import CampaignCard from './CampaignCard';
 import CreateCampaignForm from './CreateCampaignForm';
 
