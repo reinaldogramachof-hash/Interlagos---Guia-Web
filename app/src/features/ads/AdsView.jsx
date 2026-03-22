@@ -8,6 +8,7 @@ import CreateAdWizard from './CreateAdWizard';
 import EmptyState from '../../components/EmptyState';
 import LoginModal from '../auth/LoginModal';
 import { incrementAdClick } from '../../services/statsService';
+import { useToast } from '../../components/Toast';
 
 const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Veículos', 'Eletrônicos', 'Doações'];
 
@@ -15,6 +16,7 @@ const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Ve�
 
 export default function AdsView({ onRequireAuth }) {
     const { currentUser } = useAuth();
+    const { showToast } = useToast();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -30,6 +32,7 @@ export default function AdsView({ onRequireAuth }) {
                 if (!cancelled) setAds(data);
             } catch (error) {
                 console.error('Erro ao carregar anúncios:', error);
+                showToast('Erro ao carregar anúncios.', 'error');
             } finally {
                 if (!cancelled) setLoading(false);
             }

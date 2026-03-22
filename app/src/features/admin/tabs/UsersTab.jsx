@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { fetchUsers, updateUserRole } from '../../../services/adminService';
 import { User, Search, X } from 'lucide-react';
+import { useToast } from '../../../components/Toast';
 
 // Nota: criação de usuário via Supabase Admin requer Edge Function (service_role key).
 // Por ora, este painel apenas GERENCIA perfis existentes.
 
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadUsers = async () => {
@@ -15,21 +17,32 @@ export default function UsersTab() {
       setUsers(data);
     } catch (error) {
       console.error("Error fetching users:", error);
+      showToast('Erro ao carregar usuários.', 'error');
     }
   };
 
   useEffect(() => { loadUsers(); }, []);
 
   const handleRoleChange = async (userId, newRole) => {
-    if (!window.confirm(`Alterar cargo para ${newRole}?`)) return;
-    await updateUserRole(userId, newRole);
-    loadUsers();
+    try {
+      await updateUserRole(userId, newRole);
+      showToast(`Cargo alterado para ${newRole}.`, 'success');
+      loadUsers();
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao alterar cargo.', 'error');
+    }
   };
 
   const handleBan = async (userId) => {
-    if (!window.confirm('Banir este usuário?')) return;
-    await updateUserRole(userId, 'banned');
-    loadUsers();
+    try {
+      await updateUserRole(userId, 'banned');
+      showToast('Usuário banido.', 'success');
+      loadUsers();
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao banir usuário.', 'error');
+    }
   };
 
   const filtered = users.filter(u =>
@@ -58,7 +71,10 @@ export default function UsersTab() {
             {filtered.map(user => (
               <tr key={user.id} className="hover:bg-slate-50">
                 <td className="p-4 flex items-center gap-3">
-                  {user.photo_url ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" alt="" /> : <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center"><User size={16} className="text-slate-400" /></div>}
+                  {user.photo_url
+                    ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                    : <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
+                  }
                   <div><div className="font-bold text-slate-900">{user.display_name || 'Sem Nome'}</div><div className="text-xs text-slate-400">{user.id.slice(0, 8)}…</div></div>
                 </td>
                 <td className="p-4">

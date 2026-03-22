@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ClipboardList } from 'lucide-react';
 import { fetchAuditLogs } from '../../../services/adminService';
+import { useToast } from '../../../components/Toast';
 
 export default function AuditTab() {
   const [logs, setLogs] = useState([]);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadLogs = async () => {
@@ -12,6 +14,7 @@ export default function AuditTab() {
         setLogs(data);
       } catch (error) {
         console.error("Error fetching audit logs:", error);
+        showToast('Erro ao carregar auditoria.', 'error');
       }
     };
     loadLogs();

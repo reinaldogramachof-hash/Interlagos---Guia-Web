@@ -81,7 +81,7 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
       }
     } catch (error) {
       console.error('SettingsTab Error:', error);
-      showToast(error.message || 'Erro ao salvar dados.', 'error');
+      showToast('Erro ao salvar configurações.', 'error');
     } finally {
       setLoading(false);
     }

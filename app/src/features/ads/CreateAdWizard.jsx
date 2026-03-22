@@ -55,7 +55,10 @@ export default function CreateAdWizard({ isOpen, onClose, user }) {
             showToast("Sucesso! Aguarde aprovação.", "success");
             onClose(); setStep(1); setImageFile(null);
             setFormData({ category: '', title: '', price: '', whatsapp: '', description: '', image: '' });
-        } catch (error) { showToast("Erro ao publicar.", "error"); }
+        } catch (error) {
+            console.error(error);
+            showToast("Erro ao publicar anúncio. Tente novamente.", "error");
+        }
         finally { setIsSubmitting(false); }
     };
 

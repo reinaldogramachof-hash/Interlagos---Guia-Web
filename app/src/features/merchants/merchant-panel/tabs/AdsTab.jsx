@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 
 export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick }) {
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -26,7 +28,7 @@ export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick })
             <div key={ad.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden shrink-0">
-                  {ad.image_url && <img src={ad.image_url} alt={ad.title} className="w-full h-full object-cover" />}
+                  {ad.image_url && <img src={ad.image_url} alt={ad.title} className="w-full h-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />}
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white">{ad.title}</h4>
@@ -44,12 +46,19 @@ export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick })
                 <button className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
                   <Edit size={18} />
                 </button>
-                <button
-                  onClick={() => onDeleteClick(ad.id)}
-                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                >
-                  <Trash2 size={18} />
-                </button>
+                {pendingDeleteId === ad.id ? (
+                  <div className="flex gap-2 items-center">
+                    <button onClick={() => { setPendingDeleteId(null); onDeleteClick(ad.id); }} className="text-xs text-red-600 font-bold hover:underline">Confirmar</button>
+                    <button onClick={() => setPendingDeleteId(null)} className="text-xs text-slate-500 hover:underline">Cancelar</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setPendingDeleteId(ad.id)}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
               </div>
             </div>
           ))}

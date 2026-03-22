@@ -34,7 +34,7 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
       await useAuthStore.getState().refreshProfile();
     } catch (err) {
       console.error(err);
-      showToast('Erro ao atualizar foto.', 'error');
+      showToast('Erro ao carregar perfil.', 'error');
     }
   };
 

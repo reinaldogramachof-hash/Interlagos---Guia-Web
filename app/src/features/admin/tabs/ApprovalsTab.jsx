@@ -3,6 +3,7 @@ import { fetchPendingItems, approveItem, rejectItem } from '../../../services/ad
 import { createNotification } from '../../../services/notificationService';
 import { useAuth } from '../../auth/AuthContext';
 import { Shield, CheckCircle, AlertTriangle, X } from 'lucide-react';
+import { useToast } from '../../../components/Toast';
 
 function ModerationCard({ item, onApprove, onReject, onEscalate }) {
   const [isReviewing, setIsReviewing] = useState(false);
@@ -64,6 +65,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
 
 export default function ApprovalsTab({ onEscalate, onCountChange }) {
   const [pending, setPending] = useState([]);
+  const { showToast } = useToast();
 
   const fetchPending = async () => {
     try {
@@ -92,18 +94,23 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
   };
 
   const handleReject = async (table, id) => {
-    if (!window.confirm('Rejeitar e excluir este item?')) return;
-    const item = pending.find(i => i.id === id);
-    await rejectItem(table, id);
-    if (item?.seller_id || item?.author_id) {
-      await createNotification(
-        item.seller_id || item.author_id,
-        'Item Rejeitado',
-        `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`,
-        'warning'
-      );
+    try {
+      const item = pending.find(i => i.id === id);
+      await rejectItem(table, id);
+      if (item?.seller_id || item?.author_id) {
+        await createNotification(
+          item.seller_id || item.author_id,
+          'Item Rejeitado',
+          `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`,
+          'warning'
+        );
+      }
+      showToast('Item rejeitado.', 'info');
+      fetchPending();
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao rejeitar.', 'error');
     }
-    fetchPending();
   };
 
   return (

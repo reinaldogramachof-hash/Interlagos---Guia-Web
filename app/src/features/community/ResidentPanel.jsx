@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Heart, List, Settings, Megaphone } from 'lucide-react';
+import { useToast } from '../../components/Toast';
 import { useAuth } from '../auth/AuthContext';
 import { getFavorites } from '../../services/favoritesService';
 import { fetchCampaignsByUser } from '../../services/communityService';
@@ -12,6 +13,7 @@ import SettingsTab from './resident-panel/tabs/SettingsTab';
 export default function ResidentPanel({ onClose }) {
     const { currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState('activities');
+    const { showToast } = useToast();
     const [myActivities, setMyActivities] = useState([]);
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,6 +40,7 @@ export default function ResidentPanel({ onClose }) {
             setMyActivities(activities);
         } catch (error) {
             console.error("Error fetching activities:", error);
+            showToast('Erro ao carregar seu perfil.', 'error');
         } finally {
             setLoading(false);
         }
@@ -50,6 +53,7 @@ export default function ResidentPanel({ onClose }) {
             setFavorites(favs);
         } catch (error) {
             console.error("Error fetching favorites:", error);
+            showToast('Erro ao carregar dados do comércio.', 'error');
         } finally {
             setLoading(false);
         }

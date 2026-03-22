@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { fetchOpenTickets, resolveTicket } from '../../../services/adminService';
 import { useAuth } from '../../auth/AuthContext';
 import { FileText, CheckCircle } from 'lucide-react';
+import { useToast } from '../../../components/Toast';
 
 export default function TicketsTab({ onCountChange }) {
   const { currentUser } = useAuth();
   const [tickets, setTickets] = useState([]);
+  const { showToast } = useToast();
 
   const fetchTickets = async () => {
     try {
@@ -14,19 +16,25 @@ export default function TicketsTab({ onCountChange }) {
       onCountChange?.(data.length);
     } catch (error) {
       console.error("Error fetching tickets:", error);
+      showToast('Erro ao carregar tickets.', 'error');
     }
   };
 
   useEffect(() => { fetchTickets(); }, []);
 
   const handleResolve = async (ticketId, resolution) => {
-    if (!window.confirm(`Marcar como ${resolution}?`)) return;
-    await resolveTicket(ticketId, {
-      status: resolution,
-      resolved_at: new Date().toISOString(),
-      resolved_by: currentUser.email,
-    });
-    fetchTickets();
+    try {
+      await resolveTicket(ticketId, {
+        status: resolution,
+        resolved_at: new Date().toISOString(),
+        resolved_by: currentUser.email,
+      });
+      showToast(`Ticket ${resolution}.`, 'success');
+      fetchTickets();
+    } catch (error) {
+      console.error(error);
+      showToast('Erro ao resolver ticket.', 'error');
+    }
   };
 
   return (

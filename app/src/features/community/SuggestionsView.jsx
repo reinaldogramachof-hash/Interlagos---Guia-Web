@@ -83,7 +83,10 @@ export default function SuggestionsView() {
 
                 {currentUser && (
                     <div className="flex items-center gap-3 mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl">
-                        <img src={currentUser.photoURL} alt="" className="w-10 h-10 rounded-full" />
+                        {currentUser.photoURL
+                          ? <img src={currentUser.photoURL} alt="" className="w-10 h-10 rounded-full" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                          : <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">{currentUser.displayName?.[0]?.toUpperCase() ?? '?'}</div>
+                        }
                         <div>
                             <p className="text-sm font-bold text-slate-900 dark:text-white">{currentUser.displayName}</p>
                             <p className="text-xs text-slate-500">{currentUser.email}</p>

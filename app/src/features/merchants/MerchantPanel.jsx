@@ -4,6 +4,7 @@ import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../auth/AuthContext';
 import CreateAdWizard from '../ads/CreateAdWizard';
+import { useToast } from '../../components/Toast';
 import UpgradeModal from './UpgradeModal';
 
 // Tabs
@@ -19,6 +20,7 @@ export default function MerchantPanel({ onClose }) {
     const [loading, setLoading] = useState(true);
     const [showCreateAd, setShowCreateAd] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { showToast } = useToast();
 
     // Fetch Merchant Profile
     useEffect(() => {
@@ -33,6 +35,7 @@ export default function MerchantPanel({ onClose }) {
                 }
             } catch (err) {
                 console.error("Error fetching merchant:", err);
+                showToast('Erro ao carregar dados do painel.', 'error');
             }
         };
         loadMerchant();
@@ -51,19 +54,20 @@ export default function MerchantPanel({ onClose }) {
             setMyAds(data);
         } catch (error) {
             console.error("Error fetching ads:", error);
+            showToast('Erro ao carregar anúncios.', 'error');
         } finally {
             setLoading(false);
         }
     };
 
     const handleDeleteAd = async (adId) => {
-        if (window.confirm('Tem certeza que deseja excluir este anúncio?')) {
-            try {
-                await deleteAd(adId);
-                setMyAds(prev => prev.filter(ad => ad.id !== adId));
-            } catch (error) {
-                console.error("Error deleting ad:", error);
-            }
+        try {
+            await deleteAd(adId);
+            setMyAds(prev => prev.filter(ad => ad.id !== adId));
+            showToast('Anúncio excluído.', 'success');
+        } catch (error) {
+            console.error("Error deleting ad:", error);
+            showToast('Erro ao excluir anúncio.', 'error');
         }
     };
 

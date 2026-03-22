@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { adminFetchCampaigns, deleteCampaign } from '../../../services/communityService';
 import { Heart, Trash2 } from 'lucide-react';
+import { useToast } from '../../../components/Toast';
 
 export default function CampaignsTab() {
   const [campaigns, setCampaigns] = useState([]);
+  const { showToast } = useToast();
 
   const fetchCampaigns = async () => {
     try {
@@ -11,18 +13,20 @@ export default function CampaignsTab() {
       setCampaigns(data);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
+      showToast('Erro ao carregar campanhas.', 'error');
     }
   };
 
   useEffect(() => { fetchCampaigns(); }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Excluir esta campanha permanentemente?')) return;
     try {
       await deleteCampaign(id);
+      showToast('Campanha excluída permanentemente.', 'success');
       fetchCampaigns();
     } catch (error) {
       console.error("Error deleting campaign:", error);
+      showToast('Erro ao excluir campanha.', 'error');
     }
   };
 

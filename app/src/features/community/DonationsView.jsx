@@ -4,6 +4,7 @@ import { fetchCampaigns } from '../../services/communityService';
 import { useAuth } from '../auth/AuthContext';
 import CampaignCard from './CampaignCard';
 import CreateCampaignForm from './CreateCampaignForm';
+import { useToast } from '../../components/Toast';
 
 const categories = [
     { id: 'all', label: 'Todos' },
@@ -15,6 +16,7 @@ const categories = [
 
 export default function DonationsView() {
     const { currentUser } = useAuth();
+    const { showToast } = useToast();
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedType, setSelectedType] = useState('all');
     const [items, setItems] = useState([]);
@@ -31,6 +33,7 @@ export default function DonationsView() {
                 if (!cancelled) setItems(data);
             } catch (error) {
                 console.error("Erro ao carregar itens:", error);
+                showToast('Erro ao carregar doações.', 'error');
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -58,7 +61,7 @@ export default function DonationsView() {
             const number = phone.replace(/\D/g, '');
             window.open(`https://wa.me/55${number}?text=${encodeURIComponent(text)}`, '_blank');
         } else {
-            alert('Contato não disponível.');
+            showToast('Contato não disponível.', 'info');
         }
     };
 
