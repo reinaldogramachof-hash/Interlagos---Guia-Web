@@ -3,7 +3,8 @@ import { MessageCircle, X, Send, Loader2, ChevronRight } from 'lucide-react';
 import PlanCard from './PlanCard';
 import { sendMessageToGenkit } from '../services/genkitService';
 import { useChatContext } from '../context/ChatContext';
-import { supabase } from '../lib/supabaseClient';
+import useAuthStore from '../stores/authStore';
+import { fetchChatHistory, subscribeChatHistory } from '../services/chatService';
 
 export default function ChatbotWidget() {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,46 +13,30 @@ export default function ChatbotWidget() {
     const [isLoading, setIsLoading] = useState(false);
     const { contextData } = useChatContext();
     const messagesEndRef = useRef(null);
-    const [user, setUser] = useState(null);
+    const currentUser = useAuthStore(state => state.profile);
 
+    // Load History from Supabase via chatService
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user || null);
-        });
-        return () => subscription.unsubscribe();
-    }, []);
+        if (!currentUser?.id || !isOpen) return;
 
-    // Load History from Supabase
-    useEffect(() => {
-        if (!user || !isOpen) return;
-
-        const fetchHistory = async () => {
-            const { data } = await supabase
-                .from('chat_history')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(20);
-            setMessages((data || []).reverse());
+        const loadHistory = async () => {
+            const data = await fetchChatHistory(currentUser.id);
+            setMessages(data);
             scrollToBottom();
         };
 
-        fetchHistory();
+        loadHistory();
 
-        const channel = supabase.channel(`chat-${user.id}`)
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_history', filter: `user_id=eq.${user.id}` }, () => fetchHistory())
-            .subscribe();
-
-        return () => supabase.removeChannel(channel);
-    }, [user, isOpen]);
+        const unsubscribe = subscribeChatHistory(currentUser.id, loadHistory);
+        return unsubscribe;
+    }, [currentUser?.id, isOpen]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     const handleSendMessage = async (text = message) => {
-        if (!text.trim() || !user) return;
+        if (!text.trim() || !currentUser) return;
 
         setMessage('');
         setIsLoading(true);
@@ -77,7 +62,7 @@ export default function ChatbotWidget() {
         }
     };
 
-    if (!user) return null;
+    if (!currentUser) return null;
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">

@@ -12,11 +12,11 @@ import {
     Store,
     LogIn,
     LogOut,
-    ChevronRight,
     MapPin,
     CreditCard,
     User,
 } from 'lucide-react';
+import SidebarMenuSection, { Divider, SectionLabel, MenuItem } from './SidebarMenuSection';
 
 // ─── Seções do menu ───────────────────────────────────────────────────────────
 const COMMUNITY_ITEMS = [
@@ -131,35 +131,29 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                 <div className="flex-1 overflow-y-auto py-4">
 
                     {/* Seção: Comunidade */}
-                    <SectionLabel label="Comunidade" />
-                    {COMMUNITY_ITEMS.map((item) => (
-                        <MenuItem
-                            key={item.id}
-                            item={item}
-                            onClick={() => handleNav(item.id, item.requireAuth)}
-                        />
-                    ))}
+                    <SidebarMenuSection
+                        title="Comunidade"
+                        items={COMMUNITY_ITEMS}
+                        onNavigate={handleNav}
+                    />
 
                     <Divider />
 
                     {/* Seção: Para Comerciantes */}
-                    <SectionLabel label="Para Comerciantes" />
-                    {MERCHANT_ITEMS.map((item) => (
-                        <MenuItem
-                            key={item.id}
-                            item={item}
-                            onClick={() => handleNav(item.id, item.requireAuth)}
-                        />
-                    ))}
+                    <SidebarMenuSection
+                        title="Para Comerciantes"
+                        items={MERCHANT_ITEMS}
+                        onNavigate={handleNav}
+                    />
 
                     {/* Seção: Admin — só visível para admin/master */}
                     {(isAdmin || isMaster) && (
                         <>
                             <Divider />
-                            <SectionLabel label="Administração" />
-                            <MenuItem
-                                item={{ id: 'admin', label: 'Painel Administrativo', icon: ShieldCheck, desc: 'Gestão do sistema' }}
-                                onClick={() => handleNav('admin', true)}
+                            <SidebarMenuSection
+                                title="Administração"
+                                items={[{ id: 'admin', label: 'Painel Administrativo', icon: ShieldCheck, desc: 'Gestão do sistema', requireAuth: true }]}
+                                onNavigate={handleNav}
                                 accent
                             />
                         </>
@@ -187,39 +181,4 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
     );
 }
 
-// ─── Sub-componentes ──────────────────────────────────────────────────────────
-function SectionLabel({ label }) {
-    return (
-        <p className="px-5 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            {label}
-        </p>
-    );
-}
 
-function Divider() {
-    return <div className="my-3 mx-5 border-t border-gray-100" />;
-}
-
-function MenuItem({ item, onClick, accent = false }) {
-    const Icon = item.icon;
-    return (
-        <button
-            onClick={onClick}
-            className={`w-full flex items-center gap-3 px-5 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors group`}
-        >
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accent ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'
-                } transition-colors`}>
-                <Icon size={18} />
-            </div>
-            <div className="text-left flex-1 min-w-0">
-                <p className={`text-sm font-semibold ${accent ? 'text-indigo-700' : 'text-gray-800'}`}>
-                    {item.label}
-                </p>
-                {item.desc && (
-                    <p className="text-[11px] text-gray-400 truncate">{item.desc}</p>
-                )}
-            </div>
-            <ChevronRight size={16} className="text-gray-300 group-hover:text-gray-400 shrink-0" />
-        </button>
-    );
-}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { X, Phone, MapPin, Globe, Clock, Star, Heart, Share2, MessageCircle, Store } from 'lucide-react';
+import { X, Clock, Star, Heart, Share2, Store } from 'lucide-react';
+import { MerchantAddress, MerchantContactButtons, MerchantSocialLinks } from './MerchantContactInfo';
 import { incrementMerchantView, incrementMerchantContactClick } from '../../services/statsService';
 import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService';
 import { useAuth } from '../../context/AuthContext';
@@ -76,10 +77,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                     {merchant.category}
                                 </span>
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{merchant.name}</h2>
-                                <div className="flex items-center gap-2 text-gray-200 text-sm">
-                                    <MapPin size={14} className="text-indigo-400" />
-                                    <span>{merchant.address || 'Parque Interlagos, São José dos Campos - SP'}</span>
-                                </div>
+                                <MerchantAddress address={merchant.address} />
                             </div>
                             <div className="flex gap-2">
                                 <button
@@ -111,16 +109,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                             </div>
 
                             {/* Contact Buttons - HIDDEN FOR FREE PLAN */}
-                            {merchant.plan !== 'free' && (
-                                <div className="flex gap-3 pt-4">
-                                    <button onClick={handleWhatsApp} className="flex-1 bg-green-500 text-white py-3.5 rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2">
-                                        <MessageCircle size={20} /> Chamar no Zap
-                                    </button>
-                                    <button className="flex-1 bg-indigo-50 text-indigo-700 py-3.5 rounded-xl font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
-                                        <Phone size={20} /> Ligar Agora
-                                    </button>
-                                </div>
-                            )}
+                            <MerchantContactButtons plan={merchant.plan} onWhatsApp={handleWhatsApp} />
 
                             {/* Photo Gallery (Professional & Premium) */}
                             {['professional', 'premium'].includes(merchant.plan) && merchant.gallery && merchant.gallery.length > 0 && (
@@ -161,28 +150,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                         {/* Sidebar Info */}
                         <div className="space-y-6">
                             {/* Social Links - PROFESSIONAL & PREMIUM */}
-                            {['professional', 'premium'].includes(merchant.plan) && merchant.social_links && (
-                                <div className="grid grid-cols-3 gap-2">
-                                    {merchant.social_links.instagram && (
-                                        <a href={`https://instagram.com/${merchant.social_links.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">
-                                            <Globe size={20} />
-                                            <span className="text-[10px] font-bold mt-1">Insta</span>
-                                        </a>
-                                    )}
-                                    {merchant.social_links.facebook && (
-                                        <a href={merchant.social_links.facebook} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                                            <Globe size={20} />
-                                            <span className="text-[10px] font-bold mt-1">Face</span>
-                                        </a>
-                                    )}
-                                    {merchant.social_links.site && (
-                                        <a href={merchant.social_links.site} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
-                                            <Globe size={20} />
-                                            <span className="text-[10px] font-bold mt-1">Site</span>
-                                        </a>
-                                    )}
-                                </div>
-                            )}
+                            <MerchantSocialLinks plan={merchant.plan} socialLinks={merchant.social_links} />
 
                             <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
                                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
