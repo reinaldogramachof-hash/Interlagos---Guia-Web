@@ -38,6 +38,17 @@ export async function createAd(adData) {
   return data;
 }
 
+export async function updateAd(adId, data) {
+  const { data: updated, error } = await supabase
+    .from('ads')
+    .update(data)
+    .eq('id', adId)
+    .select()
+    .single();
+  if (error) throw error;
+  return updated;
+}
+
 export async function deleteAd(adId) {
   const { error } = await supabase
     .from('ads')

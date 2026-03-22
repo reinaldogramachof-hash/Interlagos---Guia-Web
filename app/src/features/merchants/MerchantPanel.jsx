@@ -19,6 +19,7 @@ export default function MerchantPanel({ onClose }) {
     const [merchant, setMerchant] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCreateAd, setShowCreateAd] = useState(false);
+    const [adToEdit, setAdToEdit] = useState(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const { showToast } = useToast();
 
@@ -76,13 +77,21 @@ export default function MerchantPanel({ onClose }) {
         if (myAds.length >= limit) {
             setShowUpgradeModal(true);
         } else {
+            setAdToEdit(null);
             setShowCreateAd(true);
         }
     };
 
-    if (showCreateAd) {
-        return <CreateAdWizard onBack={() => setShowCreateAd(false)} user={currentUser} />;
-    }
+    const handleEditAd = (ad) => {
+        setAdToEdit(ad);
+        setShowCreateAd(true);
+    };
+
+    const handleWizardClose = () => {
+        setShowCreateAd(false);
+        setAdToEdit(null);
+        fetchMyAds();
+    };
 
     return (
         <div className="flex-1 animate-in fade-in">
@@ -133,11 +142,12 @@ export default function MerchantPanel({ onClose }) {
                         )}
 
                         {activeTab === 'ads' && (
-                            <AdsTab 
-                                myAds={myAds} 
-                                loading={loading} 
-                                onCreateClick={handleCreateAdClick} 
-                                onDeleteClick={handleDeleteAd} 
+                            <AdsTab
+                                myAds={myAds}
+                                loading={loading}
+                                onCreateClick={handleCreateAdClick}
+                                onDeleteClick={handleDeleteAd}
+                                onEditClick={handleEditAd}
                             />
                         )}
 
@@ -158,6 +168,13 @@ export default function MerchantPanel({ onClose }) {
                 currentPlan={merchant?.plan || 'basic'}
                 merchantId={merchant?.id}
                 onUpgrade={(newPlan) => setMerchant(prev => ({ ...prev, plan: newPlan }))}
+            />
+
+            <CreateAdWizard
+                isOpen={showCreateAd}
+                onClose={handleWizardClose}
+                user={currentUser}
+                initialAd={adToEdit}
             />
         </div>
     );

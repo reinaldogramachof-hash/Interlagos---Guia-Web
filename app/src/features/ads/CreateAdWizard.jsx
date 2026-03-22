@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Check } from 'lucide-react';
-import { createAd } from '../../services/adsService';
+import { createAd, updateAd } from '../../services/adsService';
 import { uploadImage } from '../../services/storageService';
 import Modal from '../../components/Modal';
 import ImageUpload from '../../components/ImageUpload';
@@ -26,44 +26,55 @@ const CategoryStep = ({ selected, onSelect }) => {
     );
 };
 
-export default function CreateAdWizard({ isOpen, onClose, user }) {
+const EMPTY_FORM = { category: '', title: '', price: '', whatsapp: '', description: '', image: '' };
+
+export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null }) {
+    const isEditMode = !!initialAd;
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState({ category: '', title: '', price: '', whatsapp: '', description: '', image: '' });
+    const [formData, setFormData] = useState(() => initialAd
+        ? { category: initialAd.category ?? '', title: initialAd.title ?? '', price: initialAd.price != null ? String(initialAd.price) : '', whatsapp: initialAd.whatsapp ?? '', description: initialAd.description ?? '', image: initialAd.image_url ?? '' }
+        : EMPTY_FORM
+    );
     const [imageFile, setImageFile] = useState(null);
     const { showToast } = useToast();
+
+    const resetAndClose = () => {
+        onClose();
+        setStep(1);
+        setImageFile(null);
+        setFormData(EMPTY_FORM);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!user) return showToast("Logue para publicar!", "error");
         setIsSubmitting(true);
         try {
-            let imageUrl = '';
+            let imageUrl = formData.image;
             if (imageFile) {
                 const ext = imageFile.name.split('.').pop();
                 const path = `ads/${user.uid}/${Date.now()}.${ext}`;
                 imageUrl = await uploadImage('ad-images', imageFile, path);
             }
-            await createAd({
-                ...formData,
-                image_url: imageUrl,
-                status: 'pending',
-                seller_id: user.uid,
-                price: parseFloat(formData.price.replace(/[^\d.,]/g, '').replace(',', '.')) || null,
-                expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            });
-            showToast("Sucesso! Aguarde aprovação.", "success");
-            onClose(); setStep(1); setImageFile(null);
-            setFormData({ category: '', title: '', price: '', whatsapp: '', description: '', image: '' });
+            const parsedPrice = parseFloat(String(formData.price).replace(/[^\d.,]/g, '').replace(',', '.')) || null;
+            if (isEditMode) {
+                await updateAd(initialAd.id, { ...formData, image_url: imageUrl, price: parsedPrice });
+                showToast("Anúncio atualizado!", "success");
+            } else {
+                await createAd({ ...formData, image_url: imageUrl, status: 'pending', seller_id: user.uid, price: parsedPrice, expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() });
+                showToast("Sucesso! Aguarde aprovação.", "success");
+            }
+            resetAndClose();
         } catch (error) {
             console.error(error);
-            showToast("Erro ao publicar anúncio. Tente novamente.", "error");
+            showToast(isEditMode ? "Erro ao atualizar anúncio." : "Erro ao publicar anúncio. Tente novamente.", "error");
         }
         finally { setIsSubmitting(false); }
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Criar Anúncio">
+        <Modal isOpen={isOpen} onClose={resetAndClose} title={isEditMode ? 'Editar Anúncio' : 'Criar Anúncio'}>
             <div className="py-2">
                 <div className="flex items-center justify-between mb-8 px-2">
                     {[1, 2, 3].map((s) => (

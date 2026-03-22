@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 
-export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick }) {
+export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick, onEditClick }) {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   return (
@@ -43,7 +43,7 @@ export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick })
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
+                <button onClick={() => onEditClick(ad)} className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
                   <Edit size={18} />
                 </button>
                 {pendingDeleteId === ad.id ? (
