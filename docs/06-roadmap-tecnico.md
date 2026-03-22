@@ -1,7 +1,7 @@
 # Tem No Bairro — Roadmap Técnico
 
-> **Versão:** 1.0
-> **Data:** Março/2026
+> **Versão:** 2.0
+> **Data:** 22/03/2026
 > **Lançamento:** Maio/2026
 
 ---
@@ -10,20 +10,24 @@
 
 | Componente | Status |
 |---|---|
-| React 19 + Vite 7 + Tailwind 3 | ✅ Configurado |
-| Supabase (DB + Auth) | ✅ Integrado (env vazio — pendente credenciais) |
-| Zustand (authStore) | ✅ Implementado |
-| PWA + Workbox | ✅ Configurado e buildando |
-| AdminPanel (8 tabs) | ✅ Estrutura criada |
+| React 19 + Vite 7 + Tailwind 3 | ✅ Ativo |
+| Supabase (DB + Auth) | ✅ Conectado, schema completo, RLS configurado |
+| Zustand (authStore + uiStore + merchantStore) | ✅ 3 stores implementados com seletores |
+| PWA + Workbox | ✅ Build gerando SW + 12 entradas pré-cacheadas |
+| AdminPanel (8 tabs) | ✅ In-page, sem alert() |
 | MerchantsView + Carrosséis | ✅ Implementado |
 | Build sem erros | ✅ |
-| Schema SQL no Supabase | ⏳ Pendente execução |
-| Variáveis de ambiente (.env.local) | ⏳ Pendente preenchimento |
-| Google OAuth configurado | ⏳ Pendente no Supabase Dashboard |
-| RLS (Row Level Security) | ⏳ Pendente configuração |
+| Schema SQL no Supabase | ✅ Executado (M1–M7) |
+| Variáveis de ambiente (.env.local) | ✅ Preenchido e funcionando |
+| Google OAuth configurado | ✅ Testado (primeiro login: 16/03/2026) |
+| RLS (Row Level Security) | ✅ Configurado em todas as tabelas |
+| Jornal Local conectado ao backend | ✅ NewsFeed, NewsDetailModal, badges |
+| Classificados CRUD completo | ✅ criar + editar + excluir anúncio |
+| Zero alert() no codebase | ✅ Auditoria P3 concluída |
+| Router.jsx extraído de App.jsx | ✅ App.jsx < 200 linhas |
 | AuditTab — dados reais | ⏳ Usando mock |
-| Zustand stores (merchants, UI) | ⏳ Não criados |
 | Algolia (busca) | ⏳ Instalado, não integrado |
+| Métricas reais no DashboardTab | ⏳ Conectar statsService |
 
 ---
 
@@ -155,11 +159,13 @@
 | Tarefa | Prioridade |
 |---|---|
 | Integrar Algolia para busca em tempo real | 🟡 Médio |
-| Criar Zustand stores para merchants e UI | 🟡 Médio |
+| ~~Criar Zustand stores para merchants e UI~~ | ✅ Concluído (22/03/2026) |
 | Refatorar componentes legados da raiz src/ para features/ | 🟡 Médio |
 | AuditTab com dados reais (tabela audit_logs) | 🟡 Médio |
 | Chatbot Genkit (chatbot do bairro) | 🟡 Médio |
 | Tabela chat_history para ChatbotWidget | 🟡 Médio |
+| Avaliação de comércio (nota + comentário) | 🟡 Médio |
+| Share nativo WhatsApp nos cards | 🟡 Médio |
 | Plano Gold — módulo de gestão assistida | 🔵 Futuro |
 | Multi-tenant por bairro | 🔵 Futuro |
 | Publicação nas stores (App Store / Play Store) | 🔵 Futuro |

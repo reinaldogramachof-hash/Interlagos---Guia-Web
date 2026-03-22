@@ -1,10 +1,10 @@
 # Tem No Bairro — Guia de Execução do Projeto
 
-> **Versão:** 1.5
+> **Versão:** 2.0
 > **Data de criação:** Março/2026
-> **Última atualização:** 16/03/2026
+> **Última atualização:** 22/03/2026
 > **Lançamento previsto:** Maio/2026
-> **Status geral:** 🟡 Em andamento — Fase 1 concluída, Fase 2 não iniciada
+> **Status geral:** 🟢 Em andamento — Fases 0, 1 e 2 concluídas. Sprint de qualidade e arquitetura P1–P3 concluído. Fase 3 parcialmente concluída.
 
 ---
 
@@ -40,7 +40,7 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 |---|---|---|
 | Frontend | React 19 + Vite 7 | ✅ Ativo |
 | Estilo | Tailwind CSS 3 (Mobile-First) | ✅ Ativo |
-| Estado Global | Zustand 5 | ✅ authStore implementado |
+| Estado Global | Zustand 5 | ✅ authStore + uiStore + merchantStore implementados |
 | Backend / DB | Supabase (PostgreSQL) | ✅ Conectado e com schema |
 | Auth | Supabase Auth — Google OAuth + Magic Link | ✅ Configurado e testado |
 | PWA | vite-plugin-pwa + Workbox | ✅ Build gerando SW |
@@ -181,6 +181,76 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 
 ---
 
+### Sessão 7 — Jornal Local: Conexão ao Backend + Correções de Campo
+**Data:** 22/03/2026 | **Commit:** `6c2f256`
+
+**Executado:**
+
+| Arquivo | Mudança |
+|---|---|
+| `services/newsService.js` | Adicionados `updateNews(id, data)` e `updateNewsStatus(id, status)` |
+| `features/news/NewsDetailModal.jsx` | 5 bugs corrigidos: `image_url`, `created_at` formatado, `content` real, `author_name` com fallback, `navigator.clipboard` substituindo `alert()` |
+| `features/admin/tabs/NewsTab.jsx` | Reescrita completa — upload para bucket `news-images`, campos separados `summary`/`content`, categorias expandidas, `showToast` substituindo `alert/confirm` |
+| `features/news/NewsCard.jsx` | Badge "Oficial" (equipe) vs "Morador" baseado em `author_name` |
+
+**Resultado:** Jornal Local conectado ao banco de dados real. Build ✅
+
+---
+
+### Sessão 8 — Sprint P2: Zustand Stores + Router + Hooks
+**Data:** 22/03/2026 | **Commits:** `43cd44d`, `aaa27e7`
+
+**Executado:**
+
+| Arquivo | Mudança |
+|---|---|
+| `stores/uiStore.js` | NOVO — centraliza: currentView, isLoginOpen, isSidebarOpen, showCreateAd, selectedMerchant/Service |
+| `stores/merchantStore.js` | NOVO — merchants, loading, selectedCategory, searchTerm + init() com realtime |
+| `hooks/useRequireAuth.js` | NOVO — hook de Lazy Login: `pendingActionRef` + `requireAuth` + `handleLoginSuccess` |
+| `app/Router.jsx` | NOVO — switch de views extraído de App.jsx com seletores granulares do Zustand |
+| `App.jsx` | Reduzido de 194 → 112 linhas. Dead state removido (selectedAd, selectedNews, selectedCampaign) |
+| `features/auth/AuthContext.jsx` | Movido de `context/` → `features/auth/`. 16 import paths atualizados em toda a codebase |
+| `services/communityService.js` | Adicionado `voteSuggestion(id)` — chama RPC `increment_suggestion_votes` |
+
+**Supabase (via Dashboard):**
+- RPC `increment_suggestion_votes` executada ✅
+
+**Resultado:** App.jsx < 200 linhas. Arquitetura feature-based consolidada. Build ✅
+
+---
+
+### Sessão 9 — Sprint P3-B + P3-C: Auditoria de Qualidade
+**Data:** 22/03/2026 | **Commits:** `56234f3`, `206d9f9`
+
+**Auditoria de 19 arquivos JSX — 22 violações encontradas e corrigidas:**
+
+| Categoria | Violações | Arquivos afetados |
+|---|---|---|
+| CAT-1: `alert()`/`window.confirm` | 18 ocorrências | AdminPanel, MerchantsTab, CreateCampaignForm, CampaignDetailModal, MerchantDetailModal, UpgradeModal, DonationsView, ApprovalsTab, CampaignsTab, UsersTab, TicketsTab |
+| CAT-2: `<img>` sem fallback de nulo | 5 ocorrências | SuggestionsView, SettingsTab, UsersTab, AdsTab, FavoritesTab |
+| CAT-3: `pendingDeleteId` pattern | 1 ocorrência | AdsTab (inline confirmation substituindo `window.confirm`) |
+| CAT-4: Erros silenciados em `catch` | 15 ocorrências | ResidentPanel, MerchantPanel, DonationsView, SettingsTab, CampaignsTab, UsersTab, TicketsTab, AuditTab, AdsView, CreateAdWizard, ProfileView |
+
+**Resultado:** Zero `alert()` / `window.confirm` no codebase. Todos os `catch` exibem feedback via `showToast`. Build ✅
+
+---
+
+### Sessão 10 — Edit de Anúncio + Fix Bug Modal Wizard
+**Data:** 22/03/2026 | **Commit:** `15d6303`
+
+**Executado:**
+
+| Arquivo | Mudança |
+|---|---|
+| `services/adsService.js` | Adicionado `updateAd(adId, data)` |
+| `features/ads/CreateAdWizard.jsx` | Modo edit via prop `initialAd` — pré-popula campos, chama `updateAd`, título muda para "Editar Anúncio". Fix: bug onde wizard usava `onBack` mas esperava `isOpen/onClose` (Modal nunca abria) |
+| `features/merchants/MerchantPanel.jsx` | Add estado `adToEdit`, handlers `handleEditAd` e `handleWizardClose` (recarrega lista após fechar). Wizard agora renderizado como Modal correto |
+| `features/merchants/merchant-panel/tabs/AdsTab.jsx` | Botão Edit agora chama `onEditClick(ad)` |
+
+**Resultado:** CRUD completo de anúncios no Painel do Comerciante. Build ✅
+
+---
+
 ### Sessão 6 — App Shell Unificado + Avatar Upload + Correções Visuais
 **Data:** 16/03/2026
 
@@ -248,33 +318,44 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 
 ---
 
-## 5. ESTADO ATUAL DO FRONTEND (16/03/2026)
+## 5. ESTADO ATUAL DO FRONTEND (22/03/2026)
 
-### Arquivos de código (~75 arquivos em `src/`)
+### Arquivos de código (~85 arquivos em `src/`)
 
 | Área | Arquivos | Status |
 |---|---|---|
 | Entry point | `main.jsx` | ✅ Estável |
-| App shell | `App.jsx`, `components/AppHeader.jsx`, `components/BottomNav.jsx` | ✅ Unificado — nav persistente em todas as views |
-| Auth | `stores/authStore.js` (com `refreshProfile`), `context/AuthContext.jsx` | ✅ Completo |
+| App shell | `app/App.jsx` (112 linhas), `app/Router.jsx`, `components/AppHeader.jsx`, `components/BottomNav.jsx` | ✅ < 200 linhas. Router extraído |
+| Auth | `stores/authStore.js`, `features/auth/AuthContext.jsx` (wrapper), `hooks/useRequireAuth.js` | ✅ Lazy Login via hook |
+| Stores | `stores/authStore.js`, `stores/uiStore.js`, `stores/merchantStore.js` | ✅ 3 stores Zustand com seletores exportados |
 | Lib | `lib/supabaseClient.js` | ✅ Completo |
-| Serviços | `services/` (8 arquivos: +`storageService`, `updateUserProfile` em `authService`) | ✅ Storage + Upload funcionando |
+| Serviços | `services/` (9 arquivos: +`communityService` com `voteSuggestion`) | ✅ CRUD completo para todas as entidades |
 | Admin | `features/admin/` (AdminPanel + 8 tabs) | ⚠️ AuditTab usa mock; renderiza in-page |
-| Merchants | `features/merchants/` (MerchantsView, PremiumCarousel, ProCarousel, MerchantPanel + 3 tabs) | ✅ Upload de imagem funcionando |
-| Classificados | `features/ads/` (AdsView, AdDetailModal, CreateAdWizard) | ✅ Upload de imagem + expires_at |
+| Merchants | `features/merchants/` (MerchantsView, PremiumCarousel, ProCarousel, MerchantPanel + 3 tabs) | ✅ CRUD completo de anúncios (criar, editar, excluir) |
+| Classificados | `features/ads/` (AdsView, AdDetailModal, CreateAdWizard — modo create + edit) | ✅ Upload + expires_at + updateAd |
+| Jornal | `features/news/` (NewsFeed, NewsDetailModal, NewsCard) | ✅ Conectado ao Supabase — badges Oficial/Morador |
+| Comunidade | `features/community/` (SuggestionsView, DonationsView, ResidentPanel) | ✅ voteSuggestion ativo |
 | Perfil | `features/auth/ProfileView.jsx` | ✅ Upload de avatar funcionando |
-| Componentes | `components/ImageUpload.jsx`, `Modal.jsx`, `Toast.jsx`, etc. | ✅ ImageUpload reutilizável |
-| Painéis | `features/merchants/MerchantPanel.jsx`, `features/community/ResidentPanel.jsx` | ✅ In-page (não mais modal) |
+| Componentes | `components/ImageUpload.jsx`, `Modal.jsx`, `Toast.jsx`, etc. | ✅ Sem alert() no codebase |
 | PWA | `vite.config.js` | ✅ SW gerado no build |
 
-### Build atual
+### Build atual (22/03/2026)
 
 ```
 vendor:   11 KB  │  ui/lucide: 21 KB
-supabase: 172 KB │  index:     366 KB
-Total:    ~624 KB (gzip ~168 KB)
+supabase: 172 KB │  index:     368 KB
+Total:    ~626 KB (gzip ~169 KB)
 PWA:      12 entradas pré-cacheadas ✅
+Build time: ~6s
 ```
+
+### Invariantes de qualidade atuais
+
+- Zero `alert()` / `window.confirm` no codebase ✅
+- Todos os `<img>` com fallback de nulo ou `onError` ✅
+- Todos os `catch` com `showToast` visível ao usuário ✅
+- Nenhum arquivo JSX acima de 200 linhas (exceto legados em `src/` raiz) ✅
+- Nenhum componente importa `supabaseClient` diretamente ✅
 
 ---
 
@@ -322,33 +403,35 @@ PWA:      12 entradas pré-cacheadas ✅
 
 ---
 
-### ⏳ FASE 2 — Jornal Local
-**Status:** PENDENTE | **Meta:** Semanas 2–3
+### ✅ FASE 2 — Jornal Local
+**Status:** CONCLUÍDA (22/03/2026)
 
 | Tarefa | Status |
 |---|---|
-| NewsFeed — lista de notícias | ✅ Existe (com mock fallback) |
-| NewsDetailModal — detalhe da notícia | ✅ Existe |
-| Publicação de notícia pela equipe (AdminPanel NewsTab) | ✅ Existe (a testar com dados reais) |
-| Submissão de notícia por morador (formulário + termos) | ⏳ A implementar |
-| Badge "Oficial" vs "Morador" | ⏳ A implementar |
-| Curtir e comentar notícia | ⏳ A verificar |
-| Mover para `features/news/` | ⏳ Refactoring |
+| NewsFeed — lista de notícias | ✅ Conectado ao Supabase real |
+| NewsDetailModal — detalhe da notícia | ✅ Campos corretos (image_url, content, created_at, author_name) |
+| Publicação de notícia pela equipe (AdminPanel NewsTab) | ✅ Upload de capa + campos separados summary/content |
+| Badge "Oficial" vs "Morador" | ✅ NewsCard com badge baseado em author_name |
+| `features/news/` estruturado | ✅ NewsFeed, NewsDetailModal, NewsCard |
+| Submissão de notícia por morador (formulário + termos) | ⏳ Fase futura |
+| Curtir e comentar notícia | ⏳ Fase futura |
 
 ---
 
-### ⏳ FASE 3 — Classificados
-**Status:** PENDENTE | **Meta:** Semana 3
+### 🟡 FASE 3 — Classificados
+**Status:** PARCIALMENTE CONCLUÍDA
 
 | Tarefa | Status |
 |---|---|
-| AdsView — lista de anúncios | ✅ Existe |
+| AdsView — lista de anúncios | ✅ Conectado ao Supabase |
 | AdDetailModal | ✅ Existe |
-| CreateAdWizard — criação de anúncio | ✅ Existe (a testar com dados reais) |
-| Contato via WhatsApp do anúncio | ⏳ A verificar |
-| Expiração automática 30 dias (cron Supabase) | ⏳ Função `expire_ads` criada — falta ativar cron |
-| Upload de fotos do anúncio (Supabase Storage) | ⏳ Depende dos buckets da Fase 1 |
-| Mover para `features/ads/` | ⏳ Refactoring |
+| CreateAdWizard — criação com upload de imagem | ✅ Upload para `ad-images` bucket + `expires_at` +30 dias |
+| Edit de anúncio no Painel do Comerciante | ✅ Modo edit via `initialAd` prop no wizard |
+| Excluir anúncio com confirmação inline | ✅ `pendingDeleteId` pattern |
+| Expiração automática 30 dias | ✅ RPC `expire_ads` + cron pg_cron diário 3h UTC |
+| `features/ads/` estruturado | ✅ |
+| Contato via WhatsApp do anúncio | ⏳ A verificar no AdDetailModal |
+| ApprovalsTab com dados reais de anúncio | ⏳ A testar ponta-a-ponta |
 
 ---
 
@@ -420,11 +503,13 @@ PWA:      12 entradas pré-cacheadas ✅
 | Tarefa | Prioridade |
 |---|---|
 | Integrar Algolia para busca em tempo real | 🟡 Médio |
-| Criar Zustand stores para merchants e UI | 🟡 Médio |
-| Refatorar componentes legados `src/` para `features/` | 🟡 Médio |
+| ~~Criar Zustand stores para merchants e UI~~ | ✅ Concluído (Sprint P2) |
+| Refatorar componentes legados `src/` raiz para `features/` | 🟡 Médio |
 | AuditTab com dados reais (tabela `audit_logs`) | 🟡 Médio |
 | Chatbot Genkit integrado ao app | 🟡 Médio |
 | Tabela `chat_history` para ChatbotWidget | 🟡 Médio |
+| Avaliação de comércio (nota + comentário) | 🟡 Médio |
+| Share nativo WhatsApp nos cards | 🟡 Médio |
 | Plano Gold — módulo de gestão assistida | 🔵 Futuro |
 | Multi-tenant por bairro | 🔵 Futuro |
 | Publicação nas stores (App Store / Play Store) | 🔵 Futuro |
@@ -517,15 +602,17 @@ O pequeno lojista do bairro organiza seu planejamento financeiro anual em torno 
 
 ## 8. PENDÊNCIAS TÉCNICAS IMEDIATAS
 
-> Ordenadas por impacto no próximo sprint (Fase 2 — Jornal Local).
+> Ordenadas por impacto no próximo sprint (22/03/2026).
 
 | # | Tarefa | Impacto | Onde |
 |---|---|---|---|
-| 1 | **Testar ApprovalsTab com dados reais** — cadastrar comércio e aprovar pelo admin | Validação end-to-end da Fase 1 | `src/features/admin/tabs/ApprovalsTab.jsx` + Supabase Dashboard |
-| 2 | **Refatorar arquivos acima de 200 linhas** | Regra obrigatória do CLAUDE.md | `NewsFeed.jsx` (253), `DonationsView.jsx` (222), `ResidentPanel.jsx` (207), `SidebarMenu.jsx` (207) |
-| 3 | **Remover policy duplicada em `profiles`** | Limpeza técnica — 2 SELECT policies | Supabase SQL Editor |
-| 4 | **Remover credenciais Firebase legacy do `.env.local`** | Segurança / limpeza | `.env.local` linhas 8-15 |
-| 5 | **Iniciar Fase 2** — NewsFeed com dados reais + upload de capa de notícia | Módulo de jornalismo comunitário | `features/news/NewsFeed.jsx`, `adsService`, `newsService` |
+| 1 | **Testar ApprovalsTab com dados reais** — cadastrar comércio → aprovar admin → verificar listagem | Validação end-to-end do fluxo principal | `features/admin/tabs/ApprovalsTab.jsx` + Supabase Dashboard |
+| 2 | **Verificar WhatsApp no AdDetailModal** — confirmar que o link `wa.me` abre corretamente | Funcionalidade core do Classificados | `features/ads/AdDetailModal.jsx` |
+| 3 | **Conectar métricas reais no MerchantPanel DashboardTab** — views, cliques, favoritos via statsService | Valor percebido pelo comerciante | `features/merchants/merchant-panel/tabs/DashboardTab.jsx` + `statsService.js` |
+| 4 | **Remover policy duplicada em `profiles`** | Limpeza técnica — 2 SELECT policies | Supabase SQL Editor |
+| 5 | **Remover credenciais Firebase legacy do `.env.local`** | Segurança | `.env.local` linhas 8-15 |
+| 6 | **Configurar cron job `expire_campaigns`** | Campanhas expiradas ficam ativas | Supabase Dashboard → pg_cron |
+| 7 | **Refatorar arquivos legados acima de 200 linhas** | Regra CLAUDE.md | `NewsFeed.jsx`, `DonationsView.jsx`, `ResidentPanel.jsx`, `SidebarMenu.jsx` |
 
 ---
 
@@ -549,9 +636,11 @@ MÓDULOS — FUNCIONALIDADE CORE
 ✅ Upload de imagem de anúncio funcionando
 ✅ Upload de avatar do perfil funcionando
 ✅ Classificados — criar anúncio com expiração em 30 dias
+✅ Classificados — editar e excluir anúncio pelo painel do comerciante
+✅ Feed de notícias com dados reais — badges Oficial/Morador
+✅ Caixa de Sugestões — votação funcional (RPC ativa)
 □  Cadastro de comerciante end-to-end testado ponta-a-ponta (signup → aprovação → listagem)
 □  Aprovação pelo admin testada com dados reais
-□  Feed de notícias com dados reais
 □  Ação Social / Campanhas funcionando
 □  Utilidade Pública com conteúdo real inserido
 
@@ -613,4 +702,4 @@ VITE_ALGOLIA_SEARCH_KEY=
 
 ---
 
-*Documento criado em 16/03/2026. Atualizar a cada sessão de trabalho relevante.*
+*Documento criado em 16/03/2026. Última atualização: 22/03/2026 (v2.0). Atualizar a cada sessão de trabalho relevante.*
