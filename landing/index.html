@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TemNoBairro — O guia digital do seu bairro</title>
+  <meta name="description"
+    content="TemNoBairro é o hub digital comunitário do seu bairro. Encontre comércios locais, publique classificados e acompanhe as novidades da sua região." />
+
+  <!-- Open Graph (WhatsApp / redes sociais) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.temnobairro.online/" />
+  <meta property="og:title" content="TemNoBairro — O guia digital do seu bairro" />
+  <meta property="og:description"
+    content="Conecte-se com comércios locais, classificados C2C e o jornal do bairro — tudo em um só lugar." />
+  <meta property="og:image" content="https://www.temnobairro.online/assets/hero.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Preconnect Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Schema.org (SEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "TemNoBairro",
+    "url": "https://www.temnobairro.online",
+    "description": "Hub digital comunitário para bairros brasileiros."
+  }
+  </script>
+</head>
+
+<body>
+
+  <!-- Skip-to-content (Acessibilidade) -->
+  <a class="skip-link" href="#main-content">Ir ao conteúdo principal</a>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <header class="navbar" role="banner">
+    <div class="container navbar__inner">
+      <a href="/" class="navbar__logo" aria-label="TemNoBairro — página inicial">
+        <span class="navbar__logo-icon" aria-hidden="true">📍</span>
+        TemNoBairro
+      </a>
+      <a href="#bairros" class="navbar__cta" id="nav-cta">
+        Explorar bairros
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          aria-hidden="true">
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO — Seção 1
+  ============================================================ -->
+  <main id="main-content">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__bg" role="img" aria-label="Vista aérea noturna de bairro urbano brasileiro"></div>
+      <canvas id="hero-canvas" class="hero__glow" aria-hidden="true"
+        style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+      <div class="hero__overlay" aria-hidden="true"></div>
+
+      <div class="container">
+        <div class="hero__content">
+          <p class="hero__eyebrow">
+            <span aria-hidden="true"></span>
+            Hub Digital Comunitário
+          </p>
+          <h1 id="hero-title" class="hero__title">
+            Seu bairro,<br />
+            agora <span class="highlight">conectado.</span>
+          </h1>
+          <p class="hero__desc">
+            Comércios locais, classificados C2C, jornal do bairro, ações sociais e muito mais!
+            Tudo reunido em uma plataforma feita para a sua comunidade.
+          </p>
+          <div class="hero__actions">
+            <a href="#bairros" class="btn-primary" id="hero-cta-primary">
+              Explorar bairros
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a href="#como-funciona" class="btn-secondary" id="hero-cta-secondary">
+              Como funciona
+            </a>
+          </div>
+          <div class="hero__stats" role="list">
+            <div role="listitem">
+              <p class="hero__stat-value">+150</p>
+              <p class="hero__stat-label">Comércios cadastrados</p>
+            </div>
+            <div role="listitem">
+              <p class="hero__stat-value">1</p>
+              <p class="hero__stat-label">Bairro ativo (+ em breve)</p>
+            </div>
+            <div role="listitem">
+              <p class="hero__stat-value">100%</p>
+              <p class="hero__stat-label">Gratuito para moradores</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         O QUE É — Seção 2
+    ============================================================ -->
+    <section class="what-is" aria-labelledby="what-is-title">
+      <div class="container">
+        <span class="section-tag reveal">🌟 A plataforma</span>
+        <h2 id="what-is-title" class="section-heading reveal reveal-delay-1">
+          Três pilares para<br />a vida no bairro
+        </h2>
+        <p class="section-sub reveal reveal-delay-2">
+          O TemNoBairro reúne em um único lugar tudo o que você precisa para se conectar com a sua comunidade local.
+        </p>
+
+        <div class="what-is__grid">
+          <article class="pillar-card reveal reveal-delay-1">
+            <div class="pillar-card__icon pillar-card__icon--brand" aria-hidden="true">🏪</div>
+            <h3 class="pillar-card__title">Guia Comercial</h3>
+            <p class="pillar-card__desc">
+              Encontre restaurantes, farmácias, salões, oficinas e centenas de outros negócios do seu bairro com fotos,
+              contato e localização.
+            </p>
+          </article>
+          <article class="pillar-card reveal reveal-delay-2">
+            <div class="pillar-card__icon pillar-card__icon--violet" aria-hidden="true">📦</div>
+            <h3 class="pillar-card__title">Classificados C2C</h3>
+            <p class="pillar-card__desc">
+              Compre, venda e troque com vizinhos da sua região. Seguro, rápido e sem taxas — direto pelo WhatsApp.
+            </p>
+          </article>
+          <article class="pillar-card reveal reveal-delay-3">
+            <div class="pillar-card__icon pillar-card__icon--amber" aria-hidden="true">📰</div>
+            <h3 class="pillar-card__title">Jornal do Bairro</h3>
+            <p class="pillar-card__desc">
+              Notícias hiperlocais, avisos da prefeitura, eventos culturais e tudo que acontece a poucos quarteirões de
+              casa.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SELETOR DE BAIRROS — Seção 3
+    ============================================================ -->
+    <section class="bairros" id="bairros" aria-labelledby="bairros-title">
+      <div class="container">
+        <span class="section-tag reveal">📍 Bairros</span>
+        <h2 id="bairros-title" class="section-heading reveal reveal-delay-1">
+          Escolha seu bairro
+        </h2>
+        <p class="section-sub reveal reveal-delay-2">
+          Selecione o bairro que você quer explorar. Novos bairros de São José dos Campos chegam em breve!
+        </p>
+
+        <div class="bairros__grid">
+
+          <!-- Interlagos — ATIVO -->
+          <a href="https://www.temnobairro.online/interlagos/"
+            class="bairro-card bairro-card--active reveal reveal-delay-1" id="card-interlagos"
+            aria-label="Acessar Interlagos, bairro ativo">
+            <div class="bairro-card__bg" style="background-image: url('assets/hero.png');" aria-hidden="true"></div>
+            <div class="bairro-card__overlay" aria-hidden="true"></div>
+            <div class="bairro-card__arrow" aria-hidden="true">→</div>
+            <div class="bairro-card__content">
+              <span class="bairro-card__badge bairro-card__badge--active">✦ Ativo</span>
+              <h3 class="bairro-card__name">Parque Interlagos</h3>
+              <p class="bairro-card__meta">São José dos Campos, SP</p>
+            </div>
+          </a>
+
+          <!-- Vila Olímpia — Em breve -->
+          <div class="bairro-card bairro-card--soon reveal reveal-delay-2" aria-label="Vila Olímpia — em breve"
+            role="img">
+            <div class="bairro-card__bg" style="background: linear-gradient(135deg,#1e1b4b,#111113);"
+              aria-hidden="true"></div>
+            <div class="bairro-card__overlay" aria-hidden="true"></div>
+            <div class="bairro-card__content">
+              <span class="bairro-card__badge bairro-card__badge--soon">Em breve</span>
+              <h3 class="bairro-card__name">Santa Júlia</h3>
+              <p class="bairro-card__meta">São José dos Campos, SP</p>
+            </div>
+          </div>
+
+          <!-- Moema — Em breve -->
+          <div class="bairro-card bairro-card--soon reveal reveal-delay-3" aria-label="Moema — em breve" role="img">
+            <div class="bairro-card__bg" style="background: linear-gradient(135deg,#1c1917,#111113);"
+              aria-hidden="true"></div>
+            <div class="bairro-card__overlay" aria-hidden="true"></div>
+            <div class="bairro-card__content">
+              <span class="bairro-card__badge bairro-card__badge--soon">Em breve</span>
+              <h3 class="bairro-card__name">Parque Novo Horizonte</h3>
+              <p class="bairro-card__meta">São José dos Campos, SP</p>
+            </div>
+          </div>
+
+          <!-- Santo André — Em breve -->
+          <div class="bairro-card bairro-card--soon reveal reveal-delay-4" aria-label="Santo André — em breve"
+            role="img">
+            <div class="bairro-card__bg" style="background: linear-gradient(135deg,#0c1a2e,#111113);"
+              aria-hidden="true"></div>
+            <div class="bairro-card__overlay" aria-hidden="true"></div>
+            <div class="bairro-card__content">
+              <span class="bairro-card__badge bairro-card__badge--soon">Em breve</span>
+              <h3 class="bairro-card__name">Jardim das Indústrias</h3>
+              <p class="bairro-card__meta">São José dos Campos, SP</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         COMO FUNCIONA — Seção 4
+    ============================================================ -->
+    <section class="how" id="como-funciona" aria-labelledby="how-title">
+      <div class="container">
+        <span class="section-tag reveal">⚡ Simples assim</span>
+        <h2 id="how-title" class="section-heading reveal reveal-delay-1">
+          Como funciona?
+        </h2>
+        <p class="section-sub reveal reveal-delay-2">
+          Três passos simples para você aproveitar tudo que o bairro tem a oferecer.
+        </p>
+
+        <div class="steps">
+          <div class="step reveal reveal-delay-1">
+            <div class="step__num" aria-hidden="true">1</div>
+            <div>
+              <h3 class="step__title">Escolha seu bairro</h3>
+              <p class="step__desc">Selecione o bairro onde você mora ou trabalha na tela inicial. Sem cadastro
+                obrigatório.</p>
+            </div>
+          </div>
+          <div class="step reveal reveal-delay-2">
+            <div class="step__num" aria-hidden="true">2</div>
+            <div>
+              <h3 class="step__title">Explore o que tem por aí</h3>
+              <p class="step__desc">Pesquise comércios, leia notícias locais e veja os classificados da sua vizinhança.
+              </p>
+            </div>
+          </div>
+          <div class="step reveal reveal-delay-3">
+            <div class="step__num" aria-hidden="true">3</div>
+            <div>
+              <h3 class="step__title">Conecte-se com a comunidade</h3>
+              <p class="step__desc">Publique anúncios, deixe avaliações e compartilhe com amigos pelo WhatsApp.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PARA COMERCIANTES — Seção 5
+    ============================================================ -->
+    <section class="merchants" aria-labelledby="merchants-title">
+      <div class="container">
+        <div class="merchants__inner reveal">
+          <span class="section-tag" style="justify-content: center;">🏢 Para comerciantes</span>
+          <h2 id="merchants-title" class="section-heading" style="text-align:center;margin-top:0.5rem;">
+            Coloque seu negócio no mapa
+          </h2>
+          <p class="section-sub" style="text-align:center;margin:0 auto;margin-top:0.75rem;">
+            Alcance novos clientes do seu bairro todos os dias. Planos simples e sem fidelidade.
+          </p>
+
+          <div class="plans">
+            <div class="plan-card">
+              <p class="plan-card__label">Plano Gratuito</p>
+              <p class="plan-card__price">R$ 0 <span>/ sempre</span></p>
+              <ul class="plan-card__features">
+                <li><span class="check" aria-hidden="true">✔</span> Perfil no guia comercial</li>
+                <li><span class="check" aria-hidden="true">✔</span> WhatsApp e telefone em destaque</li>
+                <li><span class="check" aria-hidden="true">✔</span> 1 foto principal</li>
+                <li><span class="check" aria-hidden="true">✔</span> Avaliações de clientes</li>
+              </ul>
+            </div>
+            <div class="plan-card plan-card--pro">
+              <p class="plan-card__label">Plano Pro ⭐</p>
+              <p class="plan-card__price">Consulte <span>/ mês</span></p>
+              <ul class="plan-card__features">
+                <li><span class="check" aria-hidden="true">✔</span> Destaque no topo da categoria</li>
+                <li><span class="check" aria-hidden="true">✔</span> Galeria de fotos ilimitada</li>
+                <li><span class="check" aria-hidden="true">✔</span> Campanhas e cupons de desconto</li>
+                <li><span class="check" aria-hidden="true">✔</span> Dashboard de analytics</li>
+                <li><span class="check" aria-hidden="true">✔</span> Selo "Negócio Verificado"</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="merchants__cta-row">
+            <a href="https://www.temnobairro.online/interlagos/" class="btn-primary" id="merchant-cta">
+              Cadastrar meu negócio gratuitamente
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DEPOIMENTOS — Seção 6
+    ============================================================ -->
+    <section class="testimonials" aria-labelledby="testimonials-title">
+      <div class="container">
+        <span class="section-tag reveal">💬 Comunidade</span>
+        <h2 id="testimonials-title" class="section-heading reveal reveal-delay-1">
+          O que dizem os moradores
+        </h2>
+
+        <div class="testimonials__grid">
+          <div class="tcard reveal reveal-delay-1">
+            <p class="tcard__quote">"Finalmente achei a padaria do Seu João que eu estava procurando há semanas. O
+              TemNoBairro salvou meu café da manhã!"</p>
+            <div class="tcard__author">
+              <div class="tcard__avatar" aria-hidden="true">AM</div>
+              <div>
+                <p class="tcard__name">Ana Martins</p>
+                <p class="tcard__role">Moradora de Interlagos</p>
+              </div>
+            </div>
+          </div>
+          <div class="tcard reveal reveal-delay-2">
+            <p class="tcard__quote">"Cadastrei minha barbearia e no primeiro mês já tive 12 novos clientes vindos da
+              plataforma. Vale demais!"</p>
+            <div class="tcard__author">
+              <div class="tcard__avatar" aria-hidden="true">RS</div>
+              <div>
+                <p class="tcard__name">Ricardo Santos</p>
+                <p class="tcard__role">Barbeiro · Interlagos</p>
+              </div>
+            </div>
+          </div>
+          <div class="tcard reveal reveal-delay-3">
+            <p class="tcard__quote">"Vendi meu sofá em 2 dias pelos classificados. O comprador é do mesmo bloco que eu.
+              Incrível como o bairro se conecta aqui."</p>
+            <div class="tcard__author">
+              <div class="tcard__avatar" aria-hidden="true">FC</div>
+              <div>
+                <p class="tcard__name">Fernanda Costa</p>
+                <p class="tcard__role">Moradora de Interlagos</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       FOOTER — Seção 7
+  ============================================================ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <a href="/" class="navbar__logo" aria-label="TemNoBairro — página inicial">
+            <span class="navbar__logo-icon" aria-hidden="true">📍</span>
+            TemNoBairro
+          </a>
+          <p>O hub digital comunitário dos bairros brasileiros. Feito com ❤️ para comunidades locais.</p>
+        </div>
+        <div class="footer__links">
+          <h4>Bairros</h4>
+          <ul>
+            <li><a href="https://www.temnobairro.online/interlagos/">Interlagos ↗</a></li>
+            <li><a href="#bairros">Ver todos</a></li>
+          </ul>
+        </div>
+        <div class="footer__links">
+          <h4>Plataforma</h4>
+          <ul>
+            <li><a href="#como-funciona">Como funciona</a></li>
+            <li><a href="#bairros">Para comerciantes</a></li>
+          </ul>
+        </div>
+        <div class="footer__links">
+          <h4>Contato</h4>
+          <ul>
+            <li><a href="mailto:contato@temnobairro.online">contato@temnobairro.online</a></li>
+            <li><a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copy">© 2026 TemNoBairro. Todos os direitos reservados.</p>
+        <div class="footer__social" aria-label="Redes sociais">
+          <a href="https://instagram.com/temnobairro" target="_blank" rel="noopener noreferrer"
+            aria-label="Instagram do TemNoBairro">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+            </svg>
+          </a>
+          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+            aria-label="WhatsApp do TemNoBairro">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="js/main.js" defer></script>
+</body>
+
+</html>

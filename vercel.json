@@ -3,10 +3,30 @@
     "outputDirectory": "app/dist",
     "installCommand": "echo 'install handled in buildCommand'",
     "framework": null,
-    "rewrites": [
+    "routes": [
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "/assets/(.*)",
+            "dest": "/landing/assets/$1"
+        },
+        {
+            "src": "/css/(.*)",
+            "dest": "/landing/css/$1"
+        },
+        {
+            "src": "/js/(.*)",
+            "dest": "/landing/js/$1"
+        },
+        {
+            "src": "/interlagos/(.*)",
+            "dest": "/interlagos/$1"
+        },
+        {
+            "src": "/",
+            "dest": "/landing/index.html"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
-}
+}

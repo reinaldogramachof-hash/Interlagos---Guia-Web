@@ -185,11 +185,14 @@ VITE_GENKIT_API_URL=
 ## PRIORIDADE DE EXECUÇÃO (ROADMAP TÉCNICO)
 
 1. `[FEITO]` Backup pré-migração (commit: "Backup pré-migração Supabase")
-2. `[PRÓXIMO]` Criar `lib/supabaseClient.js` e novo `.env`
-3. `[PRÓXIMO]` Migrar `AuthContext.jsx` + `authService.js` → Supabase Auth
-4. `[PRÓXIMO]` Migrar coleções Firestore → tabelas Supabase
-5. `[PRÓXIMO]` Desmembrar `AdminPanel.jsx` em tabs isoladas
-6. `[PRÓXIMO]` Extrair carrosséis e lógica de scroll de `App.jsx`
-7. `[PRÓXIMO]` Configurar `vite-plugin-pwa` + Workbox cache strategy
-8. `[FUTURO]` Integrar Zustand stores (substituir useState global)
-9. `[FUTURO]` Integrar Algolia para busca em tempo real
+2. `[FEITO]` Landing page raiz multi-bairro (`landing/`) com seletor de bairros SJC
+3. `[FEITO]` Módulo História do Bairro atualizado com conteúdo oficial do Parque Interlagos
+4. `[PRÓXIMO]` Criar `lib/supabaseClient.js` e novo `.env`
+5. `[PRÓXIMO]` Migrar `AuthContext.jsx` + `authService.js` → Supabase Auth
+6. `[PRÓXIMO]` Migrar coleções Firestore → tabelas Supabase
+7. `[PRÓXIMO]` Desmembrar `AdminPanel.jsx` em tabs isoladas
+8. `[PRÓXIMO]` Extrair carrosséis e lógica de scroll de `App.jsx`
+9. `[PRÓXIMO]` Configurar `vite-plugin-pwa` + Workbox cache strategy
+10. `[FUTURO]` Integrar Zustand stores (substituir useState global)
+11. `[FUTURO]` Integrar Algolia para busca em tempo real
+12. `[FUTURO]` Expandir landing para novos bairros de SJC

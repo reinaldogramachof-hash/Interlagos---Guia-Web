@@ -6,7 +6,7 @@ export default function MerchantLandingView({ onRegisterClick }) {
         <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
             {/* Hero Section */}
             <div className="relative rounded-3xl overflow-hidden bg-indigo-900 text-white mb-12">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=1000')] bg-cover bg-center opacity-20" />
+                <div className="absolute inset-0 bg-[url('/hero.png')] bg-cover bg-center opacity-20" />
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-indigo-900/90 to-transparent" />
 
                 <div className="relative z-10 p-8 md:p-12 max-w-2xl">
@@ -18,7 +18,7 @@ export default function MerchantLandingView({ onRegisterClick }) {
                         Transforme seu negócio em uma <span className="text-indigo-400">referência local</span>
                     </h2>
                     <p className="text-indigo-100 text-lg mb-8 leading-relaxed">
-                        Junte-se a centenas de comércios de Interlagos que já estão crescendo com nossa plataforma.
+                        Junte-se a centenas de comércios do Parque Interlagos que já estão crescendo com nossa plataforma.
                         Gestão, visibilidade e fidelização em um só lugar.
                     </p>
                     <button
@@ -90,7 +90,7 @@ export default function MerchantLandingView({ onRegisterClick }) {
                     Pronto para alavancar suas vendas?
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-lg mx-auto">
-                    Não perca mais tempo. A digitalização do seu negócio em Interlagos começa aqui.
+                    Não perca mais tempo. A digitalização do seu negócio no Parque Interlagos, São José dos Campos, começa aqui.
                 </p>
                 <button
                     onClick={onRegisterClick}
