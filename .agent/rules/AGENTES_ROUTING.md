@@ -20,12 +20,25 @@
 ├─────────────────────────────────────────────────────────────┤
 │  TIER 1 — SIMPLES / REPETITIVO                              │
 │  Gemini Flash  |  GPT-OSS 120B Medium                       │
+│  ATLAS (OpenClaw + Haiku 4.5) — Executor 24/7 via VPS      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Perfil de Cada Agente
+
+### 🦞 ATLAS — OpenClaw (Tier 1)
+**Identidade:** Agente autônomo 24/7 rodando em VPS Hostgator (IP: 129.121.47.217) via Docker.
+**Modelo:** `claude-haiku-4-5` (200k ctx)
+**Canal de acesso:** Telegram (acionado pelo Reinaldo quando externo ao ambiente principal)
+**Workspace no VPS:** `/home/node/clawd/` dentro do container `moltbot-clawdbot-1`
+**Melhor para:** Automações 24/7, boilerplate a partir de templates existentes, status checks, notificações de build, execução de scripts repetitivos, geração de relatórios simples.
+**Pontos fortes:** Sempre disponível, memória persistente entre sessões (arquivos de memória no workspace), já conhece a estrutura do projeto (análise feita em 05/03/2026).
+**Evitar:** Decisões arquiteturais, debugging de erros desconhecidos, criação de features novas, qualquer task que exija raciocínio sobre trade-offs.
+**Como acionar:** Via Telegram → ATLAS executa no workspace → reporta resultado. Para tasks técnicas, Claude define o briefing antes.
+**Skills prontas:** healthcheck, weather, skill-creator, openai-image-gen
+**Skills a instalar:** coding-agent, github
 
 ### 🟦 Gemini Pro High (Tier 3)
 **Melhor para:** Contexto longo, leitura de múltiplos arquivos grandes, auditorias completas de sistema, análise de HTML com 3000+ linhas.
@@ -68,14 +81,17 @@
 | Extração de módulo JS de HTML monolítico | Gemini Pro Low | GPT-OSS 120B |
 | Criação de módulo novo do zero | Claude Sonnet Thinking | Gemini Pro Low |
 | Atualização de CSS / cores / estilos | Gemini Flash | GPT-OSS 120B |
-| Boilerplate / replicação de padrão | GPT-OSS 120B | Gemini Flash |
+| Boilerplate / replicação de padrão | GPT-OSS 120B | ATLAS |
 | Debugging de erro desconhecido | Claude Sonnet Thinking | Claude Opus Thinking |
 | Lógica de negócio crítica (caixa, licença) | Claude Opus Thinking | Claude Sonnet Thinking |
 | Revisão de segurança (lock.js, API) | Claude Opus Thinking | — |
 | Refatoração HTML (estrutura bem definida) | Gemini Pro Low | Gemini Flash |
-| Documentação / comentários / README | Gemini Flash | GPT-OSS 120B |
+| Documentação / comentários / README | Gemini Flash | ATLAS |
 | Decisão de arquitetura | Claude (arquiteto) | Claude Opus Thinking |
 | Execução de código em falha de agente | Claude (last resort) | — |
+| Automações 24/7 / scripts agendados | ATLAS | — |
+| Status check / monitoramento de VPS | ATLAS | — |
+| Geração de bairro novo (generateBairro.mjs) | ATLAS | — |
 
 ---
 
@@ -85,7 +101,7 @@
 Falhou ou resultado ruim?
 │
 ▼
-Flash / OSS 120B  →  Pro Low / Sonnet Thinking  →  Pro High / Opus Thinking  →  Claude (eu)
+ATLAS / Flash / OSS 120B  →  Pro Low / Sonnet Thinking  →  Pro High / Opus Thinking  →  Claude (eu)
 ```
 
 **Regra:** Antes de escalar, o Claude deve validar se o briefing foi claro o suficiente. Um agente inferior com briefing preciso bate um agente superior com briefing vago.

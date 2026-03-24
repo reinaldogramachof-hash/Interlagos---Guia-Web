@@ -86,6 +86,9 @@
   window.addEventListener('resize', () => { resize(); });
 })();
 
+// --- Lucide icons init ---
+if (typeof lucide !== 'undefined') lucide.createIcons();
+
 // --- Smooth scroll for anchor CTAs ---
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', (e) => {
