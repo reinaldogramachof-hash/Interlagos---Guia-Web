@@ -1,0 +1,28 @@
+# Tem No Bairro — .gitignore raiz
+
+# Credenciais e ambiente
+app/.env.local
+app/.env.*.local
+app/.env.interlagos
+app/.env.santa-julia
+app/.env.parque-novo-horizonte
+app/.env.jardim-das-industrias
+
+# Builds
+app/dist/
+app/dist-*/
+
+# Dependências
+app/node_modules/
+node_modules/
+
+# Deploy artifacts
+config/hostgator/deploy/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/settings.json
+*.swp

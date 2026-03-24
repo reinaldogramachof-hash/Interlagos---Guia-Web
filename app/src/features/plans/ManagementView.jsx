@@ -11,7 +11,7 @@ export default function ManagementView() {
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Gestão & Transparência</h2>
                 <p className="text-slate-600 dark:text-slate-400 text-lg">
-                    Conheça a equipe dedicada a manter o TemNoBairro sempre atualizado e relevante para a nossa comunidade.
+                    Conheça a equipe dedicada a manter o Tem No Bairro sempre atualizado e relevante para a nossa comunidade.
                 </p>
             </div>
 

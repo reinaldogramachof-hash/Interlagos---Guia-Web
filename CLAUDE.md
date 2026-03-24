@@ -1,4 +1,4 @@
-# CLAUDE.md — Regras do Projeto: Interlagos Conectado / TemNoBairro
+# CLAUDE.md — Regras do Projeto: Tem No Bairro
 
 > Este arquivo é lido automaticamente pelo Claude Code a cada sessão.
 > Ele define as regras imutáveis de arquitetura, stack e UX deste projeto.
@@ -9,7 +9,7 @@
 
 **Posicionamento:** Community Hub — Rede Social Hiperlocal + Classificados C2C + SaaS B2B Local.
 **Modelo de crescimento:** O2O (Offline-to-Online), viral via compartilhamento no WhatsApp.
-**Domínio:** Bairro de Interlagos, São Paulo.
+**Domínio:** São José dos Campos, SP — plataforma multi-bairro (4 bairros mapeados, 1 ativo).
 
 ---
 
@@ -19,12 +19,39 @@
 |---|---|---|
 | Frontend | React 19 + Vite 7 | Manter; não migrar para Next.js sem aprovação |
 | Estilo | Tailwind CSS 3 | Mobile-First; sem CSS-in-JS |
-| Estado Global | **Zustand** | Substituir useState disperso em App.jsx |
-| Backend / DB | **Supabase** | Substituir Firebase/Firestore completamente |
-| Auth | Supabase Auth (Google OAuth + Magic Link) | Substituir Firebase Auth |
+| Estado Global | **Zustand 5** | 3 stores: authStore, uiStore, merchantStore |
+| Backend / DB | **Supabase** | ÚNICO backend. Firebase REMOVIDO do frontend |
+| Auth | Supabase Auth (Google OAuth + Magic Link) | Firebase Auth removido |
 | PWA | vite-plugin-pwa (Workbox) | Cache-first para feed offline |
 | Ícones | lucide-react | Já em uso; manter |
-| Busca (futuro) | Algolia (já instalado) | Integrar após migração Supabase |
+| Busca (futuro) | Algolia (já instalado) | Integrar após multi-bairro estabilizar |
+
+---
+
+## ESTRATÉGIA MULTI-BAIRRO
+
+### Bairros da Plataforma
+
+| Bairro | Slug | URL | Status |
+|---|---|---|---|
+| Parque Interlagos | `interlagos` | `/interlagos/` | ✦ Ativo |
+| Santa Júlia | `santa-julia` | `/santa-julia/` | 🔜 Em breve |
+| Parque Novo Horizonte | `parque-novo-horizonte` | `/parque-novo-horizonte/` | 🔜 Em breve |
+| Jardim das Indústrias | `jardim-das-industrias` | `/jardim-das-industrias/` | 🔜 Em breve |
+
+### Como funciona o build multi-bairro
+
+- **Um único codebase React** constrói para todos os bairros via Vite modes
+- Cada bairro tem seu arquivo `app/.env.{slug}` com `VITE_NEIGHBORHOOD={slug}`
+- Build: `npm run build:{slug}` → carrega `.env.{slug}` → `dist/` com `base=/{slug}/`
+- Dados separados no Supabase via coluna `neighborhood` + RLS policies
+
+### Regra de Dados (Multitenancy)
+
+- **Nunca** ler dados de outro bairro no frontend — `VITE_NEIGHBORHOOD` é imutável no build
+- **Sempre** passar `neighborhood` como filtro nas queries Supabase
+- RLS policies garantem isolamento no nível de banco (camada final de segurança)
+- Guia completo: `docs/BAIRROS.md`
 
 ---
 
@@ -40,34 +67,31 @@
 
 ## ARQUITETURA DE CÓDIGO (REGRAS)
 
-### Estrutura de Pastas Alvo
+### Estrutura de Pastas
 
 ```
 app/src/
 ├── app/
-│   ├── App.jsx               # Shell: layout + routing apenas
-│   └── Router.jsx            # Switch de views (extraído de App.jsx)
+│   ├── App.jsx               # Shell: layout + routing apenas (112 linhas)
+│   ├── Router.jsx            # Switch de views
+│   └── AppHeader.jsx
 ├── features/
 │   ├── admin/
-│   │   ├── AdminPanel.jsx    # Shell de tabs apenas
-│   │   ├── tabs/
-│   │   │   ├── ApprovalsTab.jsx
-│   │   │   ├── MerchantsTab.jsx
-│   │   │   ├── NewsTab.jsx
-│   │   │   ├── CampaignsTab.jsx
-│   │   │   ├── UsersTab.jsx
-│   │   │   ├── AuditTab.jsx
-│   │   │   └── TicketsTab.jsx
+│   │   ├── AdminPanel.jsx
+│   │   └── tabs/             # 8 tabs: Approvals, Merchants, News, Campaigns,
+│   │                         #         Users, Tickets, Audit, Database
 │   ├── auth/
 │   │   ├── LoginModal.jsx
 │   │   ├── AuthContext.jsx
-│   │   └── authStore.js      # Zustand store
+│   │   ├── ProfileView.jsx
+│   │   └── OnboardingModal.jsx
 │   ├── merchants/
 │   │   ├── MerchantsView.jsx
 │   │   ├── MerchantCard.jsx
 │   │   ├── MerchantDetailModal.jsx
 │   │   ├── PremiumCarousel.jsx
-│   │   └── ProCarousel.jsx
+│   │   ├── ProCarousel.jsx
+│   │   └── merchant-panel/   # DashboardTab, AdsTab, SettingsTab
 │   ├── ads/
 │   │   ├── AdsView.jsx
 │   │   ├── AdCard.jsx
@@ -75,37 +99,49 @@ app/src/
 │   │   └── CreateAdWizard.jsx
 │   ├── news/
 │   │   ├── NewsFeed.jsx
-│   │   └── NewsDetailModal.jsx
-│   ├── community/
-│   │   ├── SuggestionsView.jsx
-│   │   ├── DonationsView.jsx
-│   │   └── HistoryView.jsx
-│   └── merchant-panel/
-│       └── MerchantPanel.jsx
+│   │   ├── NewsDetailModal.jsx
+│   │   ├── NewsCard.jsx
+│   │   ├── CreateNewsModal.jsx
+│   │   └── NewsResponsibilityModal.jsx
+│   └── community/
+│       ├── SuggestionsView.jsx
+│       ├── DonationsView.jsx
+│       └── ResidentPanel.jsx
 ├── lib/
-│   ├── supabaseClient.js     # Cliente Supabase (único ponto de acesso ao DB)
-│   └── supabaseTypes.js      # Tipos/schemas das tabelas
-├── services/
-│   ├── authService.js        # Substituir: Firebase → Supabase Auth
-│   ├── merchantService.js    # CRUD de merchants via Supabase
+│   └── supabaseClient.js     # Cliente Supabase singleton — ÚNICO ponto de acesso
+├── services/                 # Todos via Supabase
+│   ├── authService.js
+│   ├── merchantService.js
 │   ├── adsService.js
+│   ├── newsService.js
+│   ├── communityService.js
+│   ├── storageService.js
 │   ├── notificationService.js
 │   ├── favoritesService.js
-│   └── statsService.js
-├── stores/                   # Zustand stores
-│   ├── merchantStore.js
+│   ├── statsService.js
+│   ├── genkitService.js
+│   └── consentService.js     # LGPD
+├── stores/
+│   ├── authStore.js
 │   ├── uiStore.js
-│   └── authStore.js
-├── components/               # Componentes genéricos e reutilizáveis
+│   └── merchantStore.js
+├── components/
 │   ├── Modal.jsx
 │   ├── Sidebar.jsx
 │   ├── NotificationBell.jsx
 │   └── ChatbotWidget.jsx
+├── hooks/
+│   └── useRequireAuth.js
 ├── constants/
 │   └── categories.jsx
 └── utils/
-    ├── validation.js
-    └── pwaUtils.js
+    └── validation.js
+
+app/bairros/                  # Configs e briefings por bairro
+├── interlagos/README.md
+├── santa-julia/README.md
+├── parque-novo-horizonte/README.md
+└── jardim-das-industrias/README.md
 ```
 
 ### Regras de Componentes
@@ -119,26 +155,36 @@ app/src/
 
 ## SUPABASE — MODELO DE DADOS
 
-### Tabelas Principais
+### Tabelas Principais (todas com coluna `neighborhood`)
 
 ```sql
 -- Usuários (espelha Supabase Auth)
-profiles (id uuid PK FK auth.users, display_name, photo_url, role, created_at, updated_at)
+profiles (id uuid PK FK auth.users, display_name, photo_url, role,
+          full_name, neighborhood, phone_verified, onboarding_completed,
+          terms_accepted_at, created_at, updated_at)
+
+-- Bairros da plataforma
+neighborhoods (id, slug, name, city, state, is_active, created_at)
 
 -- Comerciantes
-merchants (id, owner_id FK profiles, name, description, category, plan, image_url, phone, address, instagram, whatsapp, is_active, created_at)
+merchants (id, owner_id FK profiles, neighborhood, name, description,
+           category, plan, image_url, phone, address, instagram, whatsapp,
+           is_active, created_at)
 
 -- Notícias
-news (id, author_id FK profiles, title, content, image_url, category, status, created_at)
+news (id, author_id FK profiles, neighborhood, title, content, image_url,
+      category, status, created_at)
 
 -- Anúncios/Classificados C2C
-ads (id, seller_id FK profiles, title, description, price, category, image_url, status, created_at)
+ads (id, seller_id FK profiles, neighborhood, title, description, price,
+     category, image_url, status, created_at)
 
 -- Campanhas (B2B)
-campaigns (id, merchant_id FK merchants, title, description, discount, start_date, end_date, status)
+campaigns (id, merchant_id FK merchants, neighborhood, title, description,
+           discount, start_date, end_date, status)
 
 -- Analytics de Cliques
-click_events (id, entity_id, entity_type, user_id, session_id, created_at)
+click_events (id, entity_id, entity_type, neighborhood, user_id, session_id, created_at)
 
 -- Favoritos
 favorites (id, user_id FK profiles, entity_id, entity_type, created_at)
@@ -147,27 +193,43 @@ favorites (id, user_id FK profiles, entity_id, entity_type, created_at)
 notifications (id, user_id FK profiles, title, body, is_read, type, ref_id, created_at)
 
 -- Sugestões da Comunidade
-suggestions (id, author_id FK profiles, title, description, votes, status, created_at)
+suggestions (id, author_id FK profiles, neighborhood, title, description, votes, status, created_at)
 
 -- Tickets de Suporte
 tickets (id, author_id FK profiles, subject, body, status, resolved_at, resolved_by)
+
+-- Consentimentos LGPD
+user_consents (id, user_id FK profiles, consent_type, accepted, created_at)
 ```
+
+### RPCs Ativas
+
+- `increment_merchant_view` — analytics de visualização
+- `increment_merchant_contact` — analytics de clique WhatsApp
+- `expire_ads` — cron diário às 3h UTC (pg_cron)
+- `handle_new_user` — trigger criação de perfil
+- `increment_suggestion_votes` — votação na caixa de sugestões
 
 ---
 
 ## VARIÁVEIS DE AMBIENTE
 
-
 ```env
-# Supabase (substituir Firebase)
+# Bairro (define base path e filtro de dados)
+VITE_NEIGHBORHOOD=interlagos
+
+# Supabase (projeto compartilhado — mesmo para todos os bairros)
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 
-# Algolia (busca)
+# PWA
+VITE_DISABLE_PWA=false
+
+# Algolia (busca — futuro)
 VITE_ALGOLIA_APP_ID=
 VITE_ALGOLIA_SEARCH_KEY=
 
-# Genkit/AI (manter)
+# Genkit/AI
 VITE_GENKIT_API_URL=
 ```
 
@@ -177,22 +239,56 @@ VITE_GENKIT_API_URL=
 
 - **Branch principal:** `main`
 - **Nomenclatura de branch:** `feat/`, `fix/`, `refactor/`, `chore/`
-- **Antes de qualquer PR:** rodar `npm run lint` e garantir zero erros
-- **Não commitar `.env.local` nem credenciais**
+- **Antes de qualquer PR:** rodar `npm run build:interlagos` e garantir zero erros
+- **Não commitar `.env.local` nem arquivos com credenciais reais**
+
+---
+
+## ESTRUTURA DA RAIZ DO REPOSITÓRIO
+
+```
+Guia Digital Interlagos/
+├── .agent/          # Rules e skills para agentes (roles, routing, coding-standards)
+├── app/             # React PWA multi-bairro (Vite)
+│   └── bairros/    # Briefings e configs por bairro
+├── landing/         # Landing page HTML/CSS/JS puro
+│   └── assets/     # hero.png, herosjc.png, {slug}-hero.jpg
+├── docs/            # Documentação do produto e guias técnicos
+│   └── migrations/ # SQLs para executar no Supabase
+├── config/
+│   └── hostgator/  # Configs de deploy (htaccess, zips)
+├── CLAUDE.md        # Este arquivo — regras imutáveis
+└── README.md        # Visão geral do repositório
+```
 
 ---
 
 ## PRIORIDADE DE EXECUÇÃO (ROADMAP TÉCNICO)
 
-1. `[FEITO]` Backup pré-migração (commit: "Backup pré-migração Supabase")
-2. `[FEITO]` Landing page raiz multi-bairro (`landing/`) com seletor de bairros SJC
-3. `[FEITO]` Módulo História do Bairro atualizado com conteúdo oficial do Parque Interlagos
-4. `[PRÓXIMO]` Criar `lib/supabaseClient.js` e novo `.env`
-5. `[PRÓXIMO]` Migrar `AuthContext.jsx` + `authService.js` → Supabase Auth
-6. `[PRÓXIMO]` Migrar coleções Firestore → tabelas Supabase
-7. `[PRÓXIMO]` Desmembrar `AdminPanel.jsx` em tabs isoladas
-8. `[PRÓXIMO]` Extrair carrosséis e lógica de scroll de `App.jsx`
-9. `[PRÓXIMO]` Configurar `vite-plugin-pwa` + Workbox cache strategy
-10. `[FUTURO]` Integrar Zustand stores (substituir useState global)
-11. `[FUTURO]` Integrar Algolia para busca em tempo real
-12. `[FUTURO]` Expandir landing para novos bairros de SJC
+### Concluído
+- `[FEITO]` Supabase instalado, RLS, OAuth, trigger, RPCs
+- `[FEITO]` Migração Firebase → Supabase (Firebase removido do frontend)
+- `[FEITO]` Zustand 3 stores (auth, ui, merchant)
+- `[FEITO]` Todos os services Supabase (merchant, ads, news, community, storage, notifications, favorites, stats, consent)
+- `[FEITO]` Arquitetura feature-based (features/, App.jsx + Router.jsx separados)
+- `[FEITO]` AdminPanel desmembrado em 8 tabs
+- `[FEITO]` vite-plugin-pwa + Workbox configurado
+- `[FEITO]` Landing page raiz multi-bairro + História do Bairro
+- `[FEITO]` Sprint LGPD — consentimento, onboarding, OnboardingModal
+- `[FEITO]` Deploy em produção: temnobairro.online/interlagos/
+- `[FEITO]` Estrutura multi-bairro (bairros/, .env.{slug}, build scripts)
+
+### Próximos
+- `[PRÓXIMO]` Executar `docs/migrations/sprint1-lgpd.sql` no Supabase
+- `[PRÓXIMO]` Re-upload interlagos com OAuth fix + Sprint LGPD
+- `[PRÓXIMO]` Testar onboarding completo em produção
+- `[PRÓXIMO]` Conectar métricas reais ao DashboardTab (statsService)
+- `[PRÓXIMO]` Verificar link WhatsApp no AdDetailModal
+- `[PRÓXIMO]` Adicionar coluna `neighborhood` nas tabelas Supabase + atualizar RLS
+
+### Futuro
+- `[FUTURO]` Ativar bairro Santa Júlia (checklist em `app/bairros/santa-julia/README.md`)
+- `[FUTURO]` Criar tabela `neighborhoods` no Supabase
+- `[FUTURO]` Integrar Algolia para busca em tempo real
+- `[FUTURO]` Sprint 2 LGPD — verificação de telefone por OTP
+- `[FUTURO]` Expandir landing para novos bairros conforme ativação

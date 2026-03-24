@@ -1,4 +1,4 @@
-# TemNoBairro — Guia de Deploy no Hostgator
+# Tem No Bairro — Guia de Deploy no Hostgator
 
 > **Versão:** 1.0
 > **Data:** 24/03/2026

@@ -1,5 +1,5 @@
 /* ============================================
-   TemNoBairro Landing Page — main.js
+   Tem No Bairro Landing Page — main.js
    ============================================ */
 
 // --- Navbar scroll state ---

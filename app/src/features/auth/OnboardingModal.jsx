@@ -153,7 +153,7 @@ function StepDone({ onFinish, saving }) {
       <div>
         <h3 className="font-black text-slate-800 text-2xl">Tudo pronto!</h3>
         <p className="text-slate-500 text-sm mt-2">
-          Bem-vindo ao TemNoBairro.<br />Explore o melhor do bairro de Interlagos!
+          Bem-vindo ao Tem No Bairro.<br />Explore o melhor do bairro de Interlagos!
         </p>
       </div>
       <button

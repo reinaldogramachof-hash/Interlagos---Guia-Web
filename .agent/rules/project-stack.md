@@ -4,7 +4,7 @@
 
 ## Identidade do Produto
 
-- **Nome:** TemNoBairro (domínio: Parque Interlagos, SP → multi-bairro futuro)
+- **Nome:** Tem No Bairro (domínio: Parque Interlagos, SP → multi-bairro futuro)
 - **Modelo:** Community Hub O2O — Comerciantes locais + Classificados C2C + Jornal do bairro
 - **App dir:** `app/` (raiz do frontend React)
 

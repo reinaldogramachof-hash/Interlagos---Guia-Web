@@ -1,6 +1,6 @@
-# 📱 Interlagos Conectado — TemNoBairro
+# 📱 Interlagos Conectado — Tem No Bairro
 
-O **TemNoBairro** é uma plataforma digital comunitária PWA desenvolvida para conectar moradores, comerciantes e serviços da região de **Parque Interlagos, São José dos Campos/SP**.
+O **Tem No Bairro** é uma plataforma digital comunitária PWA desenvolvida para conectar moradores, comerciantes e serviços da região de **Parque Interlagos, São José dos Campos/SP**.
 
 ![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow)
 ![Stack](https://img.shields.io/badge/Stack-React_19_|_Supabase_|_Vite_7-blue)

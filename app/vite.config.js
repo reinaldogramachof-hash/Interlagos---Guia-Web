@@ -22,8 +22,8 @@ export default defineConfig(({ mode }) => {
         devOptions: { enabled: false },
         includeAssets: ['capa.jpg', 'logoIC.png'],
         manifest: {
-          name: 'TemNoBairro',
-          short_name: 'TemNoBairro',
+          name: 'Tem No Bairro',
+          short_name: 'Tem No Bairro',
           description: 'O guia digital oficial do seu bairro. Encontre comércios, serviços e novidades.',
           theme_color: '#4338ca',
           background_color: '#ffffff',
