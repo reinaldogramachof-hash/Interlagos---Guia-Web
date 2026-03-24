@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Filter } from 'lucide-react';
+import { Newspaper, PlusCircle } from 'lucide-react';
 import { fetchNews, subscribeNews } from '../../services/newsService';
+import { hasConsent } from '../../services/consentService';
 import NewsDetailModal from './NewsDetailModal';
+import NewsResponsibilityModal from './NewsResponsibilityModal';
+import CreateNewsModal from './CreateNewsModal';
 import EmptyState from '../../components/EmptyState';
 import { SkeletonNewsCard } from '../../components/SkeletonCard';
+import useAuthStore from '../../stores/authStore';
 
 // ── Mock de fallback ──────────────────────────────────────────────────────────
 const mockNews = [
@@ -48,6 +52,11 @@ export default function NewsFeed() {
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [showResponsibility, setShowResponsibility] = useState(false);
+    const [showCreateNews, setShowCreateNews] = useState(false);
+
+    const session = useAuthStore(s => s.session);
+    const userId = session?.user?.id;
 
     useEffect(() => {
         let cancelled = false;
@@ -75,6 +84,16 @@ export default function NewsFeed() {
         ? news
         : news.filter(item => item.category === selectedCategory);
 
+    const handlePublishClick = async () => {
+        if (!userId) return; // guard — botão só aparece se logado
+        const alreadyAccepted = await hasConsent(userId, 'news_responsibility');
+        if (alreadyAccepted) {
+            setShowCreateNews(true);
+        } else {
+            setShowResponsibility(true);
+        }
+    };
+
     return (
         <div className="pb-4 animate-in fade-in duration-300">
 
@@ -86,7 +105,7 @@ export default function NewsFeed() {
                     className="w-full h-full object-cover"
                     onError={e => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800'; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-indigo-900/30 flex items-center px-5">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-indigo-900/30 flex items-center justify-between px-5">
                     <div className="flex items-center gap-3">
                         <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
                             <Newspaper size={22} className="text-white" />
@@ -96,6 +115,15 @@ export default function NewsFeed() {
                             <p className="text-indigo-200 text-xs">Parque Interlagos, SJC</p>
                         </div>
                     </div>
+                    {userId && (
+                        <button
+                            onClick={handlePublishClick}
+                            className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-bold px-3 py-2 rounded-xl transition-all border border-white/20"
+                        >
+                            <PlusCircle size={15} />
+                            Publicar
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -141,6 +169,20 @@ export default function NewsFeed() {
                 isOpen={!!selectedNews}
                 onClose={() => setSelectedNews(null)}
                 news={selectedNews}
+            />
+
+            <NewsResponsibilityModal
+                isOpen={showResponsibility}
+                userId={userId}
+                onConfirm={() => { setShowResponsibility(false); setShowCreateNews(true); }}
+                onCancel={() => setShowResponsibility(false)}
+            />
+
+            <CreateNewsModal
+                isOpen={showCreateNews}
+                userId={userId}
+                onClose={() => setShowCreateNews(false)}
+                onCreated={() => setShowCreateNews(false)}
             />
         </div>
     );

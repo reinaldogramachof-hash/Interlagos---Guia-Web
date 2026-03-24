@@ -12,6 +12,7 @@ export default function LoginModal({ onClose, onSuccess }) {
   const [email, setEmail]               = useState('');
   const [password, setPassword]         = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const { signInWithGoogle, signInWithMagicLink, signInWithPassword } = useAuthStore();
 
@@ -61,11 +62,28 @@ export default function LoginModal({ onClose, onSuccess }) {
 
   const Spinner = () => <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />;
 
+  const TermsCheckbox = () => (
+    <label className="flex items-start gap-2 cursor-pointer group">
+      <input
+        type="checkbox"
+        checked={termsAccepted}
+        onChange={e => setTermsAccepted(e.target.checked)}
+        className="mt-0.5 w-4 h-4 accent-indigo-600 flex-shrink-0"
+      />
+      <span className="text-xs text-slate-500 group-hover:text-slate-700 leading-relaxed">
+        Li e aceito os{' '}
+        <span className="font-semibold text-indigo-600">Termos de Uso</span>
+        {' '}e a{' '}
+        <span className="font-semibold text-indigo-600">Política de Privacidade</span>
+      </span>
+    </label>
+  );
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
       <div className={`bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20 relative ${loginType === 'partner' ? 'ring-4 ring-slate-900/10' : ''}`}>
 
-        <button onClick={onClose} className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
+        <button onClick={() => { setTermsAccepted(false); onClose(); }} className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
           <X size={18} />
         </button>
 
@@ -88,10 +106,10 @@ export default function LoginModal({ onClose, onSuccess }) {
         {/* Tab Switcher */}
         <div className="relative -mt-8 px-8 mb-6">
           <div className="bg-white p-1 rounded-xl shadow-lg border border-slate-100 flex">
-            <button onClick={() => { setLoginType('resident'); setError(''); setMagicSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'resident' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            <button onClick={() => { setLoginType('resident'); setError(''); setMagicSent(false); setTermsAccepted(false); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'resident' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
               <User size={14} /> Morador
             </button>
-            <button onClick={() => { setLoginType('partner'); setError(''); setMagicSent(false); setMode('password'); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'partner' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            <button onClick={() => { setLoginType('partner'); setError(''); setMagicSent(false); setMode('password'); setTermsAccepted(false); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'partner' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
               <Shield size={14} /> Parceiro
             </button>
           </div>
@@ -115,7 +133,9 @@ export default function LoginModal({ onClose, onSuccess }) {
                 </div>
               ) : (
                 <>
-                  <button onClick={handleGoogleLogin} disabled={loading} className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all group">
+                  <TermsCheckbox />
+
+                  <button onClick={handleGoogleLogin} disabled={loading || !termsAccepted} className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                     {loading ? <Spinner /> : <><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" /> Entrar com Google</>}
                   </button>
 
@@ -130,7 +150,7 @@ export default function LoginModal({ onClose, onSuccess }) {
                       <Mail className="absolute left-3 top-3.5 text-slate-400" size={18} />
                       <input type="email" placeholder="seu@email.com" className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none text-slate-900 text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
-                    <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                    <button type="submit" disabled={loading || !termsAccepted} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                       {loading ? <Spinner /> : <><Send size={18} /> Enviar Link Mágico</>}
                     </button>
                   </form>
@@ -159,7 +179,8 @@ export default function LoginModal({ onClose, onSuccess }) {
                   </button>
                 </div>
               </div>
-              <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-black text-white py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-70 shadow-lg shadow-slate-900/20">
+              <TermsCheckbox />
+              <button type="submit" disabled={loading || !termsAccepted} className="w-full bg-slate-900 hover:bg-black text-white py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-slate-900/20">
                 {loading ? <Spinner /> : <><Shield size={18} /> Acessar Painel</>}
               </button>
             </form>

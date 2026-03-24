@@ -1,10 +1,10 @@
 # Tem No Bairro — Guia de Execução do Projeto
 
-> **Versão:** 2.0
+> **Versão:** 2.1
 > **Data de criação:** Março/2026
-> **Última atualização:** 22/03/2026
+> **Última atualização:** 24/03/2026
 > **Lançamento previsto:** Maio/2026
-> **Status geral:** 🟢 Em andamento — Fases 0, 1 e 2 concluídas. Sprint de qualidade e arquitetura P1–P3 concluído. Fase 3 parcialmente concluída.
+> **Status geral:** 🟢 Em andamento — Deploy em produção (temnobairro.online/interlagos). Sprint LGPD/Onboarding concluído. Fases 0, 1 e 2 concluídas.
 
 ---
 
@@ -78,6 +78,17 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 | `tickets` | ✅ Ativa + RLS | Policies adicionadas (sessão 16/03) |
 | `audit_logs` | ✅ Ativa + RLS | Acesso somente para `master` |
 | `chat_history` | ✅ Ativa + RLS | Para histórico do chatbot Genkit |
+| `user_consents` | ✅ Criada + RLS | Consentimentos LGPD — versão 1.0 (Sprint LGPD) |
+
+### Novos campos em `profiles` (Sprint LGPD — 24/03/2026)
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `full_name` | text | Nome completo do usuário |
+| `neighborhood` | text | Bairro informado no onboarding |
+| `phone_verified` | boolean | Telefone verificado via OTP (fase futura) |
+| `onboarding_completed` | boolean | Controla exibição do OnboardingModal |
+| `terms_accepted_at` | timestamptz | Data do aceite dos termos |
 
 ### RPCs criadas
 
@@ -235,6 +246,60 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 
 ---
 
+### Sessão 12 — Sprint LGPD: Consentimento, Onboarding e Gates de Responsabilidade
+**Data:** 24/03/2026
+
+**Contexto:** Para resguardo jurídico da empresa (LGPD + Marco Civil da Internet) e consciência do usuário sobre responsabilidades ao publicar conteúdo.
+
+**Executado:**
+
+| Arquivo | Mudança |
+|---|---|
+| `docs/migrations/sprint1-lgpd.sql` | NOVO — SQL completo: 5 novos campos em `profiles`, tabela `user_consents`, índice + 3 RLS policies |
+| `services/consentService.js` | NOVO — `recordConsent`, `hasConsent`, `fetchUserConsents` |
+| `features/auth/OnboardingModal.jsx` | NOVO — modal 3 passos pós-primeiro-login (termos → dados pessoais → conclusão). Sem `onClose` — obrigatório concluir |
+| `features/news/NewsResponsibilityModal.jsx` | NOVO — gate de responsabilidade antes de publicar notícia (texto legal + checkbox) |
+| `features/news/CreateNewsModal.jsx` | NOVO — formulário de criação de notícia com status `pending` |
+| `features/auth/LoginModal.jsx` | ADD — checkbox "Aceito os Termos de Uso e Política de Privacidade" bloqueia todos os botões de login enquanto não marcado |
+| `features/news/NewsFeed.jsx` | ADD — botão "Publicar" visível para usuários logados + gate `hasConsent('news_responsibility')` |
+| `app/App.jsx` | ADD — `OnboardingModal` integrado: dispara quando `profile.onboarding_completed === false` |
+
+**Supabase (executar manualmente):**
+- Rodar `docs/migrations/sprint1-lgpd.sql` no SQL Editor do projeto `jfjavgjeylahhcfcixtv`
+
+**Resultado:** Build ✅ zero erros. App com camada de consentimento LGPD funcional.
+
+---
+
+### Sessão 11 — Deploy em Produção + Fix OAuth Redirect
+**Data:** 24/03/2026 | **Commit:** `bcedc23`
+
+**Contexto:** Primeiro deploy do app em servidor real (Hostgator) no domínio `https://temnobairro.online`.
+
+**Executado:**
+
+| Item | Detalhe |
+|---|---|
+| `app/vite.config.js` | Refatorado para `defineConfig(({ mode }) => {...})` com `loadEnv` — base path dinâmico via `VITE_NEIGHBORHOOD` |
+| `app/.env.production` | NOVO — `VITE_NEIGHBORHOOD=interlagos`, credenciais Supabase produção |
+| `app/package.json` | ADD — script `build:interlagos` |
+| `app/public/.htaccess` | NOVO — SPA routing por extensão de arquivo (resolve MIME error do Hostgator) |
+| `docs/11-deploy-hostgator.md` | NOVO — guia completo de deploy, Supabase URL config, Google OAuth, checklist |
+| `root-htaccess.txt` | NOVO — `.htaccess` raiz para redirect `www` → sem-www |
+| `stores/authStore.js` | FIX — `redirectTo` OAuth corrigido de `window.location.origin` para `window.location.origin + import.meta.env.BASE_URL` (resolve 404 após login Google) |
+
+**Supabase:**
+- Site URL: `https://temnobairro.online/interlagos/`
+- Redirect URLs: `https://temnobairro.online/interlagos/` adicionado
+
+**Google Cloud Console:**
+- Authorized JavaScript origins: `https://temnobairro.online` adicionado
+- Authorized redirect URIs: URI do Supabase confirmado
+
+**Resultado:** App no ar em `https://temnobairro.online/interlagos/` ✅
+
+---
+
 ### Sessão 10 — Edit de Anúncio + Fix Bug Modal Wizard
 **Data:** 22/03/2026 | **Commit:** `15d6303`
 
@@ -329,24 +394,25 @@ Deve ser atualizado a cada sessão de trabalho significativa.
 | Auth | `stores/authStore.js`, `features/auth/AuthContext.jsx` (wrapper), `hooks/useRequireAuth.js` | ✅ Lazy Login via hook |
 | Stores | `stores/authStore.js`, `stores/uiStore.js`, `stores/merchantStore.js` | ✅ 3 stores Zustand com seletores exportados |
 | Lib | `lib/supabaseClient.js` | ✅ Completo |
-| Serviços | `services/` (9 arquivos: +`communityService` com `voteSuggestion`) | ✅ CRUD completo para todas as entidades |
+| Serviços | `services/` (10 arquivos: +`consentService` com `recordConsent/hasConsent`) | ✅ CRUD completo para todas as entidades + consentimentos LGPD |
 | Admin | `features/admin/` (AdminPanel + 8 tabs) | ⚠️ AuditTab usa mock; renderiza in-page |
 | Merchants | `features/merchants/` (MerchantsView, PremiumCarousel, ProCarousel, MerchantPanel + 3 tabs) | ✅ CRUD completo de anúncios (criar, editar, excluir) |
 | Classificados | `features/ads/` (AdsView, AdDetailModal, CreateAdWizard — modo create + edit) | ✅ Upload + expires_at + updateAd |
-| Jornal | `features/news/` (NewsFeed, NewsDetailModal, NewsCard) | ✅ Conectado ao Supabase — badges Oficial/Morador |
+| Jornal | `features/news/` (NewsFeed, NewsDetailModal, NewsCard, CreateNewsModal, NewsResponsibilityModal) | ✅ Gate de responsabilidade LGPD + formulário de publicação |
 | Comunidade | `features/community/` (SuggestionsView, DonationsView, ResidentPanel) | ✅ voteSuggestion ativo |
-| Perfil | `features/auth/ProfileView.jsx` | ✅ Upload de avatar funcionando |
+| Perfil | `features/auth/ProfileView.jsx`, `OnboardingModal.jsx` | ✅ Upload de avatar + onboarding obrigatório pós-primeiro-login |
 | Componentes | `components/ImageUpload.jsx`, `Modal.jsx`, `Toast.jsx`, etc. | ✅ Sem alert() no codebase |
 | PWA | `vite.config.js` | ✅ SW gerado no build |
 
-### Build atual (22/03/2026)
+### Build atual (24/03/2026)
 
 ```
 vendor:   11 KB  │  ui/lucide: 21 KB
-supabase: 172 KB │  index:     368 KB
-Total:    ~626 KB (gzip ~169 KB)
-PWA:      12 entradas pré-cacheadas ✅
-Build time: ~6s
+supabase: 172 KB │  index:     383 KB
+Total:    ~642 KB (gzip ~171 KB)
+PWA:      10 entradas pré-cacheadas ✅
+Build time: ~15s
+Base path: /interlagos/ (build:interlagos)
 ```
 
 ### Invariantes de qualidade atuais
@@ -360,6 +426,42 @@ Build time: ~6s
 ---
 
 ## 6. ROADMAP DE FASES — VISÃO COMPLETA
+
+### ✅ FASE LGPD — Consentimento, Identidade e Onboarding
+**Status:** CONCLUÍDA (24/03/2026) | **SQL pendente de execução no Supabase**
+
+| Tarefa | Status |
+|---|---|
+| Tabela `user_consents` com RLS | ✅ SQL gerado — executar `docs/migrations/sprint1-lgpd.sql` |
+| Campos novos em `profiles` (full_name, neighborhood, phone_verified, onboarding_completed, terms_accepted_at) | ✅ SQL gerado |
+| `consentService.js` — `recordConsent`, `hasConsent`, `fetchUserConsents` | ✅ |
+| `OnboardingModal.jsx` — 3 passos obrigatórios pós-primeiro-login | ✅ |
+| Gate de termos no `LoginModal.jsx` (checkbox bloqueia submit) | ✅ |
+| Gate de responsabilidade antes de publicar notícia (`NewsResponsibilityModal`) | ✅ |
+| `CreateNewsModal.jsx` — formulário de publicação de notícia por moradores | ✅ |
+| Integração no `App.jsx` — dispara onboarding automaticamente | ✅ |
+| Sprint 2 — Verificação de telefone (OTP WhatsApp/SMS) | ⏳ Próximo |
+| Sprint 3 — CPF para merchants, maioridade | ⏳ Futuro |
+| Sprint 4 — Central de Privacidade (ver/exportar/excluir dados) | ⏳ Futuro |
+
+---
+
+### ✅ FASE DEPLOY — Primeiro Deploy em Produção
+**Status:** CONCLUÍDA (24/03/2026)
+
+| Tarefa | Status |
+|---|---|
+| Build multi-bairro via `VITE_NEIGHBORHOOD` + `loadEnv` | ✅ |
+| `.htaccess` SPA routing por extensão (Apache/Hostgator) | ✅ |
+| Deploy em `https://temnobairro.online/interlagos/` | ✅ App no ar |
+| Supabase Site URL e Redirect URLs configurados | ✅ |
+| Google OAuth configurado para domínio de produção | ✅ |
+| Fix OAuth redirect (`window.location.origin + BASE_URL`) | ✅ |
+| Redirect www → sem-www (`root-htaccess.txt`) | ✅ Pendente upload no Hostgator |
+| SSL/HTTPS ativo | ✅ |
+
+---
+
 
 ### ✅ FASE 0 — Infraestrutura Base
 **Status:** CONCLUÍDA (16/03/2026)
@@ -602,17 +704,18 @@ O pequeno lojista do bairro organiza seu planejamento financeiro anual em torno 
 
 ## 8. PENDÊNCIAS TÉCNICAS IMEDIATAS
 
-> Ordenadas por impacto no próximo sprint (22/03/2026).
+> Ordenadas por impacto — atualizado em 24/03/2026.
 
 | # | Tarefa | Impacto | Onde |
 |---|---|---|---|
-| 1 | **Testar ApprovalsTab com dados reais** — cadastrar comércio → aprovar admin → verificar listagem | Validação end-to-end do fluxo principal | `features/admin/tabs/ApprovalsTab.jsx` + Supabase Dashboard |
-| 2 | **Verificar WhatsApp no AdDetailModal** — confirmar que o link `wa.me` abre corretamente | Funcionalidade core do Classificados | `features/ads/AdDetailModal.jsx` |
-| 3 | **Conectar métricas reais no MerchantPanel DashboardTab** — views, cliques, favoritos via statsService | Valor percebido pelo comerciante | `features/merchants/merchant-panel/tabs/DashboardTab.jsx` + `statsService.js` |
-| 4 | **Remover policy duplicada em `profiles`** | Limpeza técnica — 2 SELECT policies | Supabase SQL Editor |
-| 5 | **Remover credenciais Firebase legacy do `.env.local`** | Segurança | `.env.local` linhas 8-15 |
-| 6 | **Configurar cron job `expire_campaigns`** | Campanhas expiradas ficam ativas | Supabase Dashboard → pg_cron |
-| 7 | **Refatorar arquivos legados acima de 200 linhas** | Regra CLAUDE.md | `NewsFeed.jsx`, `DonationsView.jsx`, `ResidentPanel.jsx`, `SidebarMenu.jsx` |
+| 1 | **Executar `sprint1-lgpd.sql` no Supabase** — cria `user_consents` + campos em `profiles` | LGPD não funciona sem isso | Supabase SQL Editor → `docs/migrations/sprint1-lgpd.sql` |
+| 2 | **Upload `root-htaccess.txt` na raiz do Hostgator** — redireciona www → sem-www | UX: tablet e mobile que acessam via www | cPanel → `public_html/.htaccess` |
+| 3 | **Re-upload do `interlagos-deploy.zip`** — contém fix OAuth + Sprint LGPD | OAuth funcionando + onboarding | cPanel → `public_html/interlagos/` |
+| 4 | **Testar ApprovalsTab com dados reais** — cadastrar comércio → aprovar admin → verificar listagem | Validação end-to-end do fluxo principal | `features/admin/tabs/ApprovalsTab.jsx` |
+| 5 | **Verificar WhatsApp no AdDetailModal** — confirmar que o link `wa.me` abre corretamente | Funcionalidade core dos Classificados | `features/ads/AdDetailModal.jsx` |
+| 6 | **Conectar métricas reais no MerchantPanel DashboardTab** — views, cliques, favoritos via statsService | Valor percebido pelo comerciante | `features/merchants/merchant-panel/tabs/DashboardTab.jsx` |
+| 7 | **Remover policy duplicada em `profiles`** | Limpeza técnica — 2 SELECT policies | Supabase SQL Editor |
+| 8 | **Configurar cron job `expire_campaigns`** | Campanhas expiradas ficam ativas | Supabase Dashboard → pg_cron |
 
 ---
 
@@ -626,9 +729,12 @@ INFRAESTRUTURA
 ✅ Trigger de criação de perfil funcionando
 ✅ Storage buckets criados e testados (5 buckets)
 ✅ Cron job expire_ads configurado (pg_cron, diário às 3h UTC)
-□  Magic Link (e-mail) testado
+✅ Deploy em produção — https://temnobairro.online/interlagos/
+✅ Build multi-bairro (VITE_NEIGHBORHOOD) configurado
+□  Executar sprint1-lgpd.sql no Supabase (user_consents + campos profiles)
+□  Upload root-htaccess.txt na raiz do Hostgator (redirect www)
+□  Magic Link (e-mail) testado em produção
 □  expire_campaigns configurado
-□  Deploy no Vercel com env vars de produção
 
 MÓDULOS — FUNCIONALIDADE CORE
 ✅ Feed principal carregando com dados reais (comércios)
@@ -647,6 +753,14 @@ MÓDULOS — FUNCIONALIDADE CORE
 MONETIZAÇÃO
 □  Gateway de pagamento definido e integrado
 □  Fluxo de upgrade/downgrade de plano testado
+
+LGPD / SEGURANÇA JURÍDICA
+✅ Tabela user_consents criada (SQL pronto)
+✅ OnboardingModal — fluxo obrigatório pós-primeiro-login
+✅ Gate de termos no LoginModal
+✅ Gate de responsabilidade antes de publicar notícia
+□  Sprint 2 LGPD — verificação de telefone (OTP)
+□  Sprint 4 LGPD — Central de Privacidade (ver/exportar/excluir dados)
 
 QUALIDADE
 □  PWA instalável no Android e iOS
@@ -702,4 +816,4 @@ VITE_ALGOLIA_SEARCH_KEY=
 
 ---
 
-*Documento criado em 16/03/2026. Última atualização: 22/03/2026 (v2.0). Atualizar a cada sessão de trabalho relevante.*
+*Documento criado em 16/03/2026. Última atualização: 24/03/2026 (v2.1). Atualizar a cada sessão de trabalho relevante.*

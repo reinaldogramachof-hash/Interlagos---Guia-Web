@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import useAuthStore from './stores/authStore';
 import BottomNav from './components/BottomNav';
 import AppHeader from './components/AppHeader';
 
@@ -15,12 +16,16 @@ import CreateAdWizard from './features/ads/CreateAdWizard';
 import MerchantDetailModal from './features/merchants/MerchantDetailModal';
 import ServiceDetailModal from './features/merchants/ServiceDetailModal';
 import LoginModal from './features/auth/LoginModal';
+import OnboardingModal from './features/auth/OnboardingModal';
 
 import { PlusCircle } from 'lucide-react';
 
 function AppContent() {
   const { currentUser } = useAuth();
   const initMerchants = useMerchantStore(state => state.init);
+  const session = useAuthStore(state => state.session);
+  const profile = useAuthStore(state => state.profile);
+  const refreshProfile = useAuthStore(state => state.refreshProfile);
   
   const currentView = useUiStore(selectCurrentView);
   const isSidebarOpen = useUiStore(selectIsSidebarOpen);
@@ -96,6 +101,10 @@ function AppContent() {
       {isLoginOpen && (
         <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={handleLoginSuccess} />
       )}
+      <OnboardingModal
+        isOpen={!!session && profile?.onboarding_completed === false}
+        onComplete={refreshProfile}
+      />
       {selectedService && (
         <ServiceDetailModal service={selectedService} onClose={() => setSelectedService(null)} />
       )}

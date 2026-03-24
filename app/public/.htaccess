@@ -1,33 +1,9 @@
-# TemNoBairro — SPA Routing para Apache (Hostgator)
-# Coloque este arquivo na pasta do bairro: ex. public_html/interlagos/
+Options -MultiViews
+RewriteEngine On
+RewriteBase /interlagos/
 
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /interlagos/
+# Arquivos estáticos — servir diretamente pela extensão
+RewriteRule \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|json|webmanifest|map|txt|xml|wasm)$ - [L]
 
-  # Não redireciona arquivos e pastas reais (assets, imagens, sw.js, etc.)
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
-
-  # Redireciona tudo o mais para index.html (SPA fallback)
-  RewriteRule ^ index.html [L]
-</IfModule>
-
-# Cache para assets estáticos (melhora performance)
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresByType text/html "access plus 0 seconds"
-  ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType image/png "access plus 1 month"
-  ExpiresByType image/jpeg "access plus 1 month"
-  ExpiresByType image/webp "access plus 1 month"
-  ExpiresByType image/svg+xml "access plus 1 month"
-  ExpiresByType application/json "access plus 0 seconds"
-</IfModule>
-
-# Compressão gzip (reduz tamanho dos arquivos)
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
-</IfModule>
+# Tudo o mais vai para o index.html (SPA fallback)
+RewriteRule ^ index.html [L]

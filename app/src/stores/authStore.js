@@ -83,17 +83,19 @@ const useAuthStore = create((set, get) => ({
   },
 
   signInWithGoogle: async () => {
+    const redirectTo = window.location.origin + import.meta.env.BASE_URL;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo },
     });
     if (error) throw error;
   },
 
   signInWithMagicLink: async (email) => {
+    const redirectTo = window.location.origin + import.meta.env.BASE_URL;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: redirectTo },
     });
     if (error) throw error;
   },
