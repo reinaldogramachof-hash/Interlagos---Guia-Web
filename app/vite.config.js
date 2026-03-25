@@ -31,8 +31,10 @@ export default defineConfig(({ mode }) => {
           start_url: basePath,
           scope: basePath,
           icons: [
-            { src: `${basePath}pwa-192x192.png`, sizes: '192x192', type: 'image/png' },
-            { src: `${basePath}pwa-512x512.png`, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+            { src: `${basePath}pwa-192x192.png`, sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: `${basePath}pwa-192x192.png`, sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: `${basePath}pwa-512x512.png`, sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: `${basePath}pwa-512x512.png`, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
         workbox: {

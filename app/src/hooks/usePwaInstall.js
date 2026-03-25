@@ -1,37 +1,48 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Hook para gerenciar a instalação nativa do PWA.
- * - `canInstall`   : true quando o browser tem um prompt disponível
- * - `isInstalled`  : true quando o app já está rodando como PWA instalado
- * - `install()`    : dispara o prompt nativo de instalação
+ * Hook para instalação nativa do PWA.
+ *
+ * O beforeinstallprompt dispara muito cedo — antes do React montar.
+ * Por isso main.jsx captura o evento em window.__pwaPrompt e emite
+ * 'pwa-prompt-ready' para notificar hooks que montam depois.
  */
 export default function usePwaInstall() {
-    const [prompt, setPrompt]       = useState(null);
-    const [canInstall, setCanInstall] = useState(false);
+    const [prompt, setPrompt] = useState(() => window.__pwaPrompt || null);
+    const [canInstall, setCanInstall] = useState(() => !!window.__pwaPrompt);
     const [isInstalled, setIsInstalled] = useState(
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true
+        () =>
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true
     );
 
     useEffect(() => {
-        const onBeforeInstall = (e) => {
-            e.preventDefault();
-            setPrompt(e);
-            setCanInstall(true);
+        // Caso o prompt chegue após a montagem do componente
+        const onPromptReady = () => {
+            if (window.__pwaPrompt) {
+                setPrompt(window.__pwaPrompt);
+                setCanInstall(true);
+            }
         };
 
         const onInstalled = () => {
-            setCanInstall(false);
+            window.__pwaPrompt = null;
             setPrompt(null);
+            setCanInstall(false);
             setIsInstalled(true);
         };
 
-        window.addEventListener('beforeinstallprompt', onBeforeInstall);
+        window.addEventListener('pwa-prompt-ready', onPromptReady);
         window.addEventListener('appinstalled', onInstalled);
 
+        // Verifica novamente ao montar (garante que não perdemos o evento)
+        if (window.__pwaPrompt && !prompt) {
+            setPrompt(window.__pwaPrompt);
+            setCanInstall(true);
+        }
+
         return () => {
-            window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+            window.removeEventListener('pwa-prompt-ready', onPromptReady);
             window.removeEventListener('appinstalled', onInstalled);
         };
     }, []);
@@ -41,8 +52,9 @@ export default function usePwaInstall() {
         prompt.prompt();
         const { outcome } = await prompt.userChoice;
         if (outcome === 'accepted') {
-            setCanInstall(false);
+            window.__pwaPrompt = null;
             setPrompt(null);
+            setCanInstall(false);
         }
     };
 
