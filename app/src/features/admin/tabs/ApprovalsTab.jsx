@@ -63,7 +63,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
 
 export default function ApprovalsTab({ onEscalate, onCountChange }) {
   const [pending, setPending] = useState([]);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const fetchPending = async () => {
     try {

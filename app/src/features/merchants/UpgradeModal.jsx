@@ -7,7 +7,7 @@ import { useToast } from '../../components/Toast';
 
 export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId, onUpgrade }) {
     const { currentUser } = useAuth();
-    const { showToast } = useToast();
+    const showToast = useToast();
     if (!isOpen) return null;
 
     const handleUpgrade = async (plan) => {

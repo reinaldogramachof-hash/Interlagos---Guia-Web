@@ -11,7 +11,7 @@ export default function SuggestionsView() {
     const [showLogin, setShowLogin] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { showToast } = useToast();
+    const showToast = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -4,7 +4,7 @@ import Modal from '../../components/Modal';
 import { useToast } from '../../components/Toast';
 
 export default function CampaignDetailModal({ isOpen, onClose, campaign }) {
-    const { showToast } = useToast();
+    const showToast = useToast();
     if (!campaign) return null;
 
     const handleCopyPix = () => {

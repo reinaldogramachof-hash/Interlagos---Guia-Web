@@ -3,7 +3,7 @@ import { Camera, Image as ImageIcon } from 'lucide-react';
 import { useToast } from './Toast';
 
 export default function ImageUpload({ preview, onFileSelect, label = "Foto (máx. 2MB)" }) {
-  const { showToast } = useToast();
+  const showToast = useToast();
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {

@@ -21,7 +21,7 @@ export default function MerchantPanel({ onClose }) {
     const [showCreateAd, setShowCreateAd] = useState(false);
     const [adToEdit, setAdToEdit] = useState(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const { showToast } = useToast();
+    const showToast = useToast();
 
     // Fetch Merchant Profile
     useEffect(() => {

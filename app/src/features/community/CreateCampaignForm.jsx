@@ -9,7 +9,7 @@ export default function CreateCampaignForm({
     onClose 
 }) {
     const [newItemType, setNewItemType] = useState('donation');
-    const { showToast } = useToast();
+    const showToast = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

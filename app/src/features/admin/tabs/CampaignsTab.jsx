@@ -5,7 +5,7 @@ import { useToast } from '../../../components/Toast';
 
 export default function CampaignsTab() {
   const [campaigns, setCampaigns] = useState([]);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const fetchCampaigns = async () => {
     try {

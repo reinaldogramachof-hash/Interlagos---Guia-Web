@@ -5,7 +5,7 @@ import { useToast } from '../../../components/Toast';
 
 export default function AuditTab() {
   const [logs, setLogs] = useState([]);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   useEffect(() => {
     const loadLogs = async () => {

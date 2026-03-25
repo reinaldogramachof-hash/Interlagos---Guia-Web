@@ -22,7 +22,7 @@ function QuickAction({ emoji, label, onClick }) {
 export default function ProfileView({ onLoginOpen, onNavigate }) {
   const { currentUser, isMerchant, isAdmin, isMaster, logout } = useAuth();
   const { planId, plan } = useMerchantPlan();
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const handleAvatarChange = async (file) => {
     try {

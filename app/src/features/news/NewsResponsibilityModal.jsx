@@ -16,7 +16,7 @@ import { useToast } from '../../components/Toast';
 export default function NewsResponsibilityModal({ isOpen, userId, onConfirm, onCancel }) {
   const [accepted, setAccepted] = useState(false);
   const [saving, setSaving] = useState(false);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   if (!isOpen) return null;
 

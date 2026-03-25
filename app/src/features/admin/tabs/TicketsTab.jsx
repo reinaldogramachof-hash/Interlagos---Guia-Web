@@ -7,7 +7,7 @@ import { useToast } from '../../../components/Toast';
 export default function TicketsTab({ onCountChange }) {
   const { currentUser } = useAuth();
   const [tickets, setTickets] = useState([]);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const fetchTickets = async () => {
     try {

@@ -20,7 +20,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('Geral');
   const [saving, setSaving] = useState(false);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   if (!isOpen) return null;
 

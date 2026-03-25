@@ -7,7 +7,7 @@ import { useToast } from '../../../components/Toast';
 export default function NewsTab() {
   const { currentUser } = useAuth();
   const [newsList, setNewsList] = useState([]);
-  const { showToast } = useToast();
+  const showToast = useToast();
   const [imageFile, setImageFile] = useState(null);
 
   const fetchNews = async () => {

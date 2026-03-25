@@ -8,7 +8,7 @@ import { categories } from '../../../../constants/categories';
 import ImageSection from './ImageSection';
 
 export default function SettingsTab({ merchant, currentUser, onUpdate }) {
-  const { showToast } = useToast();
+  const showToast = useToast();
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(merchant?.image_url || '');

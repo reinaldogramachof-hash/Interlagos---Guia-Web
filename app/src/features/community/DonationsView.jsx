@@ -16,7 +16,7 @@ const categories = [
 
 export default function DonationsView() {
     const { currentUser } = useAuth();
-    const { showToast } = useToast();
+    const showToast = useToast();
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedType, setSelectedType] = useState('all');
     const [items, setItems] = useState([]);

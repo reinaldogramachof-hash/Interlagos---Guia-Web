@@ -8,7 +8,7 @@ import { useToast } from '../../../components/Toast';
 
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
-  const { showToast } = useToast();
+  const showToast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadUsers = async () => {

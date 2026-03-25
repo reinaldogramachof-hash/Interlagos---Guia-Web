@@ -33,7 +33,7 @@ export default function AdminPanel({ onClose }) {
   const [activeTab, setActiveTab] = useState('approvals');
   const [pendingCount, setPendingCount] = useState(0);
   const [ticketsCount, setTicketsCount] = useState(0);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   // Escalation state (gerenciado aqui pois o dialog flutua sobre o shell)
   const [escalationTarget, setEscalationTarget] = useState(null);

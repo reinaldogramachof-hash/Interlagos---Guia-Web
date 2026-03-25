@@ -18,7 +18,7 @@ export default function MerchantsTab() {
   const [editingId, setEditingId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const fetchMerchants = async () => {
     const data = await adminGetMerchants();

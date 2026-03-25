@@ -13,7 +13,7 @@ import SettingsTab from './resident-panel/tabs/SettingsTab';
 export default function ResidentPanel({ onClose }) {
     const { currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState('activities');
-    const { showToast } = useToast();
+    const showToast = useToast();
     const [myActivities, setMyActivities] = useState([]);
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);

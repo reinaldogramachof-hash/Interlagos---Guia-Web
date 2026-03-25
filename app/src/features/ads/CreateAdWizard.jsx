@@ -37,7 +37,7 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
         : EMPTY_FORM
     );
     const [imageFile, setImageFile] = useState(null);
-    const { showToast } = useToast();
+    const showToast = useToast();
 
     const resetAndClose = () => {
         onClose();

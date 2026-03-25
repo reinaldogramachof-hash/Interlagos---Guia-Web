@@ -16,7 +16,7 @@ const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Ve�
 
 export default function AdsView({ onRequireAuth }) {
     const { currentUser } = useAuth();
-    const { showToast } = useToast();
+    const showToast = useToast();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');

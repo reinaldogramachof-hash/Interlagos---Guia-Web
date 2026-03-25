@@ -10,7 +10,7 @@ import { useToast } from '../../components/Toast';
 export default function MerchantDetailModal({ merchant, onClose, onLoginRequired }) {
     const { currentUser } = useAuth();
     const [isFavorite, setIsFavorite] = useState(false);
-    const { showToast } = useToast();
+    const showToast = useToast();
 
     useEffect(() => {
         if (merchant?.id) incrementMerchantView(merchant.id);
