@@ -1,8 +1,10 @@
 import { useAuth } from '../features/auth/AuthContext';
-import { Menu } from 'lucide-react';
+import { Menu, Download } from 'lucide-react';
+import usePwaInstall from '../hooks/usePwaInstall';
 
 export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
   const { currentUser } = useAuth();
+  const { canInstall, install } = usePwaInstall();
 
   const titles = {
     news: 'Jornal do Bairro',
@@ -20,6 +22,21 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      {/* Banner de instalação PWA — aparece só quando disponível */}
+      {canInstall && (
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-2 flex items-center justify-between gap-3">
+          <p className="text-white text-xs font-medium leading-tight">
+            Instale o app e use offline, sem abrir o navegador
+          </p>
+          <button
+            onClick={install}
+            className="flex-shrink-0 flex items-center gap-1.5 bg-white text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors"
+          >
+            <Download size={13} />
+            Instalar
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between px-4 h-14 gap-2">
 
         {/* Esquerda */}

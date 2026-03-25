@@ -15,7 +15,9 @@ import {
     MapPin,
     CreditCard,
     User,
+    Download,
 } from 'lucide-react';
+import usePwaInstall from '../hooks/usePwaInstall';
 import SidebarMenuSection, { Divider, SectionLabel, MenuItem } from './SidebarMenuSection';
 
 // ─── Seções do menu ───────────────────────────────────────────────────────────
@@ -35,6 +37,7 @@ const MERCHANT_ITEMS = [
 // ─── SidebarMenu ──────────────────────────────────────────────────────────────
 export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }) {
     const { currentUser, isAdmin, isMaster, isMerchant, logout } = useAuth();
+    const { canInstall, isInstalled, install } = usePwaInstall();
 
     // Fechar com Escape
     useEffect(() => {
@@ -160,8 +163,36 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                     )}
                 </div>
 
+                {/* Instalar App — aparece somente quando disponível e não instalado */}
+                {canInstall && !isInstalled && (
+                    <>
+                        <Divider />
+                        <div className="px-3 py-2">
+                            <button
+                                onClick={() => { install(); onClose(); }}
+                                className="w-full flex items-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl transition-colors text-sm font-bold shadow-md shadow-indigo-500/20"
+                            >
+                                <Download size={18} />
+                                <div className="text-left">
+                                    <p className="leading-none">Instalar o App</p>
+                                    <p className="text-indigo-200 text-[10px] font-normal mt-0.5">Use offline, sem abrir o navegador</p>
+                                </div>
+                            </button>
+                        </div>
+                    </>
+                )}
+
                 {/* Rodapé */}
-                <div className="border-t border-gray-100 p-4 shrink-0">
+                <div className="border-t border-gray-100 p-4 shrink-0 flex flex-col gap-2">
+                    {/* Link para a landing page / trocar de bairro */}
+                    <a
+                        href="https://www.temnobairro.online/"
+                        className="w-full flex items-center gap-3 text-indigo-500 hover:bg-indigo-50 px-3 py-2.5 rounded-xl transition-colors text-sm font-semibold"
+                    >
+                        <MapPin size={18} />
+                        Trocar de bairro
+                    </a>
+
                     {currentUser ? (
                         <button
                             onClick={async () => { await logout(); onClose(); }}
@@ -172,7 +203,7 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                         </button>
                     ) : (
                         <p className="text-center text-xs text-gray-400">
-                            Interlagos Conectado © 2025
+                            Tem No Bairro © 2025
                         </p>
                     )}
                 </div>
