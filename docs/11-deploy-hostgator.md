@@ -1,7 +1,7 @@
 # Tem No Bairro — Guia de Deploy no Hostgator
 
-> **Versão:** 1.0
-> **Data:** 24/03/2026
+> **Versão:** 2.0
+> **Data:** 25/03/2026
 > **Domínio:** https://temnobairro.online
 > **Primeiro bairro:** Interlagos → https://temnobairro.online/interlagos
 
@@ -124,36 +124,35 @@ Se necessário, adicione header CORS nos buckets:
 
 ---
 
-## PARTE 3 — VERIFICAÇÃO PÓS-DEPLOY
+## PARTE 3 — VERIFICAÇÃO PÓS-DEPLOY (CHECKLIST V2.0)
 
-### Checklist de testes
-
-```
 □ 1. Acesse https://temnobairro.online/interlagos
-      → Deve carregar o app sem erros no console
+→ App carrega sem erros no console
 
-□ 2. Verifique o console do navegador (F12)
-      → Sem erros de CORS, 404, ou mixed content
+□ 2. Abra o console (F12)
+→ Sem erros de CORS, 404 ou mixed content
 
 □ 3. Recarregue a página (F5)
-      → Não deve dar 404 (confirma que .htaccess funciona)
+→ Não deve dar 404 (SPA routing via .htaccess)
 
-□ 4. Teste o login com Google OAuth
-      → Deve redirecionar para o domínio correto após login
+□ 4. Faça login com Google OAuth
+→ Redireciona corretamente após login
 
-□ 5. Teste o login com Magic Link
-      → Email deve conter link com https://temnobairro.online/interlagos
+□ 5. Acesse Perfil → "Quero anunciar meu comércio"
+→ Abre MerchantLandingView com link "Começar gratuitamente →"
 
-□ 6. Abra no celular e instale como PWA
-      → Botão "Adicionar à tela inicial" deve aparecer
-      → App deve abrir em modo standalone (sem barra do navegador)
+□ 6. Clique em "Começar gratuitamente →" sem estar logado
+→ Abre modal de login; após login, redireciona para painel
 
-□ 7. Desative a internet no celular e abra o PWA
-      → App deve carregar (Service Worker + Workbox cache)
+□ 7. Acesse o Painel do Comerciante
+→ Sidebar exibe 5 tabs: Visão Geral, Anúncios, Configurações, Relatórios, Campanhas
 
-□ 8. Acesse https://temnobairro.online/interlagos/assets/
-      → Deve retornar 403 ou 404 (não listar arquivos)
-```
+□ 8. Abra no celular e instale como PWA
+→ Ícone aparece na tela inicial, app abre em modo standalone
+
+□ 9. Desative a internet no celular e abra o PWA
+→ App carrega (Service Worker + Workbox cache)
+
 
 ---
 
@@ -214,12 +213,22 @@ powershell -Command "Compress-Archive -Path 'dist/*' -DestinationPath '../interl
 
 | Arquivo | Localização | Descrição |
 |---|---|---|
-| `interlagos-deploy.zip` | raiz do projeto | Pacote pronto para upload no Hostgator |
+| `interlagos-deploy.zip` | `config/hostgator/deploy/` | Pacote pronto para upload no Hostgator |
 | `app/public/.htaccess` | incluído no zip | SPA routing para Apache |
-| `app/.env.production` | local apenas | Variáveis de build (não commitar) |
+| `app/.env.interlagos` | local apenas | Variáveis de build (não commitar) |
 | `app/vite.config.js` | repositório | Suporte a base path dinâmico |
+
+## VERSÃO DESTE BUILD
+
+| Commit | Descrição |
+|---|---|
+| `125708a` | feat(merchant-panel): tabs Campanhas + Relatórios + cadastro gratuito |
+| `55f671f` | feat(plans): padroniza nomenclatura free/basic/pro/premium |
+| `5196332` | fix(toast): corrige useToast em 22 arquivos |
+| `9e9289b` | fix(ads): remove campo image do payload |
+| `cb6568a` | fix(admin): centraliza lógica nos services |
 
 ---
 
-*Documento criado em 24/03/2026.*
+*Documento criado em 24/03/2026. Última atualização: 25/03/2026 — v2.0.*  
 *Para dúvidas sobre configuração do Supabase: ver `docs/10-guia-de-execucao.md` seção 3.*
