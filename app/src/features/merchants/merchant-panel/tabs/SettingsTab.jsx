@@ -70,7 +70,7 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
       } else {
         // Novo cadastro
         merchantData.is_active = false;
-        merchantData.plan = 'basic';
+        merchantData.plan = 'free';
         const newMerchant = await createMerchant(merchantData);
         
         // Atualiza role do usuário para merchant

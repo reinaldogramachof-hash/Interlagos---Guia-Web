@@ -8,58 +8,60 @@ export default function PlansView() {
             name: 'Básico',
             price: '19,90',
             period: '/mês',
-            description: 'Ideal para pequenos negócios que estão começando a digitalizar sua presença.',
+            description: 'Para quem quer presença digital no bairro com um perfil completo.',
             icon: <Star className="text-blue-400" size={32} />,
             color: 'blue',
             features: [
-                'Perfil comercial básico',
+                'Perfil comercial completo',
                 'Presença em 1 categoria',
                 'Link para WhatsApp',
-                'Horário de funcionamento',
-                'Suporte por email'
+                'Até 3 anúncios ativos',
+                'Suporte por email',
             ],
             cta: 'Começar Agora',
-            popular: false
+            popular: false,
         },
         {
-            id: 'intermediate',
-            name: 'Profissional',
+            id: 'pro',
+            name: 'Pro',
             price: '39,90',
             period: '/mês',
-            description: 'Para quem quer mais visibilidade e ferramentas para atrair clientes.',
+            description: 'Mais visibilidade e ferramentas para atrair e fidelizar clientes.',
             icon: <Zap className="text-emerald-400" size={32} />,
             color: 'emerald',
             features: [
                 'Tudo do plano Básico',
                 'Presença em até 3 categorias',
                 'Galeria de fotos (até 10)',
-                'Links para Redes Sociais',
+                'Links para redes sociais',
                 'Destaque rotativo na categoria',
-                'Estatísticas básicas de visitas'
+                'Anúncios ilimitados',
+                'Estatísticas básicas de visitas',
             ],
-            cta: 'Assinar Profissional',
-            popular: true
+            cta: 'Assinar Pro',
+            popular: true,
         },
         {
             id: 'premium',
             name: 'Premium',
             price: '79,90',
             period: '/mês',
-            description: 'Domine sua categoria e tenha o máximo de exposição e recursos exclusivos.',
+            description: 'Domine sua categoria e tenha o máximo de exposição.',
             icon: <Crown className="text-amber-400" size={32} />,
             color: 'amber',
             features: [
-                'Tudo do plano Profissional',
+                'Tudo do plano Pro',
                 'Categorias ilimitadas',
                 'Topo nas buscas sempre',
                 'Banner de destaque na Home',
                 'Selo de Verificado Oficial',
                 'Suporte prioritário WhatsApp',
-                'Relatórios detalhados mensais'
+                'Relatórios detalhados mensais',
+                'Campanhas de desconto',
             ],
             cta: 'Ser Premium',
-            popular: false
-        }
+            popular: false,
+        },
     ];
 
     return (
@@ -73,6 +75,23 @@ export default function PlansView() {
                     Destaque seu negócio para milhares de moradores do Bairro.
                     Sem fidelidade, cancele quando quiser.
                 </p>
+            </div>
+
+            {/* Plano Grátis */}
+            <div className="max-w-6xl mx-auto px-4 mb-6">
+                <div className="bg-slate-800/40 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Comece sem pagar nada</span>
+                        <h3 className="text-xl font-bold text-white mt-1">Plano Grátis</h3>
+                        <p className="text-slate-400 text-sm mt-1">Perfil básico + 1 anúncio ativo. Sem cartão de crédito.</p>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-3xl font-bold text-white">R$ 0</span>
+                        <button onClick={() => {}} className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold transition-all border border-white/10">
+                            Cadastrar Grátis
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Pricing Grid */}

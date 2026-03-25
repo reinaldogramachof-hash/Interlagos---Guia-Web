@@ -118,8 +118,9 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-bold text-gray-800 text-sm">Plano Atual</h3>
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${planId === 'premium' ? 'bg-amber-100 text-amber-700' :
-                  planId === 'professional' ? 'bg-emerald-100 text-emerald-700' :
-                    'bg-blue-100 text-blue-700'
+                  planId === 'pro' ? 'bg-emerald-100 text-emerald-700' :
+                  planId === 'basic' ? 'bg-blue-100 text-blue-700' :
+                    'bg-gray-100 text-gray-600'
                 }`}>
                 {plan.badge ?? '🔵 Básico'}
               </span>

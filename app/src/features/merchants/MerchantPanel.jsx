@@ -6,6 +6,7 @@ import { useAuth } from '../auth/AuthContext';
 import CreateAdWizard from '../ads/CreateAdWizard';
 import { useToast } from '../../components/Toast';
 import UpgradeModal from './UpgradeModal';
+import { PLANS_CONFIG } from '../../constants/plans';
 
 // Tabs
 import DashboardTab from './merchant-panel/tabs/DashboardTab';
@@ -73,8 +74,8 @@ export default function MerchantPanel({ onClose }) {
     };
 
     const handleCreateAdClick = () => {
-        const limit = merchant?.plan === 'premium' ? 999 : merchant?.plan === 'pro' ? 5 : 1;
-        if (myAds.length >= limit) {
+        const planConfig = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
+        if (myAds.length >= planConfig.adLimit) {
             setShowUpgradeModal(true);
         } else {
             setAdToEdit(null);
