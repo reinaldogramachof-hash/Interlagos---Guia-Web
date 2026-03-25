@@ -167,6 +167,12 @@
             <p class="pillar-card__desc">
               Vaquinha para a escola, doação de agasalho, sugestão de melhoria para a praça. Bairro bom é bairro que cuida de si mesmo — e aqui tem espaço pra isso.
             </p>
+            <div class="pillar-subtypes">
+              <span class="subtype subtype--green">Quero Doar</span>
+              <span class="subtype subtype--amber">Preciso de Ajuda</span>
+              <span class="subtype subtype--blue">Voluntariado</span>
+              <span class="subtype subtype--rose">Campanhas</span>
+            </div>
           </article>
         </div>
       </div>
@@ -204,7 +210,7 @@
           <!-- Santa Júlia — Em breve -->
           <div class="bairro-card bairro-card--soon reveal reveal-delay-2" aria-label="Santa Júlia — em breve"
             role="img">
-            <div class="bairro-card__bg" style="background: linear-gradient(135deg,#1e1b4b,#111113);"
+            <div class="bairro-card__bg" style="background-image: url('assets/santa-julia.png');"
               aria-hidden="true"></div>
             <div class="bairro-card__overlay" aria-hidden="true"></div>
             <div class="bairro-card__content">
@@ -216,7 +222,7 @@
 
           <!-- Parque Novo Horizonte — Em breve -->
           <div class="bairro-card bairro-card--soon reveal reveal-delay-3" aria-label="Parque Novo Horizonte — em breve" role="img">
-            <div class="bairro-card__bg" style="background: linear-gradient(135deg,#1c1917,#111113);"
+            <div class="bairro-card__bg" style="background-image: url('assets/novo-horizonte.png');"
               aria-hidden="true"></div>
             <div class="bairro-card__overlay" aria-hidden="true"></div>
             <div class="bairro-card__content">
@@ -288,19 +294,31 @@
     <section class="merchants" id="comerciantes" aria-labelledby="merchants-title">
       <div class="container">
         <div class="merchants__inner reveal">
-          <span class="section-tag merchants__tag">🏢 Para comerciantes</span>
+          <span class="section-tag merchants__tag">💼 Para negócios &amp; profissionais</span>
           <h2 id="merchants-title" class="section-heading merchants__heading">
-            Seja visto por quem mora na rua de cima
+            Seu negócio já tem<br />um bairro inteiro te esperando
           </h2>
           <p class="section-sub merchants__sub">
-            Alcance quem passa na sua rua todos os dias. Começa de graça — sem cartão, sem burocracia.
+            Loja, consultório, prestação de serviço ou trabalho autônomo — quem mora no bairro precisa achar você antes de procurar no Google.
           </p>
+
+          <!-- Chips: quem pode anunciar -->
+          <div class="merchants__audience">
+            <span class="merchants__audience-chip">Restaurantes</span>
+            <span class="merchants__audience-chip">Salões</span>
+            <span class="merchants__audience-chip">Clínicas</span>
+            <span class="merchants__audience-chip">Eletricistas</span>
+            <span class="merchants__audience-chip">Personal trainers</span>
+            <span class="merchants__audience-chip">Advogados</span>
+            <span class="merchants__audience-chip">Oficinas</span>
+            <span class="merchants__audience-chip">+ muito mais</span>
+          </div>
 
           <!-- Banner gratuidade -->
           <div class="free-banner" role="note">
             <span class="free-banner__icon" aria-hidden="true">🎁</span>
             <div>
-              <p class="free-banner__title">Todo comércio do bairro merece ser encontrado</p>
+              <p class="free-banner__title">Todo negócio do bairro merece ser encontrado</p>
               <p class="free-banner__desc">Cadastro gratuito · Sem cartão · Sai quando quiser, sem enrolação</p>
             </div>
           </div>
@@ -313,11 +331,11 @@
               <p class="plan-card__price">R$ 0 <span>/ sempre</span></p>
               <p class="plan-card__desc">Pra começar agora e já aparecer pra quem mora perto — sem gastar nada.</p>
               <ul class="plan-card__features">
-                <li><span class="check" aria-hidden="true">✔</span> Perfil completo no guia comercial</li>
+                <li><span class="check" aria-hidden="true">✔</span> Perfil completo no guia</li>
                 <li><span class="check" aria-hidden="true">✔</span> Foto de capa e logo do negócio</li>
                 <li><span class="check" aria-hidden="true">✔</span> WhatsApp e telefone em destaque</li>
                 <li><span class="check" aria-hidden="true">✔</span> Avaliações de clientes</li>
-                <li><span class="check" aria-hidden="true">✔</span> Visível para todos os moradores do bairro</li>
+                <li><span class="check" aria-hidden="true">✔</span> Visível para todos os moradores</li>
               </ul>
               <a href="https://www.temnobairro.online/interlagos/" class="plan-card__cta plan-card__cta--free"
                 id="merchant-cta-free">
@@ -325,28 +343,65 @@
               </a>
             </div>
 
-            <!-- Plano Pro -->
+            <!-- Plano Profissional -->
             <div class="plan-card plan-card--pro">
               <div class="plan-badge">Mais popular ⭐</div>
-              <p class="plan-card__label">Plano Pro</p>
-              <p class="plan-card__price">Sob consulta <span>/ mês</span></p>
-              <p class="plan-card__desc">Pra ser o primeiro nome que o bairro pensa quando precisar do que você oferece.</p>
+              <p class="plan-card__label">Plano Profissional</p>
+              <p class="plan-card__price">R$ 39,90 <span>/ mês</span></p>
+              <p class="plan-card__desc">Pra ser o primeiro nome que o bairro pensa quando precisar do que você faz.</p>
               <ul class="plan-card__features">
-                <li><span class="check" aria-hidden="true">✔</span> Tudo do plano Gratuito, mais:</li>
+                <li><span class="check" aria-hidden="true">✔</span> Tudo do Gratuito, mais:</li>
                 <li><span class="check" aria-hidden="true">✔</span> Destaque no topo da categoria</li>
                 <li><span class="check" aria-hidden="true">✔</span> Galeria de fotos ilimitada</li>
                 <li><span class="check" aria-hidden="true">✔</span> Campanhas e cupons de desconto</li>
-                <li><span class="check" aria-hidden="true">✔</span> Dashboard de analytics completo</li>
+                <li class="plan-card__feature--highlight">
+                  <span class="check" aria-hidden="true">✔</span>
+                  <span><strong>Painel de Gestão Completo</strong><br>
+                  <small>Métricas, campanhas e presença — dentro e fora da plataforma</small></span>
+                </li>
                 <li><span class="check" aria-hidden="true">✔</span> Selo "Negócio Verificado" ✓</li>
-                <li><span class="check" aria-hidden="true">✔</span> Prioridade na busca do bairro</li>
+                <li><span class="check" aria-hidden="true">✔</span> Suporte prioritário WhatsApp</li>
               </ul>
               <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
                 class="plan-card__cta plan-card__cta--pro" id="merchant-cta-pro">
-                Falar com a equipe →
+                Assinar Profissional →
+              </a>
+            </div>
+
+            <!-- Plano Premium -->
+            <div class="plan-card plan-card--top">
+              <p class="plan-card__label">Plano Premium</p>
+              <p class="plan-card__price">R$ 79,90 <span>/ mês</span></p>
+              <p class="plan-card__desc">Pra dominar a categoria e ser o nome que o bairro não esquece.</p>
+              <ul class="plan-card__features">
+                <li><span class="check" aria-hidden="true">✔</span> Tudo do Profissional, mais:</li>
+                <li><span class="check" aria-hidden="true">✔</span> Topo absoluto nas buscas — sempre</li>
+                <li><span class="check" aria-hidden="true">✔</span> Banner de destaque na home do bairro</li>
+                <li><span class="check" aria-hidden="true">✔</span> Categorias ilimitadas</li>
+                <li><span class="check" aria-hidden="true">✔</span> Relatório mensal de performance</li>
+                <li><span class="check" aria-hidden="true">✔</span> Canal direto com a equipe</li>
+              </ul>
+              <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+                class="plan-card__cta plan-card__cta--top" id="merchant-cta-premium">
+                Assinar Premium →
               </a>
             </div>
 
           </div>
+
+          <!-- Strip de confiança -->
+          <div class="guarantee-strip">
+            <div class="guarantee-strip__item">
+              <span aria-hidden="true">🔒</span>
+              Não gostou no primeiro mês? <strong>Devolvemos seu dinheiro, sem perguntas.</strong>
+            </div>
+            <div class="guarantee-strip__divider" aria-hidden="true"></div>
+            <div class="guarantee-strip__item">
+              <span aria-hidden="true">⚡</span>
+              <strong>Sem fidelidade</strong> — cancele quando quiser
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
