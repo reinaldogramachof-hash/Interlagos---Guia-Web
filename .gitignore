@@ -23,6 +23,11 @@ config/hostgator/deploy/
 .DS_Store
 Thumbs.db
 
-# Editores
-.vscode/settings.json
+# Editores e ferramentas locales
+.vscode/
+.claude/
 *.swp
+
+# Ferramentas de auditoria e deploy temporário
+_deploy_tmp/
+app/src/audit.cjs
