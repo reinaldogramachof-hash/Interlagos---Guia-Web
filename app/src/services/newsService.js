@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { uploadImage } from './storageService';
 
 export async function fetchNews() {
   const { data, error } = await supabase
@@ -28,11 +29,22 @@ export async function adminFetchNews() {
 }
 
 export async function createNews(newsData) {
+  let finalImageUrl = newsData.image_url;
+
+  // Se receber um File como image_url, faz o upload
+  if (newsData.image_url instanceof File) {
+    const file = newsData.image_url;
+    const ext = file.name.split('.').pop();
+    const path = `news/${newsData.author_id || 'admin'}/${Date.now()}.${ext}`;
+    finalImageUrl = await uploadImage('news-images', file, path);
+  }
+
   const { data, error } = await supabase
     .from('news')
-    .insert(newsData)
+    .insert({ ...newsData, image_url: finalImageUrl })
     .select()
     .single();
+  
   if (error) throw error;
   return data;
 }

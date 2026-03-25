@@ -29,19 +29,29 @@ export default function MerchantsTab() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    const payload = {
-      name: form.name, category: form.category, description: form.description,
-      whatsapp: form.whatsapp.replace(/\D/g, ''), address: form.address, plan: form.plan,
-      social_links: form.socialLinks, gallery: form.gallery,
-      is_active: true,
+    
+    // Prepara dados básicos
+    const payload = { 
+      ...form, 
+      social_links: form.socialLinks,
+      is_active: true 
     };
+    delete payload.socialLinks;
+
     if (isCreating) {
+      // Para criação, formatamos o zap aqui por simplicidade ou movemos pro service depois
+      payload.whatsapp = payload.whatsapp.replace(/\D/g, ''); 
       await createMerchant(payload);
     } else {
+      // O updateMerchant já trata a limpeza do WhatsApp internamente conforme refatorado
       await updateMerchant(editingId, payload);
     }
-    setIsCreating(false); setEditingId(null); setForm(INITIAL_FORM);
-    showToast('Comércio salvo!', 'success'); fetchMerchants();
+    
+    setIsCreating(false); 
+    setEditingId(null); 
+    setForm(INITIAL_FORM);
+    showToast('Comércio salvo!', 'success'); 
+    fetchMerchants();
   };
 
   const setField = (f, v) => setForm(p => ({ ...p, [f]: v }));

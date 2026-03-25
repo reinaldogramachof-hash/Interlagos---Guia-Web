@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { adminFetchNews, createNews, deleteNews } from '../../../services/newsService';
 import { useAuth } from '../../auth/AuthContext';
 import { Bell, Trash2 } from 'lucide-react';
-import { uploadImage } from '../../../services/storageService';
 import { useToast } from '../../../components/Toast';
 
 export default function NewsTab() {
@@ -27,13 +26,6 @@ export default function NewsTab() {
     const f = e.target;
     
     try {
-      let image_url = '';
-      if (imageFile) {
-        const ext = imageFile.name.split('.').pop();
-        const path = `news/${currentUser.uid}/${Date.now()}.${ext}`;
-        image_url = await uploadImage('news-images', imageFile, path);
-      }
-
       await createNews({
         title: f.title.value,
         content: f.content.value,
@@ -41,7 +33,7 @@ export default function NewsTab() {
         category: f.category.value,
         author_id: currentUser.uid,
         status: 'active',
-        image_url
+        image_url: imageFile // Passa o arquivo diretamente
       });
 
       f.reset();

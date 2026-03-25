@@ -1,39 +1,36 @@
 import { supabase } from '../lib/supabaseClient';
+import { createNotification } from './notificationService';
 
-export async function fetchApprovals() {
-  const { data, error } = await supabase
-    .from('merchants')
-    .select('*')
-    .eq('is_active', false);
-  if (error) throw error;
-  return data ?? [];
-}
-
-export async function approveMerchant(id) {
-  const { data, error } = await supabase
-    .from('merchants')
-    .update({ is_active: true })
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
-}
-
+// fetchAuditLogs: a tabela audit_logs não existe no schema.
+// Usa click_events como proxy de auditoria de atividade — tabela real no schema.
 export async function fetchAuditLogs() {
   const { data, error } = await supabase
-    .from('audit_logs')
-    .select('*, profiles(display_name)')
+    .from('click_events')
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(100);
+  
   if (error) throw error;
-  return data ?? [];
+  
+  return (data ?? []).map(row => ({
+    id: row.id,
+    created_at: row.created_at,
+    action: row.entity_type,
+    details: row.entity_id,
+    user_id: row.user_id
+  }));
 }
 
 export async function escalateItem(ticketData, targetCollection, targetId) {
+  // Monta payload compatível com o schema real da tabela tickets:
+  // tickets (author_id, subject, body, status, resolved_at, resolved_by)
   const { error: ticketError } = await supabase
     .from('tickets')
-    .insert(ticketData);
+    .insert({
+      subject: ticketData.subject,
+      body: ticketData.body,
+      status: 'open',
+    });
   if (ticketError) throw ticketError;
 
   const { error: targetError } = await supabase
@@ -47,24 +44,55 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }] = await Promise.all([
-    supabase.from('ads').select('*').eq('status', 'pending'),
-    supabase.from('campaigns').select('*').eq('status', 'pending'),
+    supabase.from('ads').select('*, profiles(display_name)').eq('status', 'pending'),
+    supabase.from('campaigns').select('*, profiles(display_name)').eq('status', 'pending'),
   ]);
   return [
-    ...(ads || []).map(a => ({ ...a, _table: 'ads' })),
-    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns' })),
+    ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name })),
+    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.profiles?.display_name })),
   ];
 }
 
+// approveItem: ads usam status 'approved' (fetchAds filtra por 'approved').
+// campaigns usam status 'active' (fetchCampaigns filtra por 'active').
 export async function approveItem(table, id) {
-  const { error } = await supabase.from(table).update({ status: 'active' }).eq('id', id);
+  const { data: item, error: fetchError } = await supabase.from(table).select('*').eq('id', id).single();
+  if (fetchError) throw fetchError;
+
+  const status = table === 'ads' ? 'approved' : 'active';
+  const { error } = await supabase.from(table).update({ status }).eq('id', id);
   if (error) throw error;
+
+  const userId = item.seller_id || item.author_id || item.requester_id || item.user_id;
+  if (userId) {
+    await createNotification(
+      userId,
+      'Aprovação Concluída',
+      `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" foi aprovado!`,
+      'success'
+    );
+  }
   return true;
 }
 
+// rejectItem: atualiza status para 'rejected' em vez de deletar — preserva trilha de auditoria
+// e garante que a notificação já foi enviada antes deste ponto.
 export async function rejectItem(table, id) {
-  const { error } = await supabase.from(table).delete().eq('id', id);
+  const { data: item, error: fetchError } = await supabase.from(table).select('*').eq('id', id).single();
+  if (fetchError) throw fetchError;
+
+  const { error } = await supabase.from(table).update({ status: 'rejected' }).eq('id', id);
   if (error) throw error;
+
+  const userId = item.seller_id || item.author_id || item.requester_id || item.user_id;
+  if (userId) {
+    await createNotification(
+      userId,
+      'Item Rejeitado',
+      `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`,
+      'warning'
+    );
+  }
   return true;
 }
 
@@ -85,6 +113,13 @@ export async function updateUserRole(userId, newRole) {
     .select()
     .single();
   if (error) throw error;
+
+  const message = newRole === 'banned' 
+    ? 'Sua conta foi suspensa por violação das diretrizes.' 
+    : `Seu cargo no sistema foi alterado para: ${newRole}.`;
+  
+  await createNotification(userId, 'Atualização de Perfil', message, newRole === 'banned' ? 'error' : 'info');
+
   return data;
 }
 
@@ -106,6 +141,15 @@ export async function resolveTicket(ticketId, ticketData) {
     .select()
     .single();
   if (error) throw error;
+
+  if (data.author_id) {
+    await createNotification(
+      data.author_id,
+      'Solicitação Resolvida',
+      `Sua solicitação #${data.id.slice(0, 8)} foi marcada como: ${ticketData.status}.`,
+      ticketData.status === 'approved' ? 'success' : 'info'
+    );
+  }
   return data;
 }
 

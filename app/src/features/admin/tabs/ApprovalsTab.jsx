@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { fetchPendingItems, approveItem, rejectItem } from '../../../services/adminService';
-import { createNotification } from '../../../services/notificationService';
-import { useAuth } from '../../auth/AuthContext';
 import { Shield, CheckCircle, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
@@ -80,31 +78,19 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
   useEffect(() => { fetchPending(); }, []);
 
   const handleApprove = async (table, id) => {
-    const item = pending.find(i => i.id === id);
-    await approveItem(table, id);
-    if (item?.seller_id || item?.author_id) {
-      await createNotification(
-        item.seller_id || item.author_id,
-        'Aprovação Concluída',
-        `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" foi aprovado!`,
-        'success'
-      );
+    try {
+      await approveItem(table, id);
+      showToast('Item aprovado com sucesso!', 'success');
+      fetchPending();
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao aprovar item.', 'error');
     }
-    fetchPending();
   };
 
   const handleReject = async (table, id) => {
     try {
-      const item = pending.find(i => i.id === id);
       await rejectItem(table, id);
-      if (item?.seller_id || item?.author_id) {
-        await createNotification(
-          item.seller_id || item.author_id,
-          'Item Rejeitado',
-          `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`,
-          'warning'
-        );
-      }
       showToast('Item rejeitado.', 'info');
       fetchPending();
     } catch (e) {

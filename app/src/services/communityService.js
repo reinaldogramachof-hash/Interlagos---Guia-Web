@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { createNotification } from './notificationService';
 
 // Suggestions
 export async function fetchSuggestions() {
@@ -61,6 +62,26 @@ export async function adminFetchCampaigns() {
 }
 
 export async function deleteCampaign(id) {
+  // Buscar campanha para identificar o autor
+  const { data: campaign, error: fetchError } = await supabase
+    .from('campaigns')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (fetchError) throw fetchError;
+
+  // Notificar o autor antes da exclusão
+  const userId = campaign.requester_id || campaign.author_id || campaign.user_id;
+  if (userId) {
+    await createNotification(
+      userId,
+      'Campanha Encerrada',
+      `Sua campanha "${campaign.title}" foi removida pela administração.`,
+      'info'
+    );
+  }
+
   const { error } = await supabase
     .from('campaigns')
     .delete()

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { createNotification } from './notificationService';
 
 export const getMerchants = async () => {
   const { data, error } = await supabase
@@ -38,8 +39,30 @@ export const createMerchant = async (data) => {
 };
 
 export const updateMerchant = async (id, data) => {
-  const { error } = await supabase.from('merchants').update(data).eq('id', id);
+  // Tratar formatação interna: limpar caracteres do WhatsApp se presente
+  const sanitizedData = { ...data };
+  if (sanitizedData.whatsapp) {
+    sanitizedData.whatsapp = sanitizedData.whatsapp.replace(/\D/g, '');
+  }
+
+  const { data: updated, error } = await supabase
+    .from('merchants')
+    .update(sanitizedData)
+    .eq('id', id)
+    .select()
+    .single();
+
   if (error) throw error;
+
+  if (updated.owner_id) {
+    await createNotification(
+      updated.owner_id,
+      'Comércio Atualizado',
+      `As informações do seu comércio "${updated.name}" foram atualizadas pela administração.`,
+      'info'
+    );
+  }
+  return updated;
 };
 
 export const deleteMerchant = async (id) => {
