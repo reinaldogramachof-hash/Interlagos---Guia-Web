@@ -38,7 +38,7 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
   if (merchants.length === 0) return null;
 
   return (
-    <section className="mb-6 bg-slate-900 rounded-2xl mx-3 p-5">
+    <section className="mb-6 bg-slate-900 rounded-2xl mx-3 p-5 overflow-hidden">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <span className="w-1 h-6 bg-indigo-500 rounded-full" />

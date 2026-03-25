@@ -20,7 +20,7 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto flex items-center justify-between px-4 h-14 gap-2">
+      <div className="flex items-center justify-between px-4 h-14 gap-2">
 
         {/* Esquerda */}
         <button

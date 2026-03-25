@@ -53,7 +53,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans overflow-x-hidden">
       <SidebarMenu
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -61,7 +61,7 @@ function AppContent() {
         onLoginOpen={() => setIsLoginOpen(true)}
       />
 
-      <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto relative min-h-screen bg-gray-50 shadow-2xl shadow-black/5 flex flex-col">
+      <div className="w-full relative min-h-screen bg-gray-50 flex flex-col">
         <AppHeader
           currentView={currentView}
           onLoginOpen={() => setIsLoginOpen(true)}

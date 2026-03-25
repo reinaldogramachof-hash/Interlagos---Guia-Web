@@ -10,7 +10,7 @@ export const NAV_ITEMS = [
 export default function BottomNav({ currentView, onNavigate, onCreateAd }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-      <div className="max-w-md md:max-w-2xl lg:max-w-5xl mx-auto flex items-center justify-around h-16">
+      <div className="flex items-center justify-around h-16">
         {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
           const isActive = currentView === id;
           return (

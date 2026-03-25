@@ -39,7 +39,7 @@ export default function PremiumCarousel({ merchants, onMerchantClick }) {
   if (merchants.length === 0) return null;
 
   return (
-    <section className="mb-6 bg-slate-900 rounded-2xl mx-3 p-5">
+    <section className="mb-6 bg-slate-900 rounded-2xl mx-3 p-5 overflow-hidden">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <span className="w-1 h-6 bg-amber-500 rounded-full" />
@@ -76,7 +76,7 @@ export default function PremiumCarousel({ merchants, onMerchantClick }) {
             <div
               key={`${merchant.id}-${index}`}
               onClick={() => onMerchantClick(merchant)}
-              className="premium-card min-w-[85%] md:min-w-[48%] lg:min-w-[31%] xl:min-w-[24%] bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-3xl p-6 cursor-pointer hover:shadow-2xl hover:shadow-amber-500/20 transition-all relative overflow-hidden group/card"
+              className="premium-card min-w-[85%] md:min-w-[48%] lg:min-w-[31%] xl:min-w-[31%] bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 rounded-3xl p-6 cursor-pointer hover:shadow-2xl hover:shadow-amber-500/20 transition-all relative overflow-hidden group/card"
             >
               <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-white text-xs uppercase font-black px-4 py-1.5 rounded-bl-2xl shadow-lg z-10 flex items-center gap-1">
                 Premium <Trophy size={12} className="fill-white" />

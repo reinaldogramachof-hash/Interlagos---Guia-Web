@@ -501,8 +501,36 @@ a { color: inherit; text-decoration: none; }
   text-align: left;
 }
 .free-banner__icon { font-size: 1.75rem; flex-shrink: 0; }
+.free-banner__text { flex: 1; }
 .free-banner__title { font-weight: 700; font-size: 0.9375rem; color: #fff; }
 .free-banner__desc { font-size: 0.8125rem; color: var(--color-success); margin-top: 0.2rem; }
+
+/* Botão CTA gratuito (âmbar) dentro do free-banner */
+.btn-free-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.65rem 1.35rem;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 24px rgba(245,158,11,0.3);
+  transition: transform var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+}
+.btn-free-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(245,158,11,0.5);
+}
+
+/* Em mobile, empilha o botão abaixo do texto */
+@media (max-width: 639px) {
+  .free-banner      { flex-wrap: wrap; }
+  .btn-free-cta     { width: 100%; justify-content: center; }
+}
 
 .plans {
   display: grid;
@@ -922,12 +950,30 @@ a { color: inherit; text-decoration: none; }
 }
 .skip-link:focus { top: 0; }
 
+/* === FIX 1 — Hero stats: layout estável em telas <= 399px === */
+@media (max-width: 399px) {
+  .hero__stats        { gap: 1.25rem; }
+  .hero__stats > div  { min-width: 80px; }
+  .hero__stat-value   { font-size: 1.4rem; }
+}
+
+/* === FIX 3 — Pillar cards: padding reduzido em 640–767px === */
+@media (min-width: 640px) and (max-width: 767px) {
+  .pillar-card        { padding: 1.5rem; }
+  .pillar-card__title { font-size: 1rem; }
+}
+
+/* === FIX 6 — Merchants inner: padding de transição em 768–1023px === */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .merchants__inner { padding: 3.5rem 3rem; }
+}
+
 /* === RESPONSIVE — md (640px+) === */
 @media (min-width: 640px) {
   .what-is__grid      { grid-template-columns: repeat(2, 1fr); }
   .bairros__grid      { grid-template-columns: repeat(2, 1fr); }
   .steps              { grid-template-columns: repeat(3, 1fr); }
-  .tiers              { grid-template-columns: repeat(3, 1fr); }
+  /* Fix 5: tiers movido para 900px — ver media query dedicada abaixo */
   .testimonials__grid { grid-template-columns: repeat(2, 1fr); }
   .footer__top        { flex-direction: row; justify-content: space-between; }
   .footer__bottom     { flex-direction: row; justify-content: space-between; align-items: center; }
@@ -939,16 +985,34 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (min-width: 768px) {
+  /* Problema 3 — merchants__inner: padding de transição em tablet */
+  .merchants__inner { padding: 1.5rem 1.25rem; }
+}
+
+/* === FIX 4 — Plans grid: 3 colunas apenas a partir de 960px === */
+@media (min-width: 960px) {
   .plans { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* === FIX 5 — Tiers grid: 3 colunas apenas a partir de 900px === */
+@media (min-width: 900px) {
+  .tiers { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* === RESPONSIVE — lg (1024px+) === */
 @media (min-width: 1024px) {
   .what-is__grid { grid-template-columns: repeat(4, 1fr); }
-  .bairros__grid { grid-template-columns: repeat(3, 1fr); }
+  /* Fix 2: 2 colunas em 1024px evita o 4º card órfão — wide desktop usa 1280px */
+  .bairros__grid { grid-template-columns: repeat(2, 1fr); }
   .bairro-card   { min-height: 300px; }
   .merchants__inner { padding: 4rem 4rem; }
   .testimonials__grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* === FIX 2 — Bairros grid: 4 colunas em wide desktop (1280px+) === */
+@media (min-width: 1280px) {
+  .bairros__grid { grid-template-columns: repeat(4, 1fr); }
+  .bairro-card   { min-height: 280px; }
 }
 
 /* Scrollbar customizada */
