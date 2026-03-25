@@ -95,3 +95,23 @@ export async function voteSuggestion(id) {
   if (error) throw error;
   return true;
 }
+
+export async function fetchCampaignsByMerchant(merchantId) {
+  const { data, error } = await supabase
+    .from('campaigns')
+    .select('*')
+    .eq('merchant_id', merchantId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createMerchantCampaign(campaign) {
+  const { data, error } = await supabase
+    .from('campaigns')
+    .insert({ ...campaign, status: 'pending' })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}

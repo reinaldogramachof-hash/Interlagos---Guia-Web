@@ -13,10 +13,7 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
     const handleUpgrade = async (plan) => {
         if (!merchantId) return;
         try {
-            await updateMerchant(merchantId, {
-                plan: plan,
-                is_premium: plan !== 'basic',
-            });
+            await updateMerchant(merchantId, { plan });
 
             if (currentUser) {
                 await createNotification(
@@ -40,21 +37,21 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
         {
             id: 'basic',
             name: 'Básico',
-            price: 'Grátis',
+            price: 'R$ 19,90/mês',
             icon: Star,
-            color: 'text-slate-500',
-            bg: 'bg-slate-50',
-            features: ['1 Anúncio Ativo', 'Perfil Básico', 'Suporte por Email']
+            color: 'text-blue-500',
+            bg: 'bg-blue-50',
+            features: ['Perfil completo no bairro', 'Até 3 anúncios ativos', 'Link para WhatsApp', 'Suporte por email'],
         },
         {
             id: 'pro',
-            name: 'Profissional',
-            price: 'R$ 29,90/mês',
+            name: 'Pro',
+            price: 'R$ 39,90/mês',
             icon: Zap,
             color: 'text-indigo-600',
             bg: 'bg-indigo-50',
-            features: ['5 Anúncios Ativos', 'Estatísticas Básicas', 'Destaque na Categoria', 'Suporte Prioritário'],
-            popular: true
+            features: ['Anúncios ilimitados', 'Estatísticas e relatórios', 'Links para redes sociais', 'Destaque na categoria'],
+            popular: true,
         },
         {
             id: 'premium',
@@ -63,8 +60,8 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
             icon: Crown,
             color: 'text-amber-500',
             bg: 'bg-amber-50',
-            features: ['Anúncios Ilimitados', 'Dashboard Completo', 'Topo das Buscas', 'Selo de Verificado', 'Atendimento WhatsApp']
-        }
+            features: ['Tudo do Pro', 'Topo nas buscas', 'Campanhas de desconto', 'Selo Verificado', 'Suporte WhatsApp'],
+        },
     ];
 
     return (

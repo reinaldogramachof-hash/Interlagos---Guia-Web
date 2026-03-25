@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, LayoutDashboard, Tag, Store, Settings, TrendingUp } from 'lucide-react';
+import { X, LayoutDashboard, Tag, Store, Settings, TrendingUp, BarChart3, Megaphone } from 'lucide-react';
 import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../auth/AuthContext';
@@ -8,10 +8,11 @@ import { useToast } from '../../components/Toast';
 import UpgradeModal from './UpgradeModal';
 import { PLANS_CONFIG } from '../../constants/plans';
 
-// Tabs
 import DashboardTab from './merchant-panel/tabs/DashboardTab';
 import AdsTab from './merchant-panel/tabs/AdsTab';
 import SettingsTab from './merchant-panel/tabs/SettingsTab';
+import CampaignTab from './merchant-panel/tabs/CampaignTab';
+import ReportsTab from './merchant-panel/tabs/ReportsTab';
 
 export default function MerchantPanel({ onClose }) {
     const { currentUser } = useAuth();
@@ -130,6 +131,12 @@ export default function MerchantPanel({ onClose }) {
                         <button onClick={() => setActiveTab('settings')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'settings' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
                             <Settings size={18} /> Configurações
                         </button>
+                        <button onClick={() => setActiveTab('reports')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'reports' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                            <BarChart3 size={18} /> Relatórios
+                        </button>
+                        <button onClick={() => setActiveTab('campaigns')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'campaigns' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                            <Megaphone size={18} /> Campanhas
+                        </button>
                     </div>
 
                     {/* Content */}
@@ -158,6 +165,13 @@ export default function MerchantPanel({ onClose }) {
                                 currentUser={currentUser} 
                                 onUpdate={(updated) => setMerchant(updated)} 
                             />
+                        )}
+
+                        {activeTab === 'reports' && (
+                            <ReportsTab merchant={merchant} onUpgrade={() => setShowUpgradeModal(true)} />
+                        )}
+                        {activeTab === 'campaigns' && (
+                            <CampaignTab merchant={merchant} onUpgrade={() => setShowUpgradeModal(true)} />
                         )}
                     </div>
                 </div>

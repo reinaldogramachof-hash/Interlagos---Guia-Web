@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Star, Zap, Crown, ArrowRight } from 'lucide-react';
 
-export default function PlansView() {
+export default function PlansView({ onRegisterFree }) {
     const plans = [
         {
             id: 'basic',
@@ -87,7 +87,7 @@ export default function PlansView() {
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
                         <span className="text-3xl font-bold text-white">R$ 0</span>
-                        <button onClick={() => {}} className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold transition-all border border-white/10">
+                        <button onClick={onRegisterFree} className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold transition-all border border-white/10">
                             Cadastrar Grátis
                         </button>
                     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TrendingUp, Users, Ticket, BarChart3, ShieldCheck, ArrowRight, Store } from 'lucide-react';
 
-export default function MerchantLandingView({ onRegisterClick }) {
+export default function MerchantLandingView({ onRegisterClick, onRegisterFree }) {
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
             {/* Hero Section */}
@@ -27,6 +27,12 @@ export default function MerchantLandingView({ onRegisterClick }) {
                     >
                         Cadastrar meu Negócio
                         <ArrowRight size={20} />
+                    </button>
+                    <button
+                        onClick={onRegisterFree}
+                        className="text-indigo-200 hover:text-white text-sm font-medium underline underline-offset-4 transition-colors"
+                    >
+                        Começar gratuitamente →
                     </button>
                 </div>
             </div>

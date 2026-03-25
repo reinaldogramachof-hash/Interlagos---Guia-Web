@@ -27,6 +27,8 @@ export default function AppRouter({ requireAuth }) {
   const selectedCategory = useMerchantStore(selectSelectedCategory);
   const searchTerm = useMerchantStore(selectSearchTerm);
 
+  const goToMerchantPanel = () => requireAuth(() => setCurrentView('merchant-panel'));
+
   switch (currentView) {
     case 'news': return <NewsFeed />;
     case 'ads': return <AdsView onRequireAuth={requireAuth} />;
@@ -35,8 +37,8 @@ export default function AppRouter({ requireAuth }) {
     case 'history': return <HistoryView />;
     case 'suggestions': return <SuggestionsView />;
     case 'management': return <ManagementView />;
-    case 'plans': return <PlansView />;
-    case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} />;
+    case 'plans': return <PlansView onRegisterFree={goToMerchantPanel} />;
+    case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} onRegisterFree={goToMerchantPanel} />;
     case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
     case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
     case 'merchant-panel': return <MerchantPanel onClose={() => setCurrentView('profile')} />;
