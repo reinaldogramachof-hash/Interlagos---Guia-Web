@@ -28,20 +28,28 @@ export async function fetchAdsByUser(userId) {
   return data ?? [];
 }
 
+// Colunas válidas da tabela ads no Supabase.
+// Remove campos extras do formData (ex: 'image' que é estado local do wizard).
+function sanitizeAdPayload({ image, ...rest }) {
+  return rest;
+}
+
 export async function createAd(adData) {
+  const payload = sanitizeAdPayload(adData);
   const { data, error } = await supabase
     .from('ads')
-    .insert(adData)
+    .insert(payload)
     .select()
     .single();
   if (error) throw error;
   return data;
 }
 
-export async function updateAd(adId, data) {
+export async function updateAd(adId, adData) {
+  const payload = sanitizeAdPayload(adData);
   const { data: updated, error } = await supabase
     .from('ads')
-    .update(data)
+    .update(payload)
     .eq('id', adId)
     .select()
     .single();
