@@ -36,13 +36,13 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
         content: content.trim(),
         category,
         author_id: userId,
+        neighborhood: import.meta.env.VITE_NEIGHBORHOOD,
         status: 'pending',
       });
       showToast('Notícia enviada para aprovação!', 'success');
       onCreated?.();
       onClose();
     } catch (err) {
-      console.error('[CreateNewsModal]', err);
       showToast('Erro ao publicar notícia. Tente novamente.', 'error');
     } finally {
       setSaving(false);
@@ -51,7 +51,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[150] p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-card w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -71,7 +71,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
               value={title}
               onChange={e => setTitle(e.target.value)}
               minLength={5}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none text-slate-900 text-sm"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none text-slate-900 text-sm"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
             <select
               value={category}
               onChange={e => setCategory(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none text-slate-900 text-sm"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none text-slate-900 text-sm"
             >
               {NEWS_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
@@ -113,7 +113,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
             <button
               type="submit"
               disabled={!isValid || saving}
-              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
             >
               {saving
                 ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

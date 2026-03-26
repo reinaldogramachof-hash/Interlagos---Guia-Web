@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar, MapPin, Share2, Clock, User } from 'lucide-react';
 import Modal from '../../components/Modal';
 
@@ -12,7 +11,7 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                 text: news.summary,
                 url: window.location.href,
             })
-                .catch((error) => console.log('Error sharing', error));
+                .catch(() => {});
         } else {
             navigator.clipboard?.writeText(window.location.href);
         }
@@ -29,7 +28,7 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                         className="w-full h-full object-cover"
                     />
                     <div className="absolute top-4 left-4">
-                        <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
+                        <span className="bg-brand-600 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
                             {news.category}
                         </span>
                     </div>
@@ -68,13 +67,13 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                 <div className="border-t border-gray-100 pt-6 flex gap-3">
                     <button
                         onClick={handleShare}
-                        className="flex-1 bg-blue-50 text-blue-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors"
+                        className="flex-1 bg-brand-50 text-brand-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-brand-50 transition-colors"
                     >
                         <Share2 size={20} />
                         Compartilhar
                     </button>
                     {news.category === 'Eventos' && (
-                        <button className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                        <button className="flex-1 bg-brand-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors shadow-card">
                             <Calendar size={20} />
                             Salvar na Agenda
                         </button>

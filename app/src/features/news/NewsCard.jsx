@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 
 const CATEGORY_COLORS = {
@@ -7,7 +7,7 @@ const CATEGORY_COLORS = {
     Saúde: 'bg-green-100 text-green-700',
     Trânsito: 'bg-orange-100 text-orange-700',
     Urbanismo: 'bg-blue-100 text-blue-700',
-    default: 'bg-indigo-100 text-indigo-700',
+    default: 'bg-brand-50 text-brand-600',
 };
 
 // Avatar colorido gerado por inicial
@@ -96,8 +96,7 @@ export default function NewsCard({ item, onClick }) {
                     <img
                         src={imgSrc}
                         alt={item.title}
-                        className="w-full object-cover"
-                        style={{ maxHeight: '220px' }}
+                        className="w-full object-cover max-h-56"
                         loading="lazy"
                     />
                 </div>

@@ -27,7 +27,6 @@ export default function NewsResponsibilityModal({ isOpen, userId, onConfirm, onC
       await recordConsent(userId, 'news_responsibility');
       onConfirm?.();
     } catch (err) {
-      console.error('[NewsResponsibilityModal]', err);
       showToast('Erro ao registrar seu consentimento. Tente novamente.', 'error');
     } finally {
       setSaving(false);
@@ -36,7 +35,7 @@ export default function NewsResponsibilityModal({ isOpen, userId, onConfirm, onC
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[150] p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-card w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
 
         {/* Header */}
         <div className="bg-amber-50 border-b border-amber-100 px-5 py-4 flex items-center gap-3">
@@ -77,7 +76,7 @@ export default function NewsResponsibilityModal({ isOpen, userId, onConfirm, onC
               type="checkbox"
               checked={accepted}
               onChange={e => setAccepted(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-indigo-600 flex-shrink-0"
+              className="mt-0.5 w-4 h-4 accent-brand-600 flex-shrink-0"
             />
             <span className="text-xs text-slate-700 group-hover:text-slate-900 font-medium">
               Li, entendi e concordo com as responsabilidades acima
@@ -96,7 +95,7 @@ export default function NewsResponsibilityModal({ isOpen, userId, onConfirm, onC
           <button
             onClick={handleConfirm}
             disabled={!accepted || saving}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
           >
             {saving
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

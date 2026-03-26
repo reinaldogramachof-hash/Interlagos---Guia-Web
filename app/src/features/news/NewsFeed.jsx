@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Newspaper, PlusCircle } from 'lucide-react';
 import { fetchNews, subscribeNews } from '../../services/newsService';
 import { hasConsent } from '../../services/consentService';
@@ -8,40 +8,6 @@ import CreateNewsModal from './CreateNewsModal';
 import EmptyState from '../../components/EmptyState';
 import { SkeletonNewsCard } from '../../components/SkeletonCard';
 import useAuthStore from '../../stores/authStore';
-
-// ── Mock de fallback ──────────────────────────────────────────────────────────
-const mockNews = [
-    {
-        id: 1,
-        title: 'Feira de Artesanato na Praça do Laguinho',
-        content: 'Venha prestigiar os artesãos locais neste fim de semana. Comidas típicas e música ao vivo.',
-        summary: 'Venha prestigiar os artesãos locais neste fim de semana. Comidas típicas e música ao vivo.',
-        date: '2026-03-01T10:00:00Z',
-        category: 'Eventos',
-        image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=800',
-        author: 'Redação IC',
-    },
-    {
-        id: 2,
-        title: 'Nova Ciclofaixa na Av. Interlagos',
-        content: 'Prefeitura anuncia início das obras para nova ciclovia que ligará o autódromo à estação.',
-        summary: 'Prefeitura anuncia início das obras para nova ciclovia que ligará o autódromo à estação.',
-        date: '2026-02-28T14:00:00Z',
-        category: 'Urbanismo',
-        image_url: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=800',
-        author: 'Redação IC',
-    },
-    {
-        id: 3,
-        title: 'Vacinação Antirrábica neste Sábado',
-        content: 'Traga seu pet para vacinar gratuitamente no posto de saúde do Parque Interlagos.',
-        summary: 'Traga seu pet para vacinar gratuitamente no posto de saúde do Parque Interlagos.',
-        date: '2026-02-27T08:00:00Z',
-        category: 'Saúde',
-        image_url: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=800',
-        author: 'Redação IC',
-    },
-];
 
 const CATEGORIES = ['Todos', 'Urgente', 'Eventos', 'Geral', 'Trânsito', 'Esportes', 'Cultura', 'Obras', 'Saúde'];
 
@@ -64,10 +30,9 @@ export default function NewsFeed() {
             try {
                 const data = await fetchNews();
                 if (cancelled) return;
-                setNews(data?.length ? data : mockNews);
+                setNews(data ?? []);
             } catch (err) {
-                console.error("Erro ao buscar notícias:", err);
-                if (!cancelled) setNews(mockNews);
+                if (!cancelled) setNews([]);
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -133,8 +98,8 @@ export default function NewsFeed() {
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategory === cat
-                                ? 'bg-indigo-600 text-white'
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-pill text-xs font-bold transition-all ${selectedCategory === cat
+                                ? 'bg-brand-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >

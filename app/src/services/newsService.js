@@ -1,10 +1,12 @@
 import { supabase } from '../lib/supabaseClient';
+const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 import { uploadImage } from './storageService';
 
 export async function fetchNews() {
   const { data, error } = await supabase
     .from('news')
     .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
     .eq('status', 'active')
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -14,7 +16,7 @@ export async function fetchNews() {
 export function subscribeNews(callback) {
   callback(); // carrega inicial
   const channel = supabase.channel('news-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, callback)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'news', filter: `neighborhood=eq.${NEIGHBORHOOD}` }, callback)
     .subscribe();
   return () => supabase.removeChannel(channel);
 }
@@ -39,9 +41,10 @@ export async function createNews(newsData) {
     finalImageUrl = await uploadImage('news-images', file, path);
   }
 
+  const payload = { neighborhood: NEIGHBORHOOD, ...newsData, image_url: finalImageUrl };
   const { data, error } = await supabase
     .from('news')
-    .insert({ ...newsData, image_url: finalImageUrl })
+    .insert(payload)
     .select()
     .single();
   
