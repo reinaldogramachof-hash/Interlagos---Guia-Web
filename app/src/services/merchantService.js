@@ -6,6 +6,7 @@ export const getMerchants = async () => {
     .from('merchants')
     .select('*')
     .eq('is_active', true)
+    .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) { console.error('merchantService.getMerchants:', error); return []; }
   return data;

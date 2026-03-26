@@ -17,6 +17,7 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
     suggestions: 'Sugestões',
     plans: 'Planos e Preços',
     'merchant-landing': 'Para Comerciantes',
+    coupons: 'Cupons & Ofertas',
   };
   const title = titles[currentView] || 'Interlagos Conectado';
 

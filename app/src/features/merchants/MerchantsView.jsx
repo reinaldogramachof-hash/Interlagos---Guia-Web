@@ -1,8 +1,11 @@
-import { Search, Store, MapPin, Phone } from 'lucide-react';
+import { Search, Store, MapPin, X } from 'lucide-react';
 import { SkeletonCard } from '../../components/SkeletonCard';
 import EmptyState from '../../components/EmptyState';
 import PremiumCarousel from './PremiumCarousel';
 import ProCarousel from './ProCarousel';
+import CouponsCarousel from './CouponsCarousel';
+import useMerchantStore from '../../stores/merchantStore';
+import { categories } from '../../constants/categories';
 
 // Badge de status: Aberto entre 7h e 22h (lógica de frontend mockada)
 function isOpen() {
@@ -31,7 +34,10 @@ const PLAN_LABEL = {
   free: { label: 'Grátis', bg: 'bg-gray-50', text: 'text-gray-400' },
 };
 
-export default function MerchantsView({ merchants, loading, selectedCategory, searchTerm, onMerchantClick }) {
+export default function MerchantsView({ merchants, loading, selectedCategory, searchTerm, onMerchantClick, onViewCoupons }) {
+  const setSearchTerm = useMerchantStore(state => state.setSearchTerm);
+  const setSelectedCategory = useMerchantStore(state => state.setSelectedCategory);
+
   const premiumMerchants = merchants.filter(m => m.plan === 'premium');
   const proMerchants = merchants.filter(m => m.plan === 'professional');
   const showCarousels = selectedCategory === 'Todos' && !searchTerm;
@@ -50,6 +56,45 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
 
   return (
     <div className="pb-4">
+      {/* ── Busca + Filtros ── */}
+      <div className="px-3 pt-3 pb-1 space-y-2">
+        <div className="relative">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Buscar comércio ou serviço..."
+            className="w-full pl-9 pr-9 py-2.5 bg-white border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                selectedCategory === cat.id
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-300'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Cupons & Ofertas ── */}
+      {showCarousels && (
+        <CouponsCarousel onMerchantClick={onMerchantClick} onViewAll={onViewCoupons} />
+      )}
+
       {/* ── Carrosséis de Destaque (preservados) ── */}
       {showCarousels && premiumMerchants.length > 0 && (
         <PremiumCarousel merchants={premiumMerchants} onMerchantClick={onMerchantClick} />

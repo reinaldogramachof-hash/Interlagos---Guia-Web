@@ -16,6 +16,17 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
         if (merchant?.id) incrementMerchantView(merchant.id);
     }, [merchant?.id]);
 
+    // Lock body scroll + ESC to close
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        const handleKeyDown = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.body.style.overflow = '';
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [onClose]);
+
     useEffect(() => {
         if (merchant?.id && currentUser) {
             checkIsFavorite(currentUser.uid, merchant.id).then(setIsFavorite);
@@ -62,7 +73,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                     <img
                         src={merchant.image_url || merchant.image || '/capa.jpg'}
                         alt={merchant.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover" loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
@@ -110,6 +121,11 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
 
                             {/* Contact Buttons - HIDDEN FOR FREE PLAN */}
                             <MerchantContactButtons plan={merchant.plan} onWhatsApp={handleWhatsApp} />
+                            {(!merchant.plan || merchant.plan === 'free') && (
+                                <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                                    <Store size={12} /> Este comércio ainda não disponibilizou contato direto.
+                                </p>
+                            )}
 
                             {/* Photo Gallery (Professional & Premium) */}
                             {['professional', 'premium'].includes(merchant.plan) && merchant.gallery && merchant.gallery.length > 0 && (
@@ -152,16 +168,14 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                             {/* Social Links - PROFESSIONAL & PREMIUM */}
                             <MerchantSocialLinks plan={merchant.plan} socialLinks={merchant.social_links} />
 
-                            <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Clock size={18} className="text-gray-400" /> Horários
-                                </h3>
-                                <div className="space-y-2 text-sm text-gray-600">
-                                    <div className="flex justify-between"><span>Seg - Sex</span> <span className="font-medium text-gray-900">09:00 - 18:00</span></div>
-                                    <div className="flex justify-between"><span>Sábado</span> <span className="font-medium text-gray-900">09:00 - 14:00</span></div>
-                                    <div className="flex justify-between text-red-400"><span>Domingo</span> <span>Fechado</span></div>
+                            {merchant.hours ? (
+                                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Clock size={18} className="text-gray-400" /> Horários
+                                    </h3>
+                                    <p className="text-sm text-gray-600 whitespace-pre-line">{merchant.hours}</p>
                                 </div>
-                            </div>
+                            ) : null}
 
                             {['professional', 'premium'].includes(merchant.plan) && (
                                 <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">

@@ -115,3 +115,17 @@ export async function createMerchantCampaign(campaign) {
   if (error) throw error;
   return data;
 }
+
+export async function fetchActiveCoupons() {
+  const today = new Date().toISOString().split('T')[0];
+  const neighborhood = import.meta.env.VITE_NEIGHBORHOOD;
+  const { data, error } = await supabase
+    .from('campaigns')
+    .select('*, merchants(id, name, image_url, category, plan)')
+    .eq('status', 'active')
+    .eq('neighborhood', neighborhood)
+    .gte('end_date', today)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('fetchActiveCoupons:', error); return []; }
+  return data ?? [];
+}

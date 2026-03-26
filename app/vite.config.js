@@ -1,6 +1,51 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import path from 'path'
+import { createReadStream } from 'fs'
+import { stat } from 'fs/promises'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const landingDir = path.resolve(__dirname, '../landing')
+
+// Plugin que serve a pasta landing/ em / durante o dev server
+// Espelha o comportamento de produção: / = landing, /{bairro}/ = app
+function serveLandingPlugin(appBase) {
+  return {
+    name: 'serve-landing',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const url = (req.url || '/').split('?')[0]
+        if (url.startsWith(appBase) || url.startsWith('/@') || url.startsWith('/node_modules')) {
+          return next()
+        }
+        const filePath = path.join(landingDir, url === '/' ? 'index.html' : url)
+        try {
+          const info = await stat(filePath)
+          if (info.isFile()) {
+            const ext = path.extname(filePath).toLowerCase()
+            const mime = {
+              '.html': 'text/html; charset=utf-8',
+              '.css':  'text/css',
+              '.js':   'application/javascript',
+              '.png':  'image/png',
+              '.jpg':  'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.svg':  'image/svg+xml',
+              '.ico':  'image/x-icon',
+              '.webp': 'image/webp',
+            }
+            res.setHeader('Content-Type', mime[ext] || 'application/octet-stream')
+            createReadStream(filePath).pipe(res)
+            return
+          }
+        } catch { /* arquivo não existe, passa para o próximo handler */ }
+        next()
+      })
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -16,6 +61,7 @@ export default defineConfig(({ mode }) => {
     base: basePath,
     plugins: [
       react(),
+      serveLandingPlugin(basePath),
       VitePWA({
         disabled: env.VITE_DISABLE_PWA === 'true',
         registerType: 'autoUpdate',

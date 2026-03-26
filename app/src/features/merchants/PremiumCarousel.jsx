@@ -1,40 +1,14 @@
-import { useRef, useState, useEffect } from 'react';
+import { useAutoScrollCarousel } from '../../hooks/useAutoScrollCarousel';
 import { ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
 export default function PremiumCarousel({ merchants, onMerchantClick }) {
-  const carouselRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const { carouselRef, isPaused, setIsPaused, handleScroll } = useAutoScrollCarousel(0.5);
 
   // Duplicar para loop infinito
   const infinite = [
     ...merchants, ...merchants, ...merchants,
     ...merchants, ...merchants, ...merchants,
   ].slice(0, 30);
-
-  useEffect(() => {
-    let animId;
-    const scroll = () => {
-      if (!isPaused && carouselRef.current) {
-        const el = carouselRef.current;
-        if (el.scrollLeft >= el.scrollWidth / 2) {
-          el.scrollLeft -= el.scrollWidth / 2;
-        } else {
-          el.scrollLeft += 0.5;
-        }
-      }
-      animId = requestAnimationFrame(scroll);
-    };
-    animId = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(animId);
-  }, [isPaused]);
-
-  const handleScroll = () => {
-    if (!carouselRef.current) return;
-    const el = carouselRef.current;
-    if (el.scrollLeft >= el.scrollWidth / 2 - 10) {
-      el.scrollLeft -= el.scrollWidth / 2;
-    }
-  };
 
   if (merchants.length === 0) return null;
 

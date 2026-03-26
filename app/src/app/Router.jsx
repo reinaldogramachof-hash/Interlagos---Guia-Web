@@ -15,6 +15,11 @@ import ManagementView from '../features/plans/ManagementView';
 import PlansView from '../features/plans/PlansView';
 import MerchantLandingView from '../features/merchants/MerchantLandingView';
 import ProfileView from '../features/auth/ProfileView';
+import PollsView from '../features/community/PollsView';
+import SupportView from '../features/support/SupportView';
+import MembersLandingView from '../features/members/MembersLandingView';
+import MemberPanelView from '../features/members/MemberPanelView';
+import CouponsView from '../features/merchants/CouponsView';
 
 export default function AppRouter({ requireAuth }) {
   const currentView = useUiStore(selectCurrentView);
@@ -43,6 +48,17 @@ export default function AppRouter({ requireAuth }) {
     case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
     case 'merchant-panel': return <MerchantPanel onClose={() => setCurrentView('profile')} />;
     case 'resident-panel': return <ResidentPanel />;
+    case 'polls': return <PollsView onRequireAuth={requireAuth} />;
+    case 'support': return <SupportView />;
+    case 'members-landing': return <MembersLandingView onNavigate={setCurrentView} />;
+    case 'member-panel': return requireAuth(() => <MemberPanelView onNavigate={setCurrentView} />) || null;
+    case 'coupons':
+      return (
+        <CouponsView
+          onMerchantClick={setSelectedMerchant}
+          onBack={() => setCurrentView('merchants')}
+        />
+      );
     case 'merchants':
     default:
       return (
@@ -52,6 +68,7 @@ export default function AppRouter({ requireAuth }) {
           selectedCategory={selectedCategory}
           searchTerm={searchTerm}
           onMerchantClick={setSelectedMerchant}
+          onViewCoupons={() => setCurrentView('coupons')}
         />
       );
   }
