@@ -121,14 +121,33 @@ export async function createMerchantCampaign(campaign) {
 
 export async function fetchActiveCoupons() {
   const today = new Date().toISOString().split('T')[0];
-  const neighborhood = import.meta.env.VITE_NEIGHBORHOOD;
   const { data, error } = await supabase
     .from('campaigns')
     .select('*, merchants(id, name, image_url, category, plan)')
     .eq('status', 'active')
-    .eq('neighborhood', neighborhood)
+    .eq('neighborhood', NEIGHBORHOOD)
     .gte('end_date', today)
     .order('created_at', { ascending: false });
-  if (error) { console.error('fetchActiveCoupons:', error); return []; }
+  if (error) { return []; }
   return data ?? [];
+}
+
+export async function fetchPublicServices() {
+  const { data, error } = await supabase
+    .from('public_services')
+    .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
+    .order('is_emergency', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createTicket(ticket) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .insert(ticket)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
