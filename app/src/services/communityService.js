@@ -1,11 +1,14 @@
 import { supabase } from '../lib/supabaseClient';
 import { createNotification } from './notificationService';
 
+const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
+
 // Suggestions
 export async function fetchSuggestions() {
   const { data, error } = await supabase
     .from('suggestions')
     .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
