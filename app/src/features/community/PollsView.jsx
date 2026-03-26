@@ -1,104 +1,189 @@
-import React from 'react';
-import { BarChart2, Clock, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BarChart2, Clock, CheckCircle2, Loader2 } from 'lucide-react';
+import { fetchPolls, fetchPollVoteCounts, checkUserVoted, submitVote } from '../../services/pollsService';
+import { useAuth } from '../auth/AuthContext';
 
 const PollsView = ({ onRequireAuth }) => {
-    const polls = [
-        {
-            id: 1,
-            question: "Qual deve ser a prioridade de melhoria para a Praça do Bairro este mês?",
-            deadline: "Faltam 3 dias",
-            options: [
-                { text: "Iluminação LED", votes: 45 },
-                { text: "Novos Bancos", votes: 20 },
-                { text: "Academia ao Ar Livre", votes: 35 }
-            ],
-            totalVotes: 100
-        },
-        {
-            id: 2,
-            question: "Como você avalia a segurança no bairro recentemente?",
-            deadline: "Encerrada",
-            options: [
-                { text: "Boa", votes: 25 },
-                { text: "Regular", votes: 50 },
-                { text: "Preocupante", votes: 25 }
-            ],
-            totalVotes: 200,
-            closed: true
-        }
-    ];
+  const { currentUser } = useAuth();
+  const [polls, setPolls] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [voteCounts, setVoteCounts] = useState({});
+  const [userVotes, setUserVotes] = useState({});
+  const [voting, setVoting] = useState(null);
 
-    const handleVote = () => {
-        if (onRequireAuth) {
-            onRequireAuth(() => {
-                console.log("Votando...");
-            });
-        }
-    };
+  useEffect(() => {
+    loadPolls();
+  }, []);
 
+  useEffect(() => {
+    if (currentUser && polls.length > 0) {
+      polls.forEach(poll => loadUserVoteStatus(poll.id));
+    }
+  }, [currentUser, polls]);
+
+  async function loadPolls() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchPolls();
+      setPolls(data);
+      data.forEach(poll => loadVoteCounts(poll.id));
+    } catch (err) {
+      setError('Não foi possível carregar as enquetes.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadVoteCounts(pollId) {
+    const votes = await fetchPollVoteCounts(pollId);
+    const counts = {};
+    votes.forEach(v => {
+      counts[v.option_id] = (counts[v.option_id] || 0) + 1;
+    });
+    setVoteCounts(prev => ({ ...prev, [pollId]: counts }));
+  }
+
+  async function loadUserVoteStatus(pollId) {
+    if (!currentUser) return;
+    const voted = await checkUserVoted(pollId, currentUser.id);
+    setUserVotes(prev => ({ ...prev, [pollId]: voted }));
+  }
+
+  async function handleVote(poll, optionId) {
+    if (!currentUser) {
+      onRequireAuth?.(() => {});
+      return;
+    }
+    if (poll.status === 'closed' || userVotes[poll.id] || voting === poll.id) return;
+
+    setVoting(poll.id);
+    try {
+      const result = await submitVote(poll.id, optionId, currentUser.id);
+      if (result?.success) {
+        setUserVotes(prev => ({ ...prev, [poll.id]: true }));
+        await loadVoteCounts(poll.id);
+      }
+    } catch {
+      // voto já computado ou erro silencioso
+    } finally {
+      setVoting(null);
+    }
+  }
+
+  if (loading) {
     return (
-        <div className="p-4 bg-zinc-950 min-h-screen">
-            {/* Header */}
-            <div className="mb-6">
-                <div className="flex items-center gap-3 mb-1">
-                    <BarChart2 className="w-6 h-6 text-purple-500" />
-                    <h1 className="text-xl font-bold text-white">Enquetes do Bairro</h1>
-                </div>
-                <p className="text-zinc-400 text-sm">Vote e veja a opinião da comunidade</p>
-            </div>
-
-            {/* Content List */}
-            <div className="space-y-4">
-                {polls.map((poll) => (
-                    <div key={poll.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 overflow-hidden shadow-lg">
-                        <div className="flex justify-between items-start mb-3">
-                            <h2 className="text-white font-medium text-sm leading-relaxed pr-8">{poll.question}</h2>
-                            <span className={`text-[10px] px-2 py-1 rounded-full flex items-center gap-1 ${poll.closed ? 'bg-zinc-800 text-zinc-500' : 'bg-purple-900/30 text-purple-400'}`}>
-                                <Clock className="w-3 h-3" />
-                                {poll.deadline}
-                            </span>
-                        </div>
-
-                        <div className="space-y-3 mb-4">
-                            {poll.options.map((option, idx) => {
-                                const percentage = Math.round((option.votes / poll.totalVotes) * 100);
-                                return (
-                                    <div key={idx} className="relative group">
-                                        <div className="flex justify-between text-[11px] mb-1 px-1">
-                                            <span className="text-zinc-300">{option.text}</span>
-                                            <span className="text-zinc-500">{percentage}%</span>
-                                        </div>
-                                        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full bg-purple-500/50 rounded-full transition-all duration-500" 
-                                                style={{ width: `${percentage}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        <button 
-                            onClick={handleVote}
-                            disabled={poll.closed}
-                            className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all ${
-                                poll.closed 
-                                ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
-                                : 'bg-purple-600 hover:bg-purple-700 text-white active:scale-95'
-                            }`}
-                        >
-                            {poll.closed ? 'Enquete Encerrada' : 'Votar'}
-                        </button>
-                    </div>
-                ))}
-            </div>
-
-            <p className="mt-8 text-center text-xs text-zinc-600">
-                Somente usuários registrados podem votar para garantir a transparência da comunidade.
-            </p>
-        </div>
+      <div className="p-4 min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-brand-600" />
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 min-h-screen bg-white flex items-center justify-center">
+        <p className="text-sm text-red-500 text-center">{error}</p>
+      </div>
+    );
+  }
+
+  if (polls.length === 0) {
+    return (
+      <div className="p-4 min-h-screen bg-white flex flex-col items-center justify-center gap-2">
+        <BarChart2 className="w-10 h-10 text-gray-300" />
+        <p className="text-sm text-gray-400 text-center">Nenhuma enquete disponível no momento.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 bg-white min-h-screen pb-24">
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-1">
+          <BarChart2 className="w-6 h-6 text-brand-600" />
+          <h1 className="text-xl font-bold text-gray-900">Enquetes do Bairro</h1>
+        </div>
+        <p className="text-gray-500 text-sm">Vote e veja a opinião da comunidade</p>
+      </div>
+
+      <div className="space-y-4">
+        {polls.map((poll) => {
+          const counts = voteCounts[poll.id] || {};
+          const totalVotes = Object.values(counts).reduce((a, b) => a + b, 0);
+          const isClosed = poll.status === 'closed';
+          const hasVoted = !!userVotes[poll.id];
+          const isVoting = voting === poll.id;
+          const showResults = isClosed || hasVoted;
+          const options = [...(poll.poll_options || [])].sort((a, b) => a.display_order - b.display_order);
+
+          return (
+            <div key={poll.id} className="bg-white rounded-card shadow-card border border-gray-100 p-4">
+              <div className="flex justify-between items-start mb-3">
+                <h2 className="text-gray-900 font-medium text-sm leading-relaxed pr-8">{poll.question}</h2>
+                <span className={`text-[10px] px-2 py-1 rounded-pill flex items-center gap-1 shrink-0 ${isClosed ? 'bg-gray-100 text-gray-400' : 'bg-brand-50 text-brand-600'}`}>
+                  {isClosed ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                  {isClosed ? 'Encerrada' : 'Aberta'}
+                </span>
+              </div>
+
+              <div className="space-y-3 mb-4">
+                {options.map((option) => {
+                  const count = counts[option.id] || 0;
+                  const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+
+                  return (
+                    <div
+                      key={option.id}
+                      className={`relative ${!showResults && !isClosed ? 'cursor-pointer group' : ''}`}
+                      onClick={() => !showResults && handleVote(poll, option.id)}
+                    >
+                      <div className="flex justify-between text-[11px] mb-1 px-1">
+                        <span className="text-gray-700">{option.text}</span>
+                        {showResults && <span className="text-gray-400">{percentage}%</span>}
+                      </div>
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        {showResults && (
+                          <div
+                            className="h-full bg-brand-600 rounded-full transition-all duration-500"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {showResults && (
+                <p className="text-[11px] text-gray-400 text-right mb-2">{totalVotes} voto{totalVotes !== 1 ? 's' : ''}</p>
+              )}
+
+              {!showResults && (
+                <button
+                  disabled={isClosed || isVoting}
+                  className="w-full py-2.5 rounded-pill text-sm font-medium transition-all bg-brand-600 hover:bg-brand-700 text-white active:scale-95 min-h-[44px]"
+                >
+                  {isVoting ? 'Registrando...' : 'Selecione uma opção acima para votar'}
+                </button>
+              )}
+
+              {hasVoted && !isClosed && (
+                <p className="text-center text-[11px] text-brand-600 mt-2 flex items-center justify-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Voto registrado
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="mt-8 text-center text-xs text-gray-400">
+        Somente usuários registrados podem votar para garantir a transparência.
+      </p>
+    </div>
+  );
 };
 
 export default PollsView;
