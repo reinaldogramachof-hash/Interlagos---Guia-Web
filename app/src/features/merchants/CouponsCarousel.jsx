@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
+import { formatDate } from '../../utils/dateUtils';
 import { Ticket, ChevronRight, Tag } from 'lucide-react';
 import { fetchActiveCoupons } from '../../services/communityService';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-}
 
 export default function CouponsCarousel({ onMerchantClick, onViewAll }) {
   const [coupons, setCoupons] = useState([]);
@@ -39,11 +34,11 @@ export default function CouponsCarousel({ onMerchantClick, onViewAll }) {
         {coupons.map(coupon => {
           const merchant = coupon.merchants ?? {};
           return (
-            <div
-              key={coupon.id}
-              onClick={() => merchant.id && onMerchantClick({ ...merchant })}
-              className="flex-shrink-0 w-64 bg-white rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden"
-            >
+              <div
+                key={coupon.id}
+                onClick={() => merchant.id && onMerchantClick({ ...merchant })}
+                className="flex-shrink-0 w-[260px] bg-white rounded-card border border-emerald-100 shadow-card hover:shadow-card transition-all cursor-pointer overflow-hidden"
+              >
               <div className="h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
               <div className="p-4">
                 <div className="flex items-center gap-2.5 mb-3">

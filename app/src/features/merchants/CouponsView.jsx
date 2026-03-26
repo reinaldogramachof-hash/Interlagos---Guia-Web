@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
+import { formatDate } from '../../utils/dateUtils';
 import { ArrowLeft, Ticket, Tag, ChevronRight } from 'lucide-react';
 import { fetchActiveCoupons } from '../../services/communityService';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-}
 
 export default function CouponsView({ onMerchantClick, onBack }) {
   const [coupons, setCoupons] = useState([]);
@@ -31,9 +26,9 @@ export default function CouponsView({ onMerchantClick, onBack }) {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-3 pt-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4 pt-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-44 bg-gray-100 rounded-2xl animate-pulse" />
+            <div key={i} className="h-44 bg-gray-100 rounded-card animate-pulse" />
           ))}
         </div>
       ) : coupons.length === 0 ? (
@@ -43,14 +38,14 @@ export default function CouponsView({ onMerchantClick, onBack }) {
           <p className="text-sm text-gray-400 mt-1">Volte em breve para novas promoções!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-3 pt-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4 pt-4">
           {coupons.map(coupon => {
             const merchant = coupon.merchants ?? {};
             return (
               <div
                 key={coupon.id}
                 onClick={() => merchant.id && onMerchantClick({ ...merchant })}
-                className="bg-white rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden"
+                className="bg-white rounded-card border border-emerald-100 shadow-card hover:shadow-card transition-all cursor-pointer overflow-hidden"
               >
                 <div className="h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
                 <div className="p-3">
