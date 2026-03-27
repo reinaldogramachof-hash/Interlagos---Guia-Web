@@ -62,13 +62,13 @@ export default function AdminPanel({ onClose }) {
         subject: escalationTarget.title,
         status: 'open',
         body: escalationReason,
+        author_id: currentUser.id,
         resolved_by: currentUser.email,
       }, escalationTarget.collection, escalationTarget.id);
       
       showToast('Item escalado com sucesso para a Torre de Controle!', 'success');
       setEscalationTarget(null);
     } catch (error) {
-      console.error('Error escalating:', error);
       showToast('Erro ao escalar: ' + error.message, 'error');
     }
   };

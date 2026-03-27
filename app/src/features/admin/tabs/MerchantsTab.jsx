@@ -64,7 +64,7 @@ export default function MerchantsTab() {
       {/* Lista */}
       <div className="w-1/3 border-r border-gray-100 pr-4 flex flex-col">
         <div className="mb-4 space-y-2">
-          <button onClick={() => { setIsCreating(true); setEditingId(null); setForm(INITIAL_FORM); }} className="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2"><Plus size={16} /> Novo</button>
+          <button onClick={() => { setIsCreating(true); setEditingId(null); setForm(INITIAL_FORM); }} className="w-full bg-brand-600 text-white py-2 rounded-pill font-bold flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors"><Plus size={16} /> Novo</button>
           <div className="relative"><Search className="absolute left-3 top-2.5 text-gray-400" size={16} /><input className="w-full pl-9 p-2 border rounded-lg text-slate-900" placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
         </div>
         <div className="flex-1 overflow-y-auto space-y-2">
@@ -87,7 +87,7 @@ export default function MerchantsTab() {
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {PLANS.map(({ value, label, desc }) => (
-                <label key={value} className={`cursor-pointer border p-3 rounded-lg text-center ${form.plan === value ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200'}`}>
+                <label key={value} className={`cursor-pointer border p-3 rounded-lg text-center ${form.plan === value ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-200' : 'border-gray-200'}`}>
                   <input type="radio" name="plan" value={value} checked={form.plan === value} onChange={e => setField('plan', e.target.value)} className="hidden" />
                   <div className="font-bold text-sm mb-1">{label}</div>
                   <div className="text-[10px] text-slate-500 leading-tight">{desc}</div>
@@ -95,13 +95,13 @@ export default function MerchantsTab() {
               ))}
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome</label><input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" value={form.name} onChange={e => setField('name', e.target.value)} required /></div>
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">Categoria</label><select className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" value={form.category} onChange={e => setField('category', e.target.value)}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>
+              <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome</label><input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none" value={form.name} onChange={e => setField('name', e.target.value)} required /></div>
+              <div><label className="block text-xs font-bold text-slate-500 mb-1">Categoria</label><select className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none" value={form.category} onChange={e => setField('category', e.target.value)}>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>
             </div>
-            <div><label className="block text-xs font-bold text-slate-500 mb-1">Descrição</label><textarea className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" rows="2" value={form.description} onChange={e => setField('description', e.target.value)} /></div>
+            <div><label className="block text-xs font-bold text-slate-500 mb-1">Descrição</label><textarea className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none" rows="2" value={form.description} onChange={e => setField('description', e.target.value)} /></div>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">WhatsApp</label><input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="11999999999" value={form.whatsapp} onChange={e => setField('whatsapp', e.target.value)} /></div>
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" value={form.address} onChange={e => setField('address', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-slate-500 mb-1">WhatsApp</label><input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none" placeholder="11999999999" value={form.whatsapp} onChange={e => setField('whatsapp', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input className="w-full border p-2.5 rounded-lg text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none" value={form.address} onChange={e => setField('address', e.target.value)} /></div>
             </div>
             {showSocials && (
               <div className="pt-2 border-t border-slate-100">
@@ -113,7 +113,7 @@ export default function MerchantsTab() {
                 </div>
               </div>
             )}
-            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30">
+            <button type="submit" className="w-full bg-brand-600 text-white py-3 rounded-pill font-bold hover:bg-brand-700 flex items-center justify-center gap-2 shadow-card transition-colors">
               <Save size={18} /> {isCreating ? 'Criar Comércio' : 'Salvar Alterações'}
             </button>
           </form>

@@ -15,7 +15,7 @@ export default function NewsTab() {
       const data = await adminFetchNews();
       setNewsList(data);
     } catch (error) {
-      console.error("Error fetching news:", error);
+      // silenced for production
     }
   };
 
@@ -31,8 +31,8 @@ export default function NewsTab() {
         content: f.content.value,
         summary: f.summary.value,
         category: f.category.value,
-        author_id: currentUser.uid,
-        status: 'active',
+        author_id: currentUser.id,
+        status: 'published',
         image_url: imageFile // Passa o arquivo diretamente
       });
 
@@ -41,7 +41,6 @@ export default function NewsTab() {
       showToast('Notícia publicada!', 'success');
       fetchNews();
     } catch (error) {
-      console.error(error);
       showToast('Erro ao publicar notícia', 'error');
     }
   };
@@ -52,15 +51,14 @@ export default function NewsTab() {
       showToast('Notícia excluída!', 'success');
       fetchNews();
     } catch (e) {
-      console.error(e);
       showToast('Erro ao excluir', 'error');
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-        <h3 className="font-bold text-blue-800 mb-4 flex items-center gap-2"><Bell size={20} /> Publicar Notícia Oficial</h3>
+      <div className="bg-brand-50 p-6 rounded-card border border-brand-100">
+        <h3 className="font-bold text-brand-700 mb-4 flex items-center gap-2"><Bell size={20} /> Publicar Notícia Oficial</h3>
         <form onSubmit={handlePublish} className="space-y-4">
           <input name="title" placeholder="Título" className="w-full border p-2 rounded text-slate-900" required />
           <textarea name="summary" placeholder="Resumo (Aparece no feed)..." className="w-full border p-2 rounded text-slate-900" rows="2" required />
@@ -84,7 +82,7 @@ export default function NewsTab() {
             <option>Cultura</option>
             <option>Geral</option>
           </select>
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded font-bold">Publicar</button>
+          <button type="submit" className="w-full bg-brand-600 text-white py-2 rounded-pill font-bold hover:bg-brand-700 transition-colors">Publicar</button>
         </form>
       </div>
       <div className="space-y-4">
@@ -92,7 +90,7 @@ export default function NewsTab() {
         {newsList.map(item => (
           <div key={item.id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-start">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-1 rounded-full mb-2 inline-block">{item.category}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-1 rounded-pill mb-2 inline-block">{item.category}</span>
               <h4 className="font-bold text-slate-900">{item.title}</h4>
               <p className="text-sm text-slate-500 line-clamp-2">{item.summary || item.content}</p>
               <div className="text-xs text-slate-400 mt-2">{new Date(item.created_at).toLocaleDateString('pt-BR')}</div>

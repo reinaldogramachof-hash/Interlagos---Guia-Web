@@ -121,6 +121,7 @@ const useAuthStore = create((set, get) => ({
 export const selectCurrentUser = (state) => {
   if (!state.session) return null;
   return {
+    id: state.session.user.id,
     uid: state.session.user.id,
     email: state.session.user.email,
     displayName: state.profile?.display_name || state.session.user.email?.split('@')[0],

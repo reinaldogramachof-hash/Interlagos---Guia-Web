@@ -15,7 +15,6 @@ export default function TicketsTab({ onCountChange }) {
       setTickets(data);
       onCountChange?.(data.length);
     } catch (error) {
-      console.error("Error fetching tickets:", error);
       showToast('Erro ao carregar tickets.', 'error');
     }
   };
@@ -32,7 +31,6 @@ export default function TicketsTab({ onCountChange }) {
       showToast(`Ticket ${resolution}.`, 'success');
       fetchTickets();
     } catch (error) {
-      console.error(error);
       showToast('Erro ao resolver ticket.', 'error');
     }
   };

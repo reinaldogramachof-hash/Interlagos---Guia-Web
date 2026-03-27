@@ -16,7 +16,6 @@ export default function UsersTab() {
       const data = await fetchUsers();
       setUsers(data);
     } catch (error) {
-      console.error("Error fetching users:", error);
       showToast('Erro ao carregar usuários.', 'error');
     }
   };
@@ -29,7 +28,6 @@ export default function UsersTab() {
       showToast(`Cargo alterado para ${newRole}.`, 'success');
       loadUsers();
     } catch (e) {
-      console.error(e);
       showToast('Erro ao alterar cargo.', 'error');
     }
   };
@@ -40,7 +38,6 @@ export default function UsersTab() {
       showToast('Usuário banido.', 'success');
       loadUsers();
     } catch (e) {
-      console.error(e);
       showToast('Erro ao banir usuário.', 'error');
     }
   };
@@ -73,7 +70,7 @@ export default function UsersTab() {
                 <td className="p-4 flex items-center gap-3">
                   {user.photo_url
                     ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
-                    : <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
+                    : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
                   }
                   <div><div className="font-bold text-slate-900">{user.display_name || 'Sem Nome'}</div><div className="text-xs text-slate-400">{user.id.slice(0, 8)}…</div></div>
                 </td>
@@ -87,7 +84,7 @@ export default function UsersTab() {
                     <>
                       {user.role === 'admin'
                         ? <button onClick={() => handleRoleChange(user.id, 'resident')} className="text-orange-600 hover:bg-orange-50 px-3 py-1 rounded-lg font-bold text-xs border border-orange-200">Rebaixar</button>
-                        : <button onClick={() => handleRoleChange(user.id, 'admin')} className="text-indigo-600 hover:bg-indigo-50 px-3 py-1 rounded-lg font-bold text-xs border border-indigo-200">Promover Admin</button>
+                        : <button onClick={() => handleRoleChange(user.id, 'admin')} className="text-brand-600 hover:bg-brand-50 px-3 py-1 rounded-lg font-bold text-xs border border-brand-200">Promover Admin</button>
                       }
                       <button onClick={() => handleBan(user.id)} className="text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg font-bold text-xs border border-red-200">Banir</button>
                     </>

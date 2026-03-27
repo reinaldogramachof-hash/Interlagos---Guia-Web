@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabaseClient';
 import { createNotification } from './notificationService';
 
+const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
+
 // fetchAuditLogs: a tabela audit_logs não existe no schema.
 // Usa click_events como proxy de auditoria de atividade — tabela real no schema.
 export async function fetchAuditLogs() {
@@ -30,6 +32,7 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
       subject: ticketData.subject,
       body: ticketData.body,
       status: 'open',
+      author_id: ticketData.author_id ?? null,
     });
   if (ticketError) throw ticketError;
 
@@ -44,8 +47,8 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }] = await Promise.all([
-    supabase.from('ads').select('*, profiles(display_name)').eq('status', 'pending'),
-    supabase.from('campaigns').select('*, profiles(display_name)').eq('status', 'pending'),
+    supabase.from('ads').select('*, profiles(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('campaigns').select('*, profiles(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
   ]);
   return [
     ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name })),

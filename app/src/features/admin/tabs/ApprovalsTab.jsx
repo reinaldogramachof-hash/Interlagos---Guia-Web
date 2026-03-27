@@ -21,7 +21,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
             { key: 'communitySense',   label: 'O pedido faz sentido para a comunidade?' },
           ].map(({ key, label }) => (
             <label key={key} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
-              <input type="checkbox" checked={checks[key]} onChange={() => setChecks(p => ({ ...p, [key]: !p[key] }))} className="w-5 h-5 text-indigo-600 rounded" />
+              <input type="checkbox" checked={checks[key]} onChange={() => setChecks(p => ({ ...p, [key]: !p[key] }))} className="w-5 h-5 text-brand-600 rounded" />
               <span className="text-sm font-medium text-slate-700">{label}</span>
             </label>
           ))}
@@ -39,7 +39,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
   return (
     <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex justify-between items-start">
       <div>
-        <span className={`text-xs font-bold px-2 py-1 rounded-md mb-2 inline-block ${item._table === 'ads' ? 'bg-slate-100 text-slate-600' : 'bg-indigo-100 text-indigo-600'}`}>
+        <span className={`text-xs font-bold px-2 py-1 rounded-md mb-2 inline-block ${item._table === 'ads' ? 'bg-slate-100 text-slate-600' : 'bg-brand-50 text-brand-600'}`}>
           {item._table === 'ads' ? 'Anúncio' : 'Campanha'}
         </span>
         <h4 className="font-bold text-lg text-slate-900">{item.title}</h4>
@@ -47,7 +47,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
         <p className="text-xs text-slate-400">Autor: {item.author_name || item.author?.name || 'Desconhecido'}</p>
       </div>
       <div className="flex gap-2">
-        <button onClick={() => setIsReviewing(true)} className="bg-indigo-50 text-indigo-700 p-2 rounded-lg hover:bg-indigo-100 font-bold text-sm flex items-center gap-1">
+        <button onClick={() => setIsReviewing(true)} className="bg-brand-50 text-brand-700 p-2 rounded-lg hover:bg-brand-100 font-bold text-sm flex items-center gap-1">
           <Shield size={16} /> Revisar
         </button>
         <button onClick={() => onEscalate(item._table, item.id, item.title)} className="bg-yellow-50 text-yellow-700 p-2 rounded-lg hover:bg-yellow-100 font-bold text-sm" title="Escalar para Master">
@@ -71,7 +71,7 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
       setPending(all);
       onCountChange?.(all.length);
     } catch (error) {
-      console.error("Error fetching pending:", error);
+      // silenced for production
     }
   };
 
@@ -83,7 +83,6 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
       showToast('Item aprovado com sucesso!', 'success');
       fetchPending();
     } catch (e) {
-      console.error(e);
       showToast('Erro ao aprovar item.', 'error');
     }
   };
@@ -94,7 +93,6 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
       showToast('Item rejeitado.', 'info');
       fetchPending();
     } catch (e) {
-      console.error(e);
       showToast('Erro ao rejeitar.', 'error');
     }
   };
