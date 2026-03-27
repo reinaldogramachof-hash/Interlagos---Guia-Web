@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import {
     X,
@@ -47,11 +47,14 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
     const { currentUser, isAdmin, isMaster, isMerchant, logout } = useAuth();
     const { canInstall, isInstalled, install } = usePwaInstall();
 
+    const onCloseRef = useRef(onClose);
+    useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
     useEffect(() => {
-        const handler = (e) => { if (e.key === 'Escape') onClose(); };
+        const handler = (e) => { if (e.key === 'Escape') onCloseRef.current?.(); };
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
-    }, [onClose]);
+    }, []);
 
     useEffect(() => {
         document.body.style.overflow = isOpen ? 'hidden' : '';

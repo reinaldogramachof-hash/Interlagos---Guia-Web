@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Clock, Tag, User, MapPin, Share2, AlertTriangle } from 'lucide-react';
+import { MessageCircle, Clock, Tag, User, MapPin, Share2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 export default function AdDetailModal({ isOpen, onClose, ad }) {
@@ -89,6 +89,3 @@ export default function AdDetailModal({ isOpen, onClose, ad }) {
         </Modal>
     );
 }
-
-// Icon helper
-import { ShieldCheck } from 'lucide-react';

@@ -32,7 +32,7 @@ export default function NewsTab() {
         summary: f.summary.value,
         category: f.category.value,
         author_id: currentUser.id,
-        status: 'published',
+        status: 'active',          // fetchNews() filtra por 'active', não 'published'
         image_url: imageFile // Passa o arquivo diretamente
       });
 

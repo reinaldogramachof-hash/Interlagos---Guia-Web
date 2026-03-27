@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import useAuthStore from './stores/authStore';
 import BottomNav from './components/BottomNav';
@@ -43,6 +43,11 @@ function AppContent() {
 
   const { requireAuth, handleLoginSuccess } = useRequireAuth();
 
+  const handleCloseMerchant = useCallback(() => setSelectedMerchant(null), [setSelectedMerchant]);
+  const handleCloseService  = useCallback(() => setSelectedService(null),  [setSelectedService]);
+  const handleCloseSidebar  = useCallback(() => setIsSidebarOpen(false),   [setIsSidebarOpen]);
+  const handleCloseLogin    = useCallback(() => setIsLoginOpen(false),      [setIsLoginOpen]);
+
   useEffect(() => {
     const unsub = initMerchants();
     return () => unsub();
@@ -56,7 +61,7 @@ function AppContent() {
     <div className="min-h-screen bg-gray-50 font-sans overflow-x-hidden">
       <SidebarMenu
         isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
+        onClose={handleCloseSidebar}
         onNavigate={setCurrentView}
         onLoginOpen={() => setIsLoginOpen(true)}
       />
@@ -68,7 +73,7 @@ function AppContent() {
           onSidebarOpen={() => setIsSidebarOpen(true)}
         />
 
-        <main className="flex-1 pb-20">
+        <main className="flex-1 pt-14 pb-20">
           <div className="animate-in fade-in duration-300 h-full">
             <AppRouter requireAuth={requireAuth} />
           </div>
@@ -94,19 +99,19 @@ function AppContent() {
       {selectedMerchant && (
         <MerchantDetailModal
           merchant={selectedMerchant}
-          onClose={() => setSelectedMerchant(null)}
+          onClose={handleCloseMerchant}
           onLoginRequired={requireAuth}
         />
       )}
       {isLoginOpen && (
-        <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={handleLoginSuccess} />
+        <LoginModal isOpen={isLoginOpen} onClose={handleCloseLogin} onSuccess={handleLoginSuccess} />
       )}
       <OnboardingModal
         isOpen={!!session && profile?.onboarding_completed === false}
         onComplete={refreshProfile}
       />
       {selectedService && (
-        <ServiceDetailModal service={selectedService} onClose={() => setSelectedService(null)} />
+        <ServiceDetailModal isOpen={true} service={selectedService} onClose={handleCloseService} />
       )}
     </div>
   );

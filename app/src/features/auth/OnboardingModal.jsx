@@ -3,6 +3,7 @@ import { CheckCircle, User, FileText, MapPin, ArrowRight } from 'lucide-react';
 import { recordConsent } from '../../services/consentService';
 import { updateUserProfile } from '../../services/authService';
 import useAuthStore from '../../stores/authStore';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 // ── Passo 1: Termos ───────────────────────────────────────────────────────────
 function StepTerms({ onNext }) {
@@ -178,6 +179,8 @@ export default function OnboardingModal({ isOpen, onComplete }) {
   const [saving, setSaving] = useState(false);
   const session = useAuthStore(s => s.session);
 
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const userId = session?.user?.id;
@@ -203,7 +206,11 @@ export default function OnboardingModal({ isOpen, onComplete }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300"
+    >
       <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Barra de progresso */}
         <div className="h-1.5 bg-slate-100">

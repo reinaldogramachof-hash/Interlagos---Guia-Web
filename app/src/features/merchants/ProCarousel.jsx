@@ -38,7 +38,13 @@ export default function ProCarousel({ merchants, onMerchantClick }) {
         </div>
       </div>
 
-      <div className="relative group" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
+      <div
+        className="relative group"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setTimeout(() => setIsPaused(false), 1500)}
+      >
         <div
           ref={carouselRef}
           onScroll={handleScroll}

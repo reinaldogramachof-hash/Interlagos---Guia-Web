@@ -47,12 +47,12 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }] = await Promise.all([
-    supabase.from('ads').select('*, profiles(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
-    supabase.from('campaigns').select('*, profiles(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('ads').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('campaigns').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
   ]);
   return [
-    ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name })),
-    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.profiles?.display_name })),
+    ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.seller_id?.slice(0, 8) ?? 'Anônimo' })),
+    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.merchant_id?.slice(0, 8) ?? 'Comunidade' })),
   ];
 }
 
@@ -131,7 +131,7 @@ export async function fetchOpenTickets() {
     .from('tickets')
     .select('*')
     .eq('status', 'open')
-    .order('created_at', { ascending: false });
+    .order('id', { ascending: false }); // tickets não tem created_at no schema atual
   if (error) throw error;
   return data ?? [];
 }

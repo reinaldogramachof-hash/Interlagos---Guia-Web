@@ -22,7 +22,7 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
   const title = titles[currentView] || 'Interlagos Conectado';
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
       {/* Banner de instalação PWA — aparece só quando disponível */}
       {canInstall && (
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-2 flex items-center justify-between gap-3">

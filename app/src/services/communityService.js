@@ -30,7 +30,8 @@ export async function fetchCampaigns() {
     .from('campaigns')
     .select('*')
     .eq('status', 'active')
-    .order('created_at', { ascending: false });
+    .is('merchant_id', null)          // apenas ações sociais, sem cupons de comerciantes
+    .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
@@ -50,7 +51,7 @@ export async function fetchCampaignsByUser(userId) {
     .from('campaigns')
     .select('*')
     .eq('requester_id', userId)
-    .order('created_at', { ascending: false });
+    .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
@@ -59,7 +60,7 @@ export async function adminFetchCampaigns() {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
@@ -104,7 +105,7 @@ export async function fetchCampaignsByMerchant(merchantId) {
     .from('campaigns')
     .select('*')
     .eq('merchant_id', merchantId)
-    .order('created_at', { ascending: false });
+    .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
@@ -127,7 +128,7 @@ export async function fetchActiveCoupons() {
     .eq('status', 'active')
     .eq('neighborhood', NEIGHBORHOOD)
     .gte('end_date', today)
-    .order('created_at', { ascending: false });
+    .order('start_date', { ascending: false });
   if (error) { return []; }
   return data ?? [];
 }

@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, LogIn, Eye, EyeOff, Lock, Mail, User, Shield, Send } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export default function LoginModal({ onClose, onSuccess }) {
+  useScrollLock(true);
+
   const [loginType, setLoginType]       = useState('resident');
   const [mode, setMode]                 = useState('password'); // 'password' | 'magic'
   const [loading, setLoading]           = useState(false);

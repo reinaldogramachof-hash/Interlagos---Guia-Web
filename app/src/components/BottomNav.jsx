@@ -17,8 +17,7 @@ export default function BottomNav({ currentView, onNavigate, onCreateAd }) {
             <button
               key={id}
               onClick={() => onNavigate(id)}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all relative ${isActive ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
-                }`}
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all relative active:opacity-70 active:scale-95 ${isActive ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
             >
               <Icon size={isActive ? 24 : 22} strokeWidth={isActive ? 2.5 : 2} />
               <span className={`text-[10px] font-bold ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}>

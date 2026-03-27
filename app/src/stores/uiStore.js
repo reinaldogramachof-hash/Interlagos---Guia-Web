@@ -8,7 +8,7 @@ const useUiStore = create((set) => ({
   selectedMerchant: null,
   selectedService: null,
 
-  setCurrentView: (view) => set({ currentView: view }),
+  setCurrentView: (view) => set({ currentView: view, selectedMerchant: null, selectedService: null }),
   setIsLoginOpen: (isOpen) => set({ isLoginOpen: isOpen }),
   setIsSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
   setShowCreateAd: (show) => set({ showCreateAd: show }),

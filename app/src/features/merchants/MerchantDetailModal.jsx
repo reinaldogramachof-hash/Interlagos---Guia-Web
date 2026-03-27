@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Clock, Star, Heart, Share2, Store } from 'lucide-react';
 import { MerchantAddress, MerchantContactButtons, MerchantSocialLinks } from './MerchantContactInfo';
 import { incrementMerchantView, incrementMerchantContactClick } from '../../services/statsService';
@@ -6,34 +6,36 @@ import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService
 import { useAuth } from '../auth/AuthContext';
 import useAuthStore from '../../stores/authStore';
 import { useToast } from '../../components/Toast';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export default function MerchantDetailModal({ merchant, onClose, onLoginRequired }) {
     const { currentUser } = useAuth();
     const [isFavorite, setIsFavorite] = useState(false);
     const showToast = useToast();
+    const onCloseRef = useRef(onClose);
+
+    // Mantém referência atualizada sem reexecutar effects
+    useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
     useEffect(() => {
         if (merchant?.id) incrementMerchantView(merchant.id);
     }, [merchant?.id]);
 
-    // Lock body scroll + ESC to close
+    // Lock body scroll (iOS Safari compatível) + ESC to close
+    useScrollLock(true);
     useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        const handleKeyDown = (e) => { if (e.key === 'Escape') onClose(); };
+        const handleKeyDown = (e) => { if (e.key === 'Escape') onCloseRef.current?.(); };
         window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            document.body.style.overflow = '';
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [onClose]);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     useEffect(() => {
         if (merchant?.id && currentUser) {
-            checkIsFavorite(currentUser.uid, merchant.id).then(setIsFavorite);
+            checkIsFavorite(currentUser.id, merchant.id).then(setIsFavorite);
         } else {
             setIsFavorite(false);
         }
-    }, [merchant?.id, currentUser?.uid]);
+    }, [merchant?.id, currentUser?.id]);
 
     const handleWhatsApp = () => {
         if (merchant?.id) incrementMerchantContactClick(merchant.id);
@@ -77,7 +79,11 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                    <button onClick={onClose} className="absolute top-4 right-4 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 backdrop-blur-md transition-all">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onClose(); }}
+                        className="absolute top-4 right-4 z-20 bg-black/30 text-white p-3 rounded-full hover:bg-black/50 backdrop-blur-md transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Fechar"
+                    >
                         <X size={20} />
                     </button>
 
