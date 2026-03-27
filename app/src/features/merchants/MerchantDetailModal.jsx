@@ -126,7 +126,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                             </div>
 
                             {/* Contact Buttons - HIDDEN FOR FREE PLAN */}
-                            <MerchantContactButtons plan={merchant.plan} onWhatsApp={handleWhatsApp} />
+                            <MerchantContactButtons plan={merchant.plan} onWhatsApp={handleWhatsApp} phone={merchant.phone} />
                             {(!merchant.plan || merchant.plan === 'free') && (
                                 <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                                     <Store size={12} /> Este comércio ainda não disponibilizou contato direto.
