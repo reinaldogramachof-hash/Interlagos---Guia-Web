@@ -40,7 +40,7 @@ export default function UtilityView({ onServiceClick }) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-4">
+      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-4 px-3 pt-3">
         {categories.map(cat => (
           <button
             key={cat}
@@ -54,7 +54,7 @@ export default function UtilityView({ onServiceClick }) {
         ))}
       </div>
 
-      <div className="relative mb-8">
+      <div className="relative mb-8" style={{ marginLeft: '0.75rem', marginRight: '0.75rem' }}>
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
         <input
           type="text"
@@ -70,7 +70,7 @@ export default function UtilityView({ onServiceClick }) {
           Nenhum serviço encontrado.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3">
           {filtered.map(s => {
             const Icon = ICON_MAP[s.icon_type] || Phone;
             return (

@@ -3,7 +3,7 @@ import { History, MapPin, Trees, Waves, Leaf } from 'lucide-react';
 
 export default function HistoryView() {
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 pb-20">
+        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 pb-20 px-3 pt-3">
 
             {/* Hero Section */}
             <div className="relative h-64 rounded-3xl overflow-hidden shadow-lg group">
