@@ -19,7 +19,7 @@
 
   <!-- Favicon -->
   <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>" />
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366f1'/><path d='M16 7a6 6 0 0 1 6 6c0 4-6 12-6 12S10 17 10 13a6 6 0 0 1 6-6zm0 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z' fill='white'/></svg>" />
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/styles.css" />
@@ -51,7 +51,9 @@
   <header class="navbar" role="banner">
     <div class="container navbar__inner">
       <a href="/" class="navbar__logo" aria-label="Tem No Bairro — página inicial">
-        <span class="navbar__logo-icon" aria-hidden="true">📍</span>
+        <span class="navbar__logo-icon" aria-hidden="true">
+          <i data-lucide="map-pin"></i>
+        </span>
         Tem No Bairro
       </a>
       <a href="#bairros" class="navbar__cta" id="nav-cta">
@@ -123,7 +125,7 @@
     ============================================================ -->
     <section class="what-is" aria-labelledby="what-is-title">
       <div class="container">
-        <span class="section-tag reveal">🌟 A plataforma</span>
+        <span class="section-tag reveal"><i data-lucide="sparkles"></i> A plataforma</span>
         <h2 id="what-is-title" class="section-heading reveal reveal-delay-1">
           Quatro jeitos de fazer<br />parte do bairro
         </h2>
@@ -183,7 +185,7 @@
     ============================================================ -->
     <section class="bairros" id="bairros" aria-labelledby="bairros-title">
       <div class="container">
-        <span class="section-tag reveal">📍 Bairros</span>
+        <span class="section-tag reveal"><i data-lucide="map-pin"></i> Bairros</span>
         <h2 id="bairros-title" class="section-heading reveal reveal-delay-1">
           Escolha seu bairro
         </h2>
@@ -199,7 +201,11 @@
             aria-label="Acessar Interlagos, bairro ativo">
             <div class="bairro-card__bg" style="background-image: url('assets/hero.png');" aria-hidden="true"></div>
             <div class="bairro-card__overlay" aria-hidden="true"></div>
-            <div class="bairro-card__arrow" aria-hidden="true">→</div>
+            <div class="bairro-card__arrow" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
             <div class="bairro-card__content">
               <span class="bairro-card__badge bairro-card__badge--active">✦ Ativo</span>
               <h3 class="bairro-card__name">Parque Interlagos</h3>
@@ -254,7 +260,7 @@
     ============================================================ -->
     <section class="how" id="como-funciona" aria-labelledby="how-title">
       <div class="container">
-        <span class="section-tag reveal">⚡ Simples assim</span>
+        <span class="section-tag reveal"><i data-lucide="zap"></i> Simples assim</span>
         <h2 id="how-title" class="section-heading reveal reveal-delay-1">
           Como funciona?
         </h2>
@@ -264,21 +270,27 @@
 
         <div class="steps">
           <div class="step reveal reveal-delay-1">
-            <div class="step__num" aria-hidden="true">1</div>
+            <div class="step__icon" aria-hidden="true">
+              <i data-lucide="map-pin"></i>
+            </div>
             <div>
               <h3 class="step__title">Entra no seu bairro</h3>
               <p class="step__desc">Escolhe o bairro, abre direto — sem precisar criar conta pra dar uma olhada.</p>
             </div>
           </div>
           <div class="step reveal reveal-delay-2">
-            <div class="step__num" aria-hidden="true">2</div>
+            <div class="step__icon" aria-hidden="true">
+              <i data-lucide="search"></i>
+            </div>
             <div>
               <h3 class="step__title">Descobre o que tem por perto</h3>
               <p class="step__desc">Comércio, classificado, notícia, ação social. O que rola na sua vizinhança, tudo num feed só.</p>
             </div>
           </div>
           <div class="step reveal reveal-delay-3">
-            <div class="step__num" aria-hidden="true">3</div>
+            <div class="step__icon" aria-hidden="true">
+              <i data-lucide="share-2"></i>
+            </div>
             <div>
               <h3 class="step__title">Manda pro grupo do bairro</h3>
               <p class="step__desc">Achou algo bom? Compartilha no WhatsApp em dois toques e já ajudou o vizinho também.</p>
@@ -294,7 +306,7 @@
     <section class="merchants" id="comerciantes" aria-labelledby="merchants-title">
       <div class="container">
         <div class="merchants__inner reveal">
-          <span class="section-tag merchants__tag">💼 Para negócios &amp; profissionais</span>
+          <span class="section-tag merchants__tag"><i data-lucide="briefcase"></i> Para negócios &amp; profissionais</span>
           <h2 id="merchants-title" class="section-heading merchants__heading">
             Seu negócio já tem<br />um bairro inteiro te esperando
           </h2>
@@ -316,7 +328,9 @@
 
           <!-- Banner gratuidade -->
           <div class="free-banner" role="note">
-            <span class="free-banner__icon" aria-hidden="true">🎁</span>
+            <span class="free-banner__icon" aria-hidden="true">
+              <i data-lucide="gift"></i>
+            </span>
             <div class="free-banner__text">
               <p class="free-banner__title">Todo negócio do bairro merece ser encontrado</p>
               <p class="free-banner__desc">Cadastro gratuito · Sem cartão · Sai quando quiser, sem enrolação</p>
@@ -350,7 +364,9 @@
 
             <!-- Plano Profissional -->
             <div class="plan-card plan-card--pro">
-              <div class="plan-badge">Mais popular ⭐</div>
+              <div class="plan-badge">
+                <i data-lucide="star"></i> Mais popular
+              </div>
               <p class="plan-card__label">Plano Profissional</p>
               <p class="plan-card__price">R$ 39,90 <span>/ mês</span></p>
               <p class="plan-card__desc">Pra ser o primeiro nome que o bairro pensa quando precisar do que você faz.</p>
@@ -366,7 +382,8 @@
                   <small>Métricas, campanhas e presença — dentro e fora da plataforma</small></span>
                 </li>
               </ul>
-              <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+              <!-- TODO: substituir pelo número real do WhatsApp comercial -->
+              <a href="https://wa.me/55XXXXXXXXXXX" target="_blank" rel="noopener noreferrer"
                 class="plan-card__cta plan-card__cta--pro" id="merchant-cta-pro">
                 Assinar Profissional →
               </a>
@@ -387,7 +404,8 @@
                 <li><span class="check" aria-hidden="true">✔</span> Selo "Verificado Oficial" ✓</li>
                 <li><span class="check" aria-hidden="true">✔</span> Canal direto com a equipe</li>
               </ul>
-              <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+              <!-- TODO: substituir pelo número real do WhatsApp comercial -->
+              <a href="https://wa.me/55XXXXXXXXXXX" target="_blank" rel="noopener noreferrer"
                 class="plan-card__cta plan-card__cta--top" id="merchant-cta-premium">
                 Assinar Premium →
               </a>
@@ -398,12 +416,12 @@
           <!-- Strip de confiança -->
           <div class="guarantee-strip">
             <div class="guarantee-strip__item">
-              <span aria-hidden="true">🔒</span>
+              <span aria-hidden="true"><i data-lucide="shield-check"></i></span>
               Não gostou no primeiro mês? <strong>Devolvemos seu dinheiro, sem perguntas.</strong>
             </div>
             <div class="guarantee-strip__divider" aria-hidden="true"></div>
             <div class="guarantee-strip__item">
-              <span aria-hidden="true">⚡</span>
+              <span aria-hidden="true"><i data-lucide="zap"></i></span>
               <strong>Sem fidelidade</strong> — cancele quando quiser
             </div>
           </div>
@@ -417,7 +435,7 @@
     ============================================================ -->
     <section class="members" id="membros" aria-labelledby="members-title">
       <div class="container">
-        <span class="section-tag reveal">💜 Rede de Apoio</span>
+        <span class="section-tag reveal"><i data-lucide="heart"></i> Rede de Apoio</span>
         <h2 id="members-title" class="section-heading reveal reveal-delay-1">
           Faça parte de quem<br />mantém o bairro conectado
         </h2>
@@ -428,20 +446,10 @@
         </p>
 
         <!-- Painel de transparência público -->
-        <div class="members__transparency reveal reveal-delay-3" role="list" aria-label="Números da rede de apoio">
-          <div class="transparency__item" role="listitem">
-            <p class="transparency__value">--</p>
-            <p class="transparency__label">Membros ativos</p>
-          </div>
-          <div class="transparency__divider" aria-hidden="true"></div>
-          <div class="transparency__item" role="listitem">
-            <p class="transparency__value">R$ --</p>
-            <p class="transparency__label">Arrecadado este mês</p>
-          </div>
-          <div class="transparency__divider" aria-hidden="true"></div>
-          <div class="transparency__item" role="listitem">
-            <p class="transparency__value">--</p>
-            <p class="transparency__label">Ações sociais financiadas</p>
+        <div class="members__transparency reveal reveal-delay-3" role="note">
+          <div class="transparency__launch">
+            <p class="transparency__launch-title">Seja um dos primeiros</p>
+            <p class="transparency__launch-desc">O painel de transparência abre quando o primeiro apoiador entrar. Que tal ser você?</p>
           </div>
         </div>
 
@@ -509,7 +517,8 @@
 
         <!-- Nota de transparência -->
         <p class="members__note reveal">
-          🔒 Toda arrecadação é pública. Membros têm acesso ao painel completo com cada centavo investido
+          <i data-lucide="lock" style="width:13px;height:13px;stroke:currentColor;stroke-width:2;vertical-align:middle;margin-right:4px;"></i>
+          Toda arrecadação é pública. Membros têm acesso ao painel completo com cada centavo investido
           nas ações do bairro — sem asterisco, sem letra miúda.
         </p>
 
@@ -521,7 +530,7 @@
     ============================================================ -->
     <section class="testimonials" aria-labelledby="testimonials-title">
       <div class="container">
-        <span class="section-tag reveal">💬 Comunidade</span>
+        <span class="section-tag reveal"><i data-lucide="message-circle"></i> Comunidade</span>
         <h2 id="testimonials-title" class="section-heading reveal reveal-delay-1">
           O que dizem os moradores
         </h2>
@@ -563,6 +572,33 @@
         </div>
       </div>
     </section>
+
+    <!-- ============================================================
+         CTA FINAL — Seção 8
+    ============================================================ -->
+    <section class="cta-final" aria-labelledby="cta-final-title">
+      <div class="container">
+        <div class="cta-final__inner reveal">
+          <p class="cta-final__eyebrow">
+            <i data-lucide="map-pin"></i>
+            Parque Interlagos · São José dos Campos
+          </p>
+          <h2 id="cta-final-title" class="cta-final__title">
+            Seu bairro está esperando.
+          </h2>
+          <p class="cta-final__desc">
+            Entra e vê o que tem por perto — sem precisar criar conta pra dar uma olhada.
+          </p>
+          <a href="https://www.temnobairro.online/interlagos/" class="btn-primary cta-final__btn" id="cta-final-primary">
+            Explorar Parque Interlagos
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <p class="cta-final__note">Gratuito · Sem cadastro pra ver · Abre em segundos</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- ============================================================
@@ -573,7 +609,9 @@
       <div class="footer__top">
         <div class="footer__brand">
           <a href="/" class="navbar__logo" aria-label="Tem No Bairro — página inicial">
-            <span class="navbar__logo-icon" aria-hidden="true">📍</span>
+            <span class="navbar__logo-icon" aria-hidden="true">
+              <i data-lucide="map-pin"></i>
+            </span>
             Tem No Bairro
           </a>
           <p>O ponto de encontro digital dos bairros de São José dos Campos. Feito com ❤️ pra quem mora e trabalha por aqui.</p>

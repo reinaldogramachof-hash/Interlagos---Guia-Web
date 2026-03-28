@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { adminFetchNews, createNews, deleteNews } from '../../../services/newsService';
+import { adminFetchNews, createNews, deleteNews, uploadNewsImage } from '../../../services/newsService';
 import { useAuth } from '../../auth/AuthContext';
-import { Bell, Trash2 } from 'lucide-react';
+import { Bell, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 export default function NewsTab() {
@@ -9,6 +9,7 @@ export default function NewsTab() {
   const [newsList, setNewsList] = useState([]);
   const showToast = useToast();
   const [imageFile, setImageFile] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const fetchNews = async () => {
     try {
@@ -24,24 +25,38 @@ export default function NewsTab() {
   const handlePublish = async (e) => {
     e.preventDefault();
     const f = e.target;
-    
+    setIsPublishing(true);
+
     try {
+      let imageUrl = null;
+      if (imageFile) {
+        try {
+          imageUrl = await uploadNewsImage(imageFile);
+        } catch {
+          showToast('Erro ao enviar imagem. Tente novamente.', 'error');
+          setIsPublishing(false);
+          return;
+        }
+      }
+
       await createNews({
         title: f.title.value,
         content: f.content.value,
         summary: f.summary.value,
         category: f.category.value,
         author_id: currentUser.id,
-        status: 'active',          // fetchNews() filtra por 'active', não 'published'
-        image_url: imageFile // Passa o arquivo diretamente
+        status: 'active',
+        image_url: imageUrl,
       });
 
       f.reset();
       setImageFile(null);
       showToast('Notícia publicada!', 'success');
       fetchNews();
-    } catch (error) {
-      showToast('Erro ao publicar notícia', 'error');
+    } catch {
+      showToast('Erro ao publicar notícia.', 'error');
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -82,7 +97,9 @@ export default function NewsTab() {
             <option>Cultura</option>
             <option>Geral</option>
           </select>
-          <button type="submit" className="w-full bg-brand-600 text-white py-2 rounded-pill font-bold hover:bg-brand-700 transition-colors">Publicar</button>
+          <button type="submit" disabled={isPublishing} className="w-full bg-brand-600 text-white py-2 rounded-pill font-bold hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            {isPublishing ? <><Loader2 size={16} className="animate-spin" /> Publicando...</> : 'Publicar'}
+          </button>
         </form>
       </div>
       <div className="space-y-4">

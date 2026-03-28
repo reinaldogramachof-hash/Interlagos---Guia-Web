@@ -79,10 +79,23 @@ export default function AdminPanel({ onClose }) {
       case 'merchants': return <MerchantsTab />;
       case 'news':      return <NewsTab />;
       case 'campaigns': return <CampaignsTab />;
-      case 'users':     return isMaster ? <UsersTab /> : null;
-      case 'tickets':   return isMaster ? <TicketsTab onCountChange={setTicketsCount} /> : null;
-      case 'audit':     return isMaster ? <AuditTab /> : null;
-      case 'database':  return isMaster ? <DatabaseTab /> : null;
+      case 'users':
+      case 'tickets':
+      case 'audit':
+      case 'database': {
+        if (!isMaster) {
+          return (
+            <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+              <Lock size={32} className="mb-3 opacity-40" />
+              <p className="text-sm font-medium">Acesso restrito a administradores master</p>
+            </div>
+          );
+        }
+        if (activeTab === 'users') return <UsersTab />;
+        if (activeTab === 'tickets') return <TicketsTab onCountChange={setTicketsCount} />;
+        if (activeTab === 'audit') return <AuditTab />;
+        return <DatabaseTab />;
+      }
       default:          return null;
     }
   };

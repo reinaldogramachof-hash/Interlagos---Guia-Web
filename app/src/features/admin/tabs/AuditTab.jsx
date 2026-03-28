@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, AlertTriangle } from 'lucide-react';
 import { fetchAuditLogs } from '../../../services/adminService';
 import { useToast } from '../../../components/Toast';
 
 export default function AuditTab() {
   const [logs, setLogs] = useState([]);
+  const [error, setError] = useState(null);
   const showToast = useToast();
 
   useEffect(() => {
     const loadLogs = async () => {
       try {
+        setError(null);
         const data = await fetchAuditLogs();
         setLogs(data);
-      } catch (error) {
-        console.error("Error fetching audit logs:", error);
+      } catch (err) {
+        setError(err.message || 'Falha ao buscar dados de auditoria.');
         showToast('Erro ao carregar auditoria.', 'error');
       }
     };
@@ -25,6 +27,13 @@ export default function AuditTab() {
       <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
         <ClipboardList className="text-indigo-600" /> Auditoria e Logs do Sistema
       </h3>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center gap-3 text-red-700 text-sm">
+          <AlertTriangle size={18} className="shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         <table className="w-full text-left text-sm">
@@ -42,10 +51,10 @@ export default function AuditTab() {
                 <td className="p-4 text-slate-500 font-mono text-xs">{new Date(log.created_at).toLocaleString()}</td>
                 <td className="p-4 font-bold text-slate-700">{log.action}</td>
                 <td className="p-4 text-slate-600">{log.details}</td>
-                <td className="p-4 text-slate-500 text-xs">{log.profiles?.display_name || log.user_id}</td>
+                <td className="p-4 text-slate-500 text-xs">{log.user_name || log.profiles?.display_name || log.user_id}</td>
               </tr>
             ))}
-            {logs.length === 0 && (
+            {logs.length === 0 && !error && (
               <tr>
                 <td colSpan="4" className="p-8 text-center text-slate-400">Nenhum log registrado recentemente.</td>
               </tr>

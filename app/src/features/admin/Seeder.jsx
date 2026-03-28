@@ -22,12 +22,12 @@ const generateMockMerchants = () => {
                 address: `Av. Principal do Bairro, ${1000 + i}`,
                 plan: plan,
                 isPremium: ['premium', 'professional'].includes(plan),
-                image: `https://source.unsplash.com/random/800x600/?store,${category},${i}`,
+                image: `https://picsum.photos/seed/${plan}-${category.toLowerCase()}-${i}/800/600`,
                 socialLinks: isPremiumOrPro ? { instagram: '@loja', facebook: 'fb.com/loja', site: 'loja.com' } : null,
                 gallery: isPremiumOrPro ? [
-                    `https://source.unsplash.com/random/800x600/?${category},interior,${i}`,
-                    `https://source.unsplash.com/random/800x600/?${category},product,${i}`,
-                    `https://source.unsplash.com/random/800x600/?${category},service,${i}`
+                    `https://picsum.photos/seed/${category.toLowerCase()}-interior-${i}/800/600`,
+                    `https://picsum.photos/seed/${category.toLowerCase()}-product-${i}/800/600`,
+                    `https://picsum.photos/seed/${category.toLowerCase()}-service-${i}/800/600`
                 ] : [],
                 rating: plan === 'premium' ? (4 + Math.random()).toFixed(1) : 0,
                 views: Math.floor(Math.random() * 1000)
@@ -45,18 +45,16 @@ const MOCK_ADS = [
         description: 'Venha conhecer nosso novo espaço e ganhe 20% de desconto!',
         price: 'R$ 0,00',
         category: 'Alimentação',
-        author: { uid: 'mock_user_1', name: 'Padaria do Bairro' },
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 dias
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     },
     {
         title: 'Troca de Óleo Grátis',
         description: 'Na compra de 4 pneus, a troca de óleo é por nossa conta.',
         price: 'R$ 1200,00',
         category: 'Automotivo',
-        author: { uid: 'mock_user_2', name: 'Auto Center Sul' },
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // +15 dias
+        expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
     }
 ];
 
@@ -129,7 +127,6 @@ export default function Seeder() {
                 description: ad.description,
                 price: parseFloat(ad.price.replace(/[^\d.,]/g, '').replace(',', '.')) || null,
                 category: ad.category,
-                seller_id: ad.author.uid,
                 status: 'active',
             }));
 
@@ -157,7 +154,6 @@ export default function Seeder() {
             addLog('Sucesso! Banco de dados populado.');
             setStatus('success');
         } catch (error) {
-            console.error("Erro no Seeder:", error);
             addLog(`Erro: ${error.message}`);
             setStatus('error');
         } finally {

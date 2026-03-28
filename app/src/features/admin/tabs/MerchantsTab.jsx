@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminGetMerchants, createMerchant, updateMerchant } from '../../../services/merchantService';
-import { Trophy, Search, Plus, Save, X } from 'lucide-react';
+import { uploadImage } from '../../../services/storageService';
+import { Trophy, Search, Plus, Save, X, ImagePlus, Loader2 } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 const INITIAL_FORM = { name: '', category: 'Alimentação', description: '', phone: '', whatsapp: '', address: '', plan: 'free', socialLinks: { instagram: '', facebook: '', site: '' }, gallery: [] };
@@ -18,6 +19,8 @@ export default function MerchantsTab() {
   const [editingId, setEditingId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
+  const [imageFile, setImageFile] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   const showToast = useToast();
 
   const fetchMerchants = async () => {
@@ -29,29 +32,43 @@ export default function MerchantsTab() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
-    // Prepara dados básicos
-    const payload = { 
-      ...form, 
-      social_links: form.socialLinks,
-      is_active: true 
-    };
-    delete payload.socialLinks;
+    setIsSaving(true);
 
-    if (isCreating) {
-      // Para criação, formatamos o zap aqui por simplicidade ou movemos pro service depois
-      payload.whatsapp = payload.whatsapp.replace(/\D/g, ''); 
-      await createMerchant(payload);
-    } else {
-      // O updateMerchant já trata a limpeza do WhatsApp internamente conforme refatorado
-      await updateMerchant(editingId, payload);
+    try {
+      // Upload de imagem se houver arquivo selecionado
+      let finalImageUrl = form.image;
+      if (imageFile) {
+        const safeName = imageFile.name.replace(/\s+/g, '-');
+        const path = `merchants/${Date.now()}-${safeName}`;
+        finalImageUrl = await uploadImage('merchant-images', imageFile, path);
+      }
+
+      const payload = {
+        ...form,
+        image: finalImageUrl,
+        social_links: form.socialLinks,
+        is_active: true,
+      };
+      delete payload.socialLinks;
+
+      if (isCreating) {
+        payload.whatsapp = payload.whatsapp.replace(/\D/g, '');
+        await createMerchant(payload);
+      } else {
+        await updateMerchant(editingId, payload);
+      }
+
+      setIsCreating(false);
+      setEditingId(null);
+      setForm(INITIAL_FORM);
+      setImageFile(null);
+      showToast('Comércio salvo!', 'success');
+      fetchMerchants();
+    } catch (err) {
+      showToast(`Erro ao salvar. ${err.message || 'Tente novamente.'}`, 'error');
+    } finally {
+      setIsSaving(false);
     }
-    
-    setIsCreating(false); 
-    setEditingId(null); 
-    setForm(INITIAL_FORM);
-    showToast('Comércio salvo!', 'success'); 
-    fetchMerchants();
   };
 
   const setField = (f, v) => setForm(p => ({ ...p, [f]: v }));
@@ -113,8 +130,28 @@ export default function MerchantsTab() {
                 </div>
               </div>
             )}
-            <button type="submit" className="w-full bg-brand-600 text-white py-3 rounded-pill font-bold hover:bg-brand-700 flex items-center justify-center gap-2 shadow-card transition-colors">
-              <Save size={18} /> {isCreating ? 'Criar Comércio' : 'Salvar Alterações'}
+            <div className="pt-2 border-t border-slate-100">
+              <label className="block text-xs font-bold text-slate-500 mb-2">Imagem do Comércio</label>
+              {form.image && (
+                <div className="mb-2">
+                  <img src={form.image} alt="Imagem atual" className="w-24 h-24 object-cover rounded-lg border border-slate-200" />
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg cursor-pointer hover:bg-slate-200 text-sm font-medium transition-colors">
+                  <ImagePlus size={16} />
+                  {imageFile ? imageFile.name : 'Selecionar imagem'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files[0] || null)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+            <button type="submit" disabled={isSaving} className="w-full bg-brand-600 text-white py-3 rounded-pill font-bold hover:bg-brand-700 flex items-center justify-center gap-2 shadow-card transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSaving ? <><Loader2 size={18} className="animate-spin" /> Salvando...</> : <><Save size={18} /> {isCreating ? 'Criar Comércio' : 'Salvar Alterações'}</>}
             </button>
           </form>
         ) : (

@@ -1,6 +1,18 @@
 import { supabase } from '../lib/supabaseClient';
-const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 import { uploadImage } from './storageService';
+
+const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
+
+/**
+ * Faz upload de imagem de notícia para o bucket 'news-images'.
+ * @param {File} file — arquivo de imagem selecionado pelo admin
+ * @returns {Promise<string>} — URL pública da imagem
+ */
+export async function uploadNewsImage(file) {
+  const safeName = file.name.replace(/\s+/g, '-');
+  const path = `news/${Date.now()}-${safeName}`;
+  return uploadImage('news-images', file, path);
+}
 
 export async function fetchNews() {
   const { data, error } = await supabase
@@ -31,23 +43,13 @@ export async function adminFetchNews() {
 }
 
 export async function createNews(newsData) {
-  let finalImageUrl = newsData.image_url;
-
-  // Se receber um File como image_url, faz o upload
-  if (newsData.image_url instanceof File) {
-    const file = newsData.image_url;
-    const ext = file.name.split('.').pop();
-    const path = `news/${newsData.author_id || 'admin'}/${Date.now()}.${ext}`;
-    finalImageUrl = await uploadImage('news-images', file, path);
-  }
-
-  const payload = { neighborhood: NEIGHBORHOOD, ...newsData, image_url: finalImageUrl };
+  const payload = { neighborhood: NEIGHBORHOOD, ...newsData };
   const { data, error } = await supabase
     .from('news')
     .insert(payload)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }

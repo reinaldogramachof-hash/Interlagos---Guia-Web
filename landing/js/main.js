@@ -34,6 +34,11 @@
 
 // --- Hero canvas particles ---
 (function initParticles() {
+  // A1 — Verificação de acessibilidade: não animar se usuário prefere movimento reduzido
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // A2 — Performance mobile: não iniciar canvas em telas < 768px
+  if (window.innerWidth < 768) return;
+
   const canvas = document.getElementById('hero-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');

@@ -8,30 +8,33 @@ const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 export async function fetchAuditLogs() {
   const { data, error } = await supabase
     .from('click_events')
-    .select('*')
+    .select('*, profiles!user_id(display_name)')
     .order('created_at', { ascending: false })
     .limit(100);
-  
+
   if (error) throw error;
-  
+
   return (data ?? []).map(row => ({
     id: row.id,
     created_at: row.created_at,
     action: row.entity_type,
     details: row.entity_id,
-    user_id: row.user_id
+    user_id: row.user_id,
+    user_name: row.profiles?.display_name || 'Usuário desconhecido',
+    profiles: row.profiles,
   }));
 }
 
 export async function escalateItem(ticketData, targetCollection, targetId) {
   // Monta payload compatível com o schema real da tabela tickets:
-  // tickets (author_id, subject, body, status, resolved_at, resolved_by)
+  // tickets (author_id, subject, body, status, type, resolved_at, resolved_by)
   const { error: ticketError } = await supabase
     .from('tickets')
     .insert({
       subject: ticketData.subject,
       body: ticketData.body,
       status: 'open',
+      type: ticketData.type || ticketData.target_collection || 'moderation',
       author_id: ticketData.author_id ?? null,
     });
   if (ticketError) throw ticketError;
@@ -47,12 +50,12 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }] = await Promise.all([
-    supabase.from('ads').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
-    supabase.from('campaigns').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('ads').select('*, profiles!seller_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
+    supabase.from('campaigns').select('*, profiles!merchant_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
   ]);
   return [
-    ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.seller_id?.slice(0, 8) ?? 'Anônimo' })),
-    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.merchant_id?.slice(0, 8) ?? 'Comunidade' })),
+    ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name || 'Anônimo' })),
+    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.profiles?.display_name || 'Comunidade' })),
   ];
 }
 
@@ -103,6 +106,7 @@ export async function fetchUsers() {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
+    .limit(100)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
@@ -127,11 +131,12 @@ export async function updateUserRole(userId, newRole) {
 }
 
 export async function fetchOpenTickets() {
+  // Requer migration: docs/migrations/add-tickets-created-at.sql
   const { data, error } = await supabase
     .from('tickets')
     .select('*')
     .eq('status', 'open')
-    .order('id', { ascending: false }); // tickets não tem created_at no schema atual
+    .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
