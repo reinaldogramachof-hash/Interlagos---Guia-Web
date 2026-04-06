@@ -1,7 +1,7 @@
 import { Heart, Star, Zap, Crown, Info } from 'lucide-react';
 import MemberTierCard from './MemberTierCard';
 
-const MembersLandingView = ({ onNavigate }) => {
+const MembersLandingView = ({ _onNavigate }) => {
     const tiers = [
         {
             name: 'Apoiador',

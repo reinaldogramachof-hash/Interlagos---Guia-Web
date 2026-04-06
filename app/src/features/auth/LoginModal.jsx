@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, LogIn, Eye, EyeOff, Lock, Mail, User, Shield, Send } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -7,7 +7,6 @@ export default function LoginModal({ onClose, onSuccess }) {
   useScrollLock(true);
 
   const [loginType, setLoginType]       = useState('resident');
-  const [mode, setMode]                 = useState('password'); // 'password' | 'magic'
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState('');
   const [magicSent, setMagicSent]       = useState(false);
@@ -112,7 +111,7 @@ export default function LoginModal({ onClose, onSuccess }) {
             <button onClick={() => { setLoginType('resident'); setError(''); setMagicSent(false); setTermsAccepted(false); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'resident' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
               <User size={14} /> Morador
             </button>
-            <button onClick={() => { setLoginType('partner'); setError(''); setMagicSent(false); setMode('password'); setTermsAccepted(false); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'partner' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            <button onClick={() => { setLoginType('partner'); setError(''); setMagicSent(false); setTermsAccepted(false); }} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'partner' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
               <Shield size={14} /> Parceiro
             </button>
           </div>

@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 const GENKIT_API_URL = import.meta.env.VITE_GENKIT_API_URL
   || 'http://localhost:5001/interlagos-conectado/us-central1/mainChatFlow';
 
-export const sendMessageToGenkit = async ({ message, context, userProfile, history = [] }) => {
+export const sendMessageToGenkit = async ({ message, context, userProfile: _userProfile, history = [] }) => {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Usuário não autenticado.');
 

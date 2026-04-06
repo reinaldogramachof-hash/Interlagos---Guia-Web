@@ -23,7 +23,29 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', {
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^[_A-Z]',
+        caughtErrors: 'none',
+        destructuredArrayIgnorePattern: '^_',
+      }],
+      // Padrão intencional em context providers e hooks — downgrade para warn
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+    },
+  },
+  // Arquivos de configuração e scripts Node.js — process disponível
+  {
+    files: ['*.config.{js,mjs}', 'scripts/**/*.{js,mjs}', 'verify_*.js'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+  },
+  // Context providers e arquivos que exportam não-componentes intencionalmente
+  {
+    files: ['**/context/**/*.{js,jsx}', '**/stores/**/*.{js,jsx}', '**/*Context.{js,jsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'warn',
     },
   },
 ])

@@ -1,5 +1,6 @@
 import { Home, Newspaper, Tag, Heart } from 'lucide-react';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const NAV_ITEMS = [
   { id: 'merchants', label: 'Home', icon: Home },
   { id: 'news', label: 'Jornal', icon: Newspaper },
@@ -7,7 +8,7 @@ export const NAV_ITEMS = [
   { id: 'donations', label: 'Campanhas', icon: Heart },
 ];
 
-export default function BottomNav({ currentView, onNavigate, onCreateAd }) {
+export default function BottomNav({ currentView, onNavigate }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-around h-16">

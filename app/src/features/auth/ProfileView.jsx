@@ -72,9 +72,6 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
   }
 
   // ── Usuário logado ─────────────────────────────────────────────────────────
-  const initials = (currentUser.displayName || currentUser.email || '?')
-    .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-
   const roleMeta = {
     master: { label: 'Master', emoji: '⚡', color: 'bg-purple-100 text-purple-700' },
     admin: { label: 'Admin', emoji: '🛡️', color: 'bg-blue-100 text-blue-700' },

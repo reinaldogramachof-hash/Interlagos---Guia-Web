@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabaseClient';
  * @returns {Promise<string>} - The public URL of the uploaded file.
  */
 export async function uploadImage(bucket, file, path) {
-  const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+  const { data: _data, error } = await supabase.storage.from(bucket).upload(path, file, {
     upsert: true,
     cacheControl: '3600'
   });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin, Store, Newspaper, Megaphone, Heart, Siren, History, Lightbulb, Users, ShieldCheck, DollarSign, Star } from 'lucide-react';
 
-export default function Sidebar({ currentView, setCurrentView, handleAdminClick, className }) {
+export default function Sidebar({ currentView, setCurrentView, _handleAdminClick, className }) {
     const menuItems = [
         { id: 'merchants', label: 'Comércios', icon: <Store size={20} /> },
         { id: 'news', label: 'Notícias', icon: <Newspaper size={20} /> },

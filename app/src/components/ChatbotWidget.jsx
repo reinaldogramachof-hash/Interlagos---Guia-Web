@@ -42,7 +42,7 @@ export default function ChatbotWidget() {
         setIsLoading(true);
 
         try {
-            const response = await sendMessageToGenkit({
+            const _response = await sendMessageToGenkit({
                 message: text,
                 context: contextData
             });

@@ -30,7 +30,7 @@ export async function fetchAdsByUser(userId) {
 
 // Colunas válidas da tabela ads no Supabase.
 // Remove campos extras do formData (ex: 'image' que é estado local do wizard).
-function sanitizeAdPayload({ image, ...rest }) {
+function sanitizeAdPayload({ image: _image, ...rest }) {
   return rest;
 }
 

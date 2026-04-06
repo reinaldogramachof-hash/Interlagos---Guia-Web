@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 
-export const toggleFavorite = async (userId, itemId, type, itemData = {}) => {
+export const toggleFavorite = async (userId, itemId, type, _itemData = {}) => {
   if (!userId || !itemId) return false;
 
   const { data: existing } = await supabase

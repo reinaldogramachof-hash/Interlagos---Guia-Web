@@ -2,7 +2,7 @@ import { useAutoScrollCarousel } from '../../hooks/useAutoScrollCarousel';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 export default function ProCarousel({ merchants, onMerchantClick }) {
-  const { carouselRef, isPaused, setIsPaused, handleScroll } = useAutoScrollCarousel(0.5);
+  const { carouselRef, isPaused: _isPaused, setIsPaused, handleScroll } = useAutoScrollCarousel(0.5);
 
   const infinite = [
     ...merchants, ...merchants, ...merchants, ...merchants,
