@@ -37,6 +37,7 @@ export async function adminFetchNews() {
   const { data, error } = await supabase
     .from('news')
     .select('*')
+    .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];

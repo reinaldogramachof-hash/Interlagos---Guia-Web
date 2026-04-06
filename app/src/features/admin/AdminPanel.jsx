@@ -38,6 +38,7 @@ export default function AdminPanel({ onClose }) {
   // Escalation state (gerenciado aqui pois o dialog flutua sobre o shell)
   const [escalationTarget, setEscalationTarget] = useState(null);
   const [escalationReason, setEscalationReason] = useState('');
+  const [escalationLoading, setEscalationLoading] = useState(false);
 
   if (!currentUser || (!isMaster && !isAdmin)) {
     return (
@@ -54,6 +55,7 @@ export default function AdminPanel({ onClose }) {
 
   const handleEscalate = async () => {
     if (!escalationReason.trim()) return showToast('Por favor, informe o motivo.', 'warning');
+    setEscalationLoading(true);
     try {
       await escalateItem({
         type: 'escalation',
@@ -65,11 +67,13 @@ export default function AdminPanel({ onClose }) {
         author_id: currentUser.id,
         resolved_by: currentUser.email,
       }, escalationTarget.collection, escalationTarget.id);
-      
+
       showToast('Item escalado com sucesso para a Torre de Controle!', 'success');
       setEscalationTarget(null);
     } catch (error) {
       showToast('Erro ao escalar: ' + error.message, 'error');
+    } finally {
+      setEscalationLoading(false);
     }
   };
 
@@ -173,6 +177,7 @@ export default function AdminPanel({ onClose }) {
         onReasonChange={setEscalationReason}
         onConfirm={handleEscalate}
         onClose={() => setEscalationTarget(null)}
+        isLoading={escalationLoading}
       />
     </div>
   );

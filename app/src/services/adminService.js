@@ -134,7 +134,7 @@ export async function fetchOpenTickets() {
   // Requer migration: docs/migrations/add-tickets-created-at.sql
   const { data, error } = await supabase
     .from('tickets')
-    .select('*')
+    .select('*, profiles!author_id(display_name)')
     .eq('status', 'open')
     .order('created_at', { ascending: false });
   if (error) throw error;

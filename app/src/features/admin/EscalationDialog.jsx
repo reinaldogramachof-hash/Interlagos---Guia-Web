@@ -2,7 +2,7 @@ import { AlertTriangle, X } from 'lucide-react';
 
 const REASONS = ['Conteúdo Suspeito', 'Dúvida de Categoria', 'Denúncia de Usuário', 'Outro'];
 
-export default function EscalationDialog({ target, reason, onReasonChange, onConfirm, onClose }) {
+export default function EscalationDialog({ target, reason, onReasonChange, onConfirm, onClose, isLoading }) {
   if (!target) return null;
 
   return (
@@ -47,8 +47,12 @@ export default function EscalationDialog({ target, reason, onReasonChange, onCon
           <button onClick={onClose} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors">
             Cancelar
           </button>
-          <button onClick={onConfirm} className="flex-1 py-3 bg-yellow-500 text-white font-bold rounded-xl hover:bg-yellow-600 transition-colors shadow-lg shadow-yellow-500/20">
-            Confirmar Envio
+          <button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className={`flex-1 py-3 font-bold rounded-xl transition-colors shadow-lg shadow-yellow-500/20 flex items-center justify-center gap-2 ${isLoading ? 'bg-yellow-300 text-white cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-600 text-white'}`}
+          >
+            {isLoading ? 'Enviando...' : 'Confirmar Envio'}
           </button>
         </div>
       </div>

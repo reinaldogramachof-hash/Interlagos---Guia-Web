@@ -96,7 +96,15 @@ export default function Seeder() {
         setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
     };
 
+    const isDev = import.meta.env.DEV;
+    const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
+
     const handleFullReset = async () => {
+        if (!isDev) {
+            addLog('BLOQUEADO: Seeder indisponível em ambiente de produção.');
+            setStatus('error');
+            return;
+        }
         setLoading(true);
         setStatus(null);
         setLogs([]);
@@ -119,6 +127,7 @@ export default function Seeder() {
                 rating: m.isPremium ? 4.8 : 0,
                 views: m.views,
                 is_active: true,
+                neighborhood: NEIGHBORHOOD,
             }));
 
             addLog('Inserindo Anúncios...');
@@ -128,6 +137,7 @@ export default function Seeder() {
                 price: parseFloat(ad.price.replace(/[^\d.,]/g, '').replace(',', '.')) || null,
                 category: ad.category,
                 status: 'active',
+                neighborhood: NEIGHBORHOOD,
             }));
 
             addLog('Inserindo Notícias...');
@@ -136,6 +146,7 @@ export default function Seeder() {
                 content: n.content,
                 category: n.category,
                 status: 'active',
+                neighborhood: NEIGHBORHOOD,
             }));
 
             addLog('Inserindo Campanhas...');
@@ -147,6 +158,7 @@ export default function Seeder() {
                 raised: c.raised,
                 progress: c.progress,
                 status: 'active',
+                neighborhood: NEIGHBORHOOD,
             }));
 
             await seedDatabase(merchantData, adData, newsData, campaignData);
@@ -174,21 +186,26 @@ export default function Seeder() {
             </div>
 
             <div className="space-y-4">
-                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
+                <div className={`p-4 rounded-lg border ${isDev
+                  ? 'bg-yellow-500/10 border-yellow-500/20'
+                  : 'bg-red-500/20 border-red-500/40'
+                }`}>
                     <div className="flex items-start gap-3">
-                        <AlertTriangle className="text-yellow-500 shrink-0 mt-0.5" size={18} />
-                        <div className="text-sm text-yellow-200">
-                            <p className="font-bold mb-1">Atenção Desenvolvedor</p>
-                            <p>Esta ação criará dezenas de registros no banco. Use com cautela em produção.</p>
+                        <AlertTriangle className={isDev ? 'text-yellow-500' : 'text-red-400'} size={18} />
+                        <div className="text-sm">
+                            {isDev ? (
+                                <p className="text-yellow-200"><span className="font-bold">Atenção Desenvolvedor</span> — Esta ação criará dezenas de registros no banco. Use com cautela em produção.</p>
+                            ) : (
+                                <p className="text-red-300"><span className="font-bold">BLOQUEADO EM PRODUÇÃO</span> — Seeder disponível apenas em <code>npm run dev</code>.</p>
+                            )}
                         </div>
                     </div>
                 </div>
-
                 <button
                     onClick={handleFullReset}
-                    disabled={loading}
-                    className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${loading
-                        ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                    disabled={loading || !isDev}
+                    className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${loading || !isDev
+                        ? 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-50'
                         : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
                         }`}
                 >

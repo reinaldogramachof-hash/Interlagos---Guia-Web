@@ -63,15 +63,20 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
 
 export default function ApprovalsTab({ onEscalate, onCountChange }) {
   const [pending, setPending] = useState([]);
+  const [loading, setLoading] = useState(true);
   const showToast = useToast();
 
   const fetchPending = async () => {
+    setLoading(true);
     try {
       const all = await fetchPendingItems();
       setPending(all);
       onCountChange?.(all.length);
     } catch (error) {
-      // silenced for production
+      showToast('Erro ao carregar itens pendentes. Verifique sua conexão.', 'error');
+      onCountChange?.(0);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,17 +107,23 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
       <h3 className="font-bold text-lg flex items-center gap-2 text-slate-800">
         <CheckCircle className="text-emerald-500" /> Itens Pendentes de Aprovação
       </h3>
-      {pending.length === 0 && (
-        <div className="p-8 bg-emerald-50 rounded-xl text-center border border-emerald-100">
-          <CheckCircle className="mx-auto text-emerald-500 mb-2" size={32} />
-          <p className="text-emerald-800 font-medium">Tudo limpo! Nada para moderar.</p>
-        </div>
+      {loading ? (
+        <p className="text-center text-slate-400 py-10">Carregando itens pendentes...</p>
+      ) : (
+        <>
+          {pending.length === 0 && (
+            <div className="p-8 bg-emerald-50 rounded-xl text-center border border-emerald-100">
+              <CheckCircle className="mx-auto text-emerald-500 mb-2" size={32} />
+              <p className="text-emerald-800 font-medium">Tudo limpo! Nada para moderar.</p>
+            </div>
+          )}
+          <div className="space-y-4">
+            {pending.map(item => (
+              <ModerationCard key={item.id} item={item} onApprove={handleApprove} onReject={handleReject} onEscalate={onEscalate} />
+            ))}
+          </div>
+        </>
       )}
-      <div className="space-y-4">
-        {pending.map(item => (
-          <ModerationCard key={item.id} item={item} onApprove={handleApprove} onReject={handleReject} onEscalate={onEscalate} />
-        ))}
-      </div>
     </div>
   );
 }

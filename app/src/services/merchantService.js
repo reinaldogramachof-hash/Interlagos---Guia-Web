@@ -16,6 +16,7 @@ export const adminGetMerchants = async () => {
   const { data, error } = await supabase
     .from('merchants')
     .select('*')
+    .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) { console.error('merchantService.adminGetMerchants:', error); return []; }
   return data;

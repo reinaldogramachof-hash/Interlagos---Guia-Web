@@ -5,14 +5,18 @@ import { useToast } from '../../../components/Toast';
 
 export default function CampaignsTab() {
   const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
   const showToast = useToast();
 
   const fetchCampaigns = async () => {
+    setLoading(true);
     try {
       const data = await adminFetchCampaigns();
       setCampaigns(data);
     } catch (error) {
       showToast('Erro ao carregar campanhas.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,6 +64,8 @@ export default function CampaignsTab() {
       </div>
     </div>
   );
+
+  if (loading) return <p className="text-center text-slate-400 py-10">Carregando campanhas...</p>;
 
   return (
     <div className="space-y-8">
