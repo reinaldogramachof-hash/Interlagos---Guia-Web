@@ -4,7 +4,7 @@
 
 **NÃO abra issues públicas para vulnerabilidades de segurança.**
 
-Entre em contato por e-mail: reinaldogramachof@gmail.com
+Entre em contato por e-mail: tecnologia@plenaaplicativos.com.br
 
 Inclua no relato:
 - Descrição da vulnerabilidade
