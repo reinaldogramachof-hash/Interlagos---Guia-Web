@@ -92,7 +92,7 @@ export default function LoginModal({ onClose, onSuccess }) {
 
         {/* Header */}
         <div className={`relative px-6 pt-10 pb-16 transition-colors duration-500 ${loginType === 'partner' ? 'bg-slate-900' : 'bg-indigo-600'}`}>
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }} />
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.5)_1px,transparent_0)] bg-[size:20px_20px]" />
           <div className="relative z-10 text-center">
             <div className={`w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg transform rotate-3 transition-all duration-500 ${loginType === 'partner' ? 'bg-indigo-500 text-white rotate-0' : 'bg-white text-indigo-600'}`}>
               {loginType === 'partner' ? <Shield size={40} /> : <User size={40} />}
@@ -139,7 +139,7 @@ export default function LoginModal({ onClose, onSuccess }) {
                   <TermsCheckbox />
 
                   <button onClick={handleGoogleLogin} disabled={loading || !termsAccepted} className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? <Spinner /> : <><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" /> Entrar com Google</>}
+                    {loading ? <Spinner /> : <><img src="/google-logo.svg" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" /> Entrar com Google</>}
                   </button>
 
                   <div className="relative flex py-2 items-center">

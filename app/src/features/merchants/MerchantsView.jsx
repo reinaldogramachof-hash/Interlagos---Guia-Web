@@ -78,10 +78,10 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+              className={`flex-shrink-0 px-3 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap min-h-[44px] flex items-center ${
                 selectedCategory === cat.id
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-300'
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-brand-300'
               }`}
             >
               {cat.label}

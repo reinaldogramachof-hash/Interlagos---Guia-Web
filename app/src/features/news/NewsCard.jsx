@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Newspaper, PenLine } from 'lucide-react';
 
 const CATEGORY_COLORS = {
     Urgente: 'bg-red-100 text-red-700',
@@ -61,7 +61,7 @@ export default function NewsCard({ item, onClick }) {
     };
 
     return (
-        <article className="bg-white border-b border-gray-100 pb-1 mb-1">
+        <article className="bg-white border-b border-gray-100 pb-1 mb-1 cursor-pointer" onClick={onClick}>
             {/* ── Cabeçalho ── */}
             <div className="flex items-center gap-2.5 px-4 pt-4 pb-2">
                 <AuthorAvatar name={author} />
@@ -74,14 +74,14 @@ export default function NewsCard({ item, onClick }) {
                         {item.category}
                     </span>
                     {item.author_name
-                        ? <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full ml-auto">📰 {item.author_name}</span>
-                        : <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-auto">✏️ Redação</span>
+                        ? <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full ml-auto flex items-center gap-1"><Newspaper size={12} /> {item.author_name}</span>
+                        : <span className="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full ml-auto flex items-center gap-1"><PenLine size={12} /> Redação</span>
                     }
                 </div>
             </div>
 
             {/* ── Título + resumo ── */}
-            <div className="px-4 pb-2 cursor-pointer" onClick={onClick}>
+            <div className="px-4 pb-2">
                 <h3 className="text-sm font-bold text-gray-900 mb-1 leading-snug">{item.title}</h3>
                 {(item.summary || item.content) && (
                     <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
@@ -92,7 +92,7 @@ export default function NewsCard({ item, onClick }) {
 
             {/* ── Imagem edge-to-edge ── */}
             {imgSrc && (
-                <div className="w-full overflow-hidden cursor-pointer" onClick={onClick}>
+                <div className="w-full overflow-hidden">
                     <img
                         src={imgSrc}
                         alt={item.title}
@@ -116,7 +116,7 @@ export default function NewsCard({ item, onClick }) {
 
                 {/* Comentar */}
                 <button
-                    onClick={(e) => { e.stopPropagation(); onClick(); }}
+                    onClick={(e) => e.stopPropagation()}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
                 >
                     <MessageCircle size={15} />

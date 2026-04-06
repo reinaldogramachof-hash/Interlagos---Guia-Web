@@ -18,6 +18,8 @@ import {
     BarChart2,
     MessageCircle,
     Medal,
+    Shield,
+    Home,
 } from 'lucide-react';
 import usePwaInstall from '../hooks/usePwaInstall';
 import SidebarMenuSection, { Divider, SectionLabel, MenuItem } from './SidebarMenuSection';
@@ -81,13 +83,13 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                 className={`fixed top-0 left-0 z-[60] h-full w-[300px] max-w-[85vw] bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 {/* Cabeçalho */}
-                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 px-5 pt-10 pb-6 shrink-0 text-white">
+                <div className="bg-gradient-to-br from-brand-600 to-brand-700 px-5 pt-10 pb-6 shrink-0 text-white">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <MapPin size={18} className="text-indigo-200" />
                             <span className="text-indigo-100 text-xs font-semibold tracking-widest uppercase">Interlagos Conectado</span>
                         </div>
-                        <button onClick={onClose} className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"><X size={18} /></button>
+                        <button onClick={onClose} className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"><X size={18} /></button>
                     </div>
 
                     {currentUser ? (
@@ -95,8 +97,8 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                             <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg shrink-0">{currentUser.email?.[0]?.toUpperCase() ?? '?'}</div>
                             <div className="min-w-0">
                                 <p className="font-semibold text-sm truncate">{currentUser.displayName || currentUser.email}</p>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isMaster ? 'bg-purple-400/30' : isAdmin ? 'bg-blue-400/30' : isMerchant ? 'bg-amber-400/30' : 'bg-white/20'}`}>
-                                    {isMaster ? '⚡ Master' : isAdmin ? '🛡️ Admin' : isMerchant ? '🏪 Comerciante' : '🏘️ Morador'}
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${isMaster ? 'bg-purple-400/30' : isAdmin ? 'bg-blue-400/30' : isMerchant ? 'bg-amber-400/30' : 'bg-white/20'}`}>
+                                    {isMaster ? <><Zap size={14} /> Master</> : isAdmin ? <><Shield size={14} /> Admin</> : isMerchant ? <><Store size={14} /> Comerciante</> : <><Home size={14} /> Morador</>}
                                 </span>
                             </div>
                         </div>
@@ -111,7 +113,7 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                 </div>
 
                 {/* Corpo do menu */}
-                <div className="flex-1 overflow-y-auto py-2">
+                <div className="flex-1 overflow-y-auto scrollbar-hide py-2">
                     <SidebarMenuSection title="Comunidade" items={COMMUNITY_ITEMS} onNavigate={handleNav} />
                     <Divider />
                     <SidebarMenuSection title="Meu Negócio" items={BUSINESS_ITEMS} onNavigate={handleNav} />
@@ -133,7 +135,7 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
 
                 {canInstall && !isInstalled && (
                     <div className="px-3 py-2 border-t border-gray-100">
-                        <button onClick={() => { install(); onClose(); }} className="w-full flex items-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl transition-colors text-sm font-bold shadow-md shadow-indigo-500/20">
+                        <button onClick={() => { install(); onClose(); }} className="w-full flex items-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-4 py-3 rounded-xl transition-colors text-sm font-bold shadow-md shadow-brand-500/20">
                             <Download size={18} />
                             <div className="text-left"><p className="leading-none">Instalar o App</p><p className="text-indigo-200 text-[10px] font-normal mt-0.5">Use offline, sem abrir o navegador</p></div>
                         </button>
@@ -145,7 +147,7 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                     {/* Link para a landing page / trocar de bairro */}
                     <a
                         href={import.meta.env.VITE_LANDING_URL || '/'}
-                        className="w-full flex items-center gap-3 text-indigo-500 hover:bg-indigo-50 px-3 py-2.5 rounded-xl transition-colors text-sm font-semibold"
+                        className="w-full flex items-center gap-3 text-brand-500 hover:bg-brand-50 px-3 py-2.5 rounded-xl transition-colors text-sm font-semibold"
                     >
                         <MapPin size={18} />
                         Trocar de bairro

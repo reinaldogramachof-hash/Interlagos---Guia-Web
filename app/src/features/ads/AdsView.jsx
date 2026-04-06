@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Tag, PlusCircle } from 'lucide-react';
 import AdCard from './AdCard';
 import { fetchAds, subscribeAds } from '../../services/adsService';
-import { useAuth } from '../auth/AuthContext';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
 import EmptyState from '../../components/EmptyState';
-import LoginModal from '../auth/LoginModal';
 import { incrementAdClick } from '../../services/statsService';
 import { useToast } from '../../components/Toast';
 
@@ -15,14 +13,12 @@ const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Ve�
 
 
 export default function AdsView({ onRequireAuth }) {
-    const { currentUser } = useAuth();
     const showToast = useToast();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showLoginModal, setShowLoginModal] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -50,8 +46,7 @@ export default function AdsView({ onRequireAuth }) {
         : ads.filter(ad => ad.category === selectedCategory);
 
     const handleCreateClick = () => {
-        if (!currentUser) { setShowLoginModal(true); }
-        else { setIsWizardOpen(true); }
+        onRequireAuth?.(() => setIsWizardOpen(true));
     };
 
     const handleWppClick = (e, ad) => {
@@ -71,8 +66,8 @@ export default function AdsView({ onRequireAuth }) {
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategory === cat
-                                ? 'bg-indigo-600 text-white'
+                        className={`inline-flex items-center px-3 py-2 rounded-full text-xs font-bold transition-all min-h-[44px] ${selectedCategory === cat
+                                ? 'bg-brand-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
@@ -83,7 +78,7 @@ export default function AdsView({ onRequireAuth }) {
 
             {/* ── Grid de Anúncios ── */}
             {loading ? (
-                <div className="grid grid-cols-2 gap-3 px-3 pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-3 pt-4">
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="bg-white rounded-card overflow-hidden shadow-card border border-gray-100">
                             <div className="h-40 bg-gray-100 animate-pulse" />
@@ -105,7 +100,7 @@ export default function AdsView({ onRequireAuth }) {
                     }}
                 />
             ) : (
-                <div className="grid grid-cols-2 gap-3 px-3 pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-3 pt-4">
                     {filteredAds.map((ad) => (
                         <AdCard 
                             key={ad.id} 
@@ -133,15 +128,7 @@ export default function AdsView({ onRequireAuth }) {
             <CreateAdWizard
                 isOpen={isWizardOpen}
                 onClose={() => setIsWizardOpen(false)}
-                user={currentUser}
             />
-            {showLoginModal && (
-                <LoginModal
-                    isOpen={showLoginModal}
-                    onClose={() => setShowLoginModal(false)}
-                    onSuccess={() => { setShowLoginModal(false); setIsWizardOpen(true); }}
-                />
-            )}
         </div>
     );
 }

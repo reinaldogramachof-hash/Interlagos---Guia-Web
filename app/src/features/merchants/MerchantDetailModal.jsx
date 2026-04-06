@@ -90,7 +90,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                     <div className="absolute bottom-0 left-0 p-8 w-full">
                         <div className="flex justify-between items-end">
                             <div>
-                                <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full mb-3 shadow-lg">
+                                <span className="inline-block px-3 py-1 bg-brand-600 text-white text-xs font-bold rounded-full mb-3 shadow-lg">
                                     {merchant.category}
                                 </span>
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{merchant.name}</h2>
@@ -118,7 +118,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                         <div className="md:col-span-2 space-y-6">
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                    <Store size={20} className="text-indigo-600" /> Sobre
+                                    <Store size={20} className="text-brand-600" /> Sobre
                                 </h3>
                                 <p className="text-gray-600 leading-relaxed">
                                     {merchant.description || 'Uma excelente opção no Parque Interlagos, São José dos Campos, com produtos de qualidade e ótimo atendimento.'}
@@ -137,7 +137,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                             {['professional', 'premium'].includes(merchant.plan) && merchant.gallery && merchant.gallery.length > 0 && (
                                 <div className="mt-8 pt-6 border-t border-gray-100">
                                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                        <div className="w-1 h-5 bg-indigo-600 rounded-full"></div> Galeria de Fotos
+                                        <div className="w-1 h-5 bg-brand-600 rounded-full"></div> Galeria de Fotos
                                     </h3>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {merchant.gallery.map((url, index) => (
@@ -184,11 +184,11 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                             ) : null}
 
                             {['professional', 'premium'].includes(merchant.plan) && (
-                                <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
-                                    <div className="flex items-center gap-2 mb-2 text-indigo-900 font-bold">
+                                <div className="bg-brand-50 p-5 rounded-2xl border border-brand-100">
+                                    <div className="flex items-center gap-2 mb-2 text-brand-600 font-bold">
                                         <Star size={18} className="text-amber-400 fill-amber-400" /> 4.8
                                     </div>
-                                    <p className="text-xs text-indigo-700">Baseado em 128 avaliações de clientes locais.</p>
+                                    <p className="text-xs text-brand-700">Baseado em 128 avaliações de clientes locais.</p>
                                 </div>
                             )}
                         </div>

@@ -17,14 +17,14 @@ export default function BottomNav({ currentView, onNavigate, onCreateAd }) {
             <button
               key={id}
               onClick={() => onNavigate(id)}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all relative active:opacity-70 active:scale-95 ${isActive ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all relative active:opacity-70 active:scale-95 ${isActive ? 'text-brand-600' : 'text-gray-400 hover:text-gray-600'}`}
             >
               <Icon size={isActive ? 24 : 22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] font-bold ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}>
+              <span className={`text-[10px] font-bold ${isActive ? 'text-brand-600' : 'text-gray-400'}`}>
                 {label}
               </span>
               {isActive && (
-                <span className="absolute bottom-0 w-8 h-1 bg-indigo-600 rounded-t-full shadow-[0_-2px_6px_rgba(79,70,229,0.3)]" />
+                <span className="absolute bottom-0 w-8 h-1 bg-brand-600 rounded-t-full shadow-[0_-2px_6px_rgba(79,70,229,0.3)]" />
               )}
             </button>
           );

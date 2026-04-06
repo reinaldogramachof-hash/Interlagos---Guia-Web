@@ -53,7 +53,7 @@ export default function AdCard({ ad, onClick, onWppClick }) {
                     </span>
                 </div>
                 
-                <h4 className="text-gray-900 text-xs font-semibold mb-1 line-clamp-1">
+                <h4 className="text-gray-900 text-sm font-semibold mb-1 line-clamp-1">
                     {ad.title}
                 </h4>
 

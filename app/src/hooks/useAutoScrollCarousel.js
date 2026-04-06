@@ -5,6 +5,11 @@ export function useAutoScrollCarousel(speed = 0.5) {
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+    if (prefersReducedMotion) return; // não iniciar auto-scroll
+
     let animId;
     const scroll = () => {
       if (!isPaused && carouselRef.current) {

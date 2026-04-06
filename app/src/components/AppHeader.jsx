@@ -43,7 +43,7 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
         {/* Esquerda */}
         <button
           onClick={onSidebarOpen}
-          className="flex-shrink-0 p-2 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-all active:scale-95"
+          className="flex-shrink-0 p-2.5 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-all active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label="Abrir menu"
         >
           <Menu size={22} />
