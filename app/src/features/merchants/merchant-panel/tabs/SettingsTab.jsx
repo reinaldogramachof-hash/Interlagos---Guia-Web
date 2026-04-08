@@ -60,6 +60,7 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
         ...formData,
         image_url: imageUrl,
         owner_id: currentUser.uid,
+        neighborhood: import.meta.env.VITE_NEIGHBORHOOD,
       };
 
       // Se for edição de um comércio existente
