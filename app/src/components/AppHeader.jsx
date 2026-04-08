@@ -51,12 +51,6 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
 
         {/* Centro — flex-1 com min-w-0 para truncar se necessário */}
         <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
-          <img
-            src="/logoIC.png"
-            alt="Logo"
-            className="w-7 h-7 rounded-lg object-contain flex-shrink-0"
-            onError={e => e.target.style.display = 'none'}
-          />
           <h1 className="text-base font-black text-gray-900 tracking-tight truncate">
             {title}
           </h1>

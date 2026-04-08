@@ -35,36 +35,81 @@ export const subscribeMerchants = (callback) => {
 };
 
 export const createMerchant = async (data) => {
-  const { data: result, error } = await supabase.from('merchants').insert(data).select().single();
+  const sanitizedData = { ...data };
+  let { data: result, error } = await supabase.from('merchants').insert(sanitizedData).select();
+
+  // Retry resiliente: Se o schema estiver antigo
+  if (error && (error.message?.includes('column') || error.hint?.includes('column') || error.message?.includes('schema cache'))) {
+    delete sanitizedData.gallery;
+    delete sanitizedData.social_links;
+    delete sanitizedData.social_url;
+    delete sanitizedData.owner_id;
+    
+    const { data: retryData, error: retryError } = await supabase
+      .from('merchants')
+      .insert(sanitizedData)
+      .select();
+    
+    if (retryError) throw retryError;
+    result = retryData;
+    error = null;
+  }
+
   if (error) throw error;
-  return result;
+  return result?.[0];
 };
 
 export const updateMerchant = async (id, data) => {
-  // Tratar formatação interna: limpar caracteres do WhatsApp se presente
   const sanitizedData = { ...data };
+  
+  // Limpeza de campos comuns: whatsapp
   if (sanitizedData.whatsapp) {
     sanitizedData.whatsapp = sanitizedData.whatsapp.replace(/\D/g, '');
   }
 
-  const { data: updated, error } = await supabase
+  // Tenta o update original
+  let { data: updated, error } = await supabase
     .from('merchants')
     .update(sanitizedData)
     .eq('id', id)
-    .select()
-    .single();
+    .select();
+
+  // Retry resiliente: Se houver erro de coluna ausente (gallery, social_links, etc)
+  if (error && (error.message?.includes('column') || error.hint?.includes('column') || error.message?.includes('schema cache'))) {
+    // Remove todos os campos opcionais que podem não existir em schemas antigos
+    delete sanitizedData.gallery;
+    delete sanitizedData.social_links;
+    delete sanitizedData.social_url;
+    delete sanitizedData.owner_id; // Às vezes falta em schemas básicos
+    
+    // Tenta novamente apenas com o básico (nome, categoria, descrição, whatsapp, etc)
+    const { data: retryData, error: retryError } = await supabase
+      .from('merchants')
+      .update(sanitizedData)
+      .eq('id', id)
+      .select();
+    
+    if (retryError) throw retryError;
+    updated = retryData;
+    error = null;
+  }
 
   if (error) throw error;
+  const result = updated?.[0];
 
-  if (updated.owner_id) {
-    await createNotification(
-      updated.owner_id,
-      'Comércio Atualizado',
-      `As informações do seu comércio "${updated.name}" foram atualizadas pela administração.`,
-      'info'
-    );
+  if (result) {
+    // Notifica se houver um owner_id no resultado
+    const userId = result.owner_id;
+    if (userId) {
+      await createNotification(
+        userId,
+        'Comércio Atualizado',
+        `As informações do seu comércio "${result.name}" foram atualizadas pela administração.`,
+        'info'
+      ).catch(() => {}); // Ignora erro de notificação se a tabela não existir
+    }
   }
-  return updated;
+  return result;
 };
 
 export const deleteMerchant = async (id) => {

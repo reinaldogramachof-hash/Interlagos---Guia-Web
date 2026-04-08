@@ -138,7 +138,7 @@ export default function LoginModal({ onClose, onSuccess }) {
                   <TermsCheckbox />
 
                   <button onClick={handleGoogleLogin} disabled={loading || !termsAccepted} className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? <Spinner /> : <><img src="/google-logo.svg" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" /> Entrar com Google</>}
+                    {loading ? <Spinner /> : <><span className="w-5 h-5 flex items-center justify-center font-black text-blue-500 text-lg leading-none group-hover:scale-110 transition-transform">G</span> Entrar com Google</>}
                   </button>
 
                   <div className="relative flex py-2 items-center">

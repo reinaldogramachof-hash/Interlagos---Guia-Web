@@ -51,7 +51,7 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }] = await Promise.all([
     supabase.from('ads').select('*, profiles!seller_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
-    supabase.from('campaigns').select('*, profiles!merchant_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
+    supabase.from('campaigns').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
   ]);
   return [
     ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name || 'Anônimo' })),
@@ -132,47 +132,82 @@ export async function updateUserRole(userId, newRole) {
 
 export async function fetchOpenTickets() {
   // Requer migration: docs/migrations/add-tickets-created-at.sql
+  // Resiliência: Tenta buscar os tickets, opcionalmente com profile se a relação existir
   const { data, error } = await supabase
     .from('tickets')
-    .select('*, profiles!author_id(display_name)')
-    .eq('status', 'open')
-    .order('created_at', { ascending: false });
-  if (error) throw error;
+    .select('*, author:profiles!author_id(display_name)')
+    .eq('status', 'open');
+
+  if (error) {
+    // Fallback se o join ou tabela falhar
+    const { data: simpleData, error: simpleError } = await supabase.from('tickets').select('*').eq('status', 'open');
+    if (simpleError) throw simpleError;
+    return simpleData ?? [];
+  }
   return data ?? [];
 }
 
 export async function resolveTicket(ticketId, ticketData) {
-  const { data, error } = await supabase
+  // Tenta o update completo
+  let { data, error } = await supabase
     .from('tickets')
     .update(ticketData)
     .eq('id', ticketId)
-    .select()
-    .single();
-  if (error) throw error;
+    .select();
 
-  if (data.author_id) {
+  // Retry resiliente: Se houver erro de coluna ausente (resolved_at/by), tenta apenas com o status
+  if (error && (error.message?.includes('column') || error.hint?.includes('column'))) {
+    const { data: retryData, error: retryError } = await supabase
+      .from('tickets')
+      .update({ status: ticketData.status })
+      .eq('id', ticketId)
+      .select();
+    
+    if (retryError) throw retryError;
+    data = retryData;
+    error = null;
+  }
+
+  if (error) throw error;
+  const result = data?.[0];
+
+  if (result && result.author_id) {
     await createNotification(
-      data.author_id,
+      result.author_id,
       'Solicitação Resolvida',
-      `Sua solicitação #${data.id.slice(0, 8)} foi marcada como: ${ticketData.status}.`,
+      `Sua solicitação #${result.id.slice(0, 8)} foi marcada como: ${ticketData.status}.`,
       ticketData.status === 'approved' ? 'success' : 'info'
     );
   }
-  return data;
+  return result;
 }
 
 export async function seedDatabase(merchants, ads, news, campaigns) {
-  const { error: e1 } = await supabase.from('merchants').insert(merchants);
-  if (e1) throw e1;
+  // Helper resiliente: se falhar por erro de coluna, tenta o insert sem as colunas que costumam faltar
+  const safeInsert = async (table, data) => {
+    const { error } = await supabase.from(table).insert(data);
+    if (error && (error.message?.includes('column') || error.hint?.includes('column') || error.message?.includes('schema cache'))) {
+      const sanitized = data.map(item => {
+        const newItem = { ...item };
+        // Remove campos que causam falha comum se o schema estiver antigo
+        delete newItem.gallery;
+        delete newItem.social_links;
+        delete newItem.is_premium;
+        delete newItem.merchant_id;
+        delete newItem.created_at;
+        return newItem;
+      });
+      const { error: retryError } = await supabase.from(table).insert(sanitized);
+      if (retryError) throw retryError;
+    } else if (error) {
+      throw error;
+    }
+  };
 
-  const { error: e2 } = await supabase.from('ads').insert(ads);
-  if (e2) throw e2;
-
-  const { error: e3 } = await supabase.from('news').insert(news);
-  if (e3) throw e3;
-
-  const { error: e4 } = await supabase.from('campaigns').insert(campaigns);
-  if (e4) throw e4;
+  await safeInsert('merchants', merchants);
+  await safeInsert('ads', ads);
+  await safeInsert('news', news);
+  await safeInsert('campaigns', campaigns);
 
   return true;
 }

@@ -120,12 +120,7 @@ export default function Seeder() {
                 whatsapp: m.whatsapp,
                 address: m.address,
                 plan: m.plan,
-                is_premium: m.isPremium,
-                image: m.image,
-                social_links: m.socialLinks || {},
-                gallery: m.gallery || [],
-                rating: m.isPremium ? 4.8 : 0,
-                views: m.views,
+                image_url: m.image,
                 is_active: true,
                 neighborhood: NEIGHBORHOOD,
             }));

@@ -53,7 +53,7 @@ export default function TicketsTab({ onCountChange }) {
                   <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-1 rounded-full uppercase">{ticket.type || 'Ticket'}</span>
                   <h4 className="font-bold text-slate-900 text-lg mt-1">{ticket.subject || 'Item #' + ticket.id}</h4>
                   {ticket.body && <p className="text-sm text-slate-500">Motivo: <span className="italic">"{ticket.body}"</span></p>}
-                  <p className="text-xs text-slate-400 mt-1">Enviado por: {ticket.profiles?.display_name || ticket.author_id?.slice(0, 8) || 'Sistema'}</p>
+                  <p className="text-xs text-slate-400 mt-1">Enviado por: {ticket.author?.display_name || ticket.author_id?.slice(0, 8) || 'Sistema'}</p>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleResolve(ticket.id, 'approved')} className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-emerald-200 flex items-center gap-2"><CheckCircle size={16} /> Aprovar</button>

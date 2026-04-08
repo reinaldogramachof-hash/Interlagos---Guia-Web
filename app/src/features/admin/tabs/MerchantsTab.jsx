@@ -36,7 +36,7 @@ export default function MerchantsTab() {
 
     try {
       // Upload de imagem se houver arquivo selecionado
-      let finalImageUrl = form.image;
+      let finalImageUrl = form.image_url;
       if (imageFile) {
         const safeName = imageFile.name.replace(/\s+/g, '-');
         const path = `merchants/${Date.now()}-${safeName}`;
@@ -45,8 +45,9 @@ export default function MerchantsTab() {
 
       const payload = {
         ...form,
-        image: finalImageUrl,
+        image_url: finalImageUrl,
         social_links: form.socialLinks,
+        neighborhood: import.meta.env.VITE_NEIGHBORHOOD,
         is_active: true,
       };
       delete payload.socialLinks;
@@ -132,9 +133,9 @@ export default function MerchantsTab() {
             )}
             <div className="pt-2 border-t border-slate-100">
               <label className="block text-xs font-bold text-slate-500 mb-2">Imagem do Comércio</label>
-              {form.image && (
+              {form.image_url && (
                 <div className="mb-2">
-                  <img src={form.image} alt="Imagem atual" className="w-24 h-24 object-cover rounded-lg border border-slate-200" />
+                  <img src={form.image_url} alt="Imagem atual" className="w-24 h-24 object-cover rounded-lg border border-slate-200" />
                 </div>
               )}
               <div className="flex items-center gap-3">
