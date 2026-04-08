@@ -49,43 +49,70 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 }
 
 export async function fetchPendingItems() {
-  const [{ data: ads }, { data: campaigns }] = await Promise.all([
+  const [{ data: ads }, { data: campaigns }, { data: merchants }] = await Promise.all([
     supabase.from('ads').select('*, profiles!seller_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
     supabase.from('campaigns').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('merchants').select('*, profiles!owner_id(display_name)').eq('is_active', false).eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
   ]);
   return [
     ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name || 'Anônimo' })),
-    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.profiles?.display_name || 'Comunidade' })),
+    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: 'Comunidade' })),
+    ...(merchants || []).map(m => ({ ...m, _table: 'merchants', author_name: m.profiles?.display_name || 'Anônimo' })),
   ];
 }
 
 // approveItem: ads usam status 'approved' (fetchAds filtra por 'approved').
 // campaigns usam status 'active' (fetchCampaigns filtra por 'active').
+// merchants usam is_active: true.
 export async function approveItem(table, id) {
   const { data: item, error: fetchError } = await supabase.from(table).select('*').eq('id', id).single();
   if (fetchError) throw fetchError;
 
-  const status = table === 'ads' ? 'approved' : 'active';
-  const { error } = await supabase.from(table).update({ status }).eq('id', id);
+  let updatePayload;
+  let notifTitle;
+  let notifMsg;
+
+  if (table === 'merchants') {
+    updatePayload = { is_active: true };
+    notifTitle = 'Comércio Aprovado!';
+    notifMsg = `Seu negócio "${item.name}" está ativo e já aparece no bairro!`;
+  } else {
+    const status = table === 'ads' ? 'approved' : 'active';
+    updatePayload = { status };
+    notifTitle = 'Aprovação Concluída';
+    notifMsg = `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" foi aprovado!`;
+  }
+
+  const { error } = await supabase.from(table).update(updatePayload).eq('id', id);
   if (error) throw error;
 
-  const userId = item.seller_id || item.author_id || item.requester_id || item.user_id;
+  const userId = item.owner_id || item.seller_id || item.author_id || item.requester_id || item.user_id;
   if (userId) {
-    await createNotification(
-      userId,
-      'Aprovação Concluída',
-      `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" foi aprovado!`,
-      'success'
-    );
+    await createNotification(userId, notifTitle, notifMsg, 'success');
   }
   return true;
 }
 
-// rejectItem: atualiza status para 'rejected' em vez de deletar — preserva trilha de auditoria
-// e garante que a notificação já foi enviada antes deste ponto.
+// rejectItem: atualiza status para 'rejected' em vez de deletar — preserva trilha de auditoria.
+// Exceção: merchants não têm coluna status, então são deletados ao rejeitar.
 export async function rejectItem(table, id) {
   const { data: item, error: fetchError } = await supabase.from(table).select('*').eq('id', id).single();
   if (fetchError) throw fetchError;
+
+  if (table === 'merchants') {
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) throw error;
+    const userId = item.owner_id;
+    if (userId) {
+      await createNotification(
+        userId,
+        'Cadastro Não Aprovado',
+        `Seu negócio "${item.name}" não foi aprovado. Entre em contato com a administração para mais informações.`,
+        'warning'
+      );
+    }
+    return true;
+  }
 
   const { error } = await supabase.from(table).update({ status: 'rejected' }).eq('id', id);
   if (error) throw error;

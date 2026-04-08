@@ -29,7 +29,7 @@ function OpenBadge() {
 // Converte nome do plano em label display
 const PLAN_LABEL = {
   premium: { label: 'Premium', bg: 'bg-amber-50', text: 'text-amber-700' },
-  professional: { label: 'Pro', bg: 'bg-indigo-50', text: 'text-indigo-700' },
+  pro: { label: 'Pro', bg: 'bg-indigo-50', text: 'text-indigo-700' },
   basic: { label: 'Básico', bg: 'bg-gray-100', text: 'text-gray-600' },
   free: { label: 'Grátis', bg: 'bg-gray-50', text: 'text-gray-400' },
 };
@@ -39,7 +39,7 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
   const setSelectedCategory = useMerchantStore(state => state.setSelectedCategory);
 
   const premiumMerchants = merchants.filter(m => m.plan === 'premium');
-  const proMerchants = merchants.filter(m => m.plan === 'professional');
+  const proMerchants = merchants.filter(m => m.plan === 'pro');
   const showCarousels = selectedCategory === 'Todos' && !searchTerm;
 
   const filteredMerchants = merchants
@@ -50,7 +50,7 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
       return matchesCategory && matchesSearch;
     })
     .sort((a, b) => {
-      const priority = { premium: 4, professional: 3, basic: 2, free: 1 };
+      const priority = { premium: 4, pro: 3, basic: 2, free: 1 };
       return (priority[b.plan] ?? 2) - (priority[a.plan] ?? 2);
     });
 

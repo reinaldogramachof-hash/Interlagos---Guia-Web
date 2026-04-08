@@ -95,6 +95,16 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
   const formCategories = categories.filter(c => c.id !== 'Todos');
 
   return (
+    <>
+    {merchant?.id && merchant.id !== 'temp_dev' && !merchant?.is_active && (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 mb-4">
+        <span className="text-amber-500 text-xl">⏳</span>
+        <div>
+          <p className="font-bold text-amber-800 text-sm">Cadastro em análise</p>
+          <p className="text-amber-700 text-xs mt-0.5">Seu negócio foi cadastrado e está aguardando aprovação da administração. Em breve aparecerá na página do bairro.</p>
+        </div>
+      </div>
+    )}
     <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row gap-8">
         {/* Upload Logo */}
@@ -197,5 +207,6 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
         </button>
       </div>
     </form>
+    </>
   );
 }

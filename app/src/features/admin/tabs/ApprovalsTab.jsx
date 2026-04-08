@@ -36,13 +36,16 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
     );
   }
 
+  const tableLabels = { ads: 'Anúncio', campaigns: 'Campanha', merchants: 'Novo Comércio' };
+  const tableBgColors = { ads: 'bg-slate-100 text-slate-600', campaigns: 'bg-brand-50 text-brand-600', merchants: 'bg-emerald-50 text-emerald-700' };
+
   return (
     <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex justify-between items-start">
       <div>
-        <span className={`text-xs font-bold px-2 py-1 rounded-md mb-2 inline-block ${item._table === 'ads' ? 'bg-slate-100 text-slate-600' : 'bg-brand-50 text-brand-600'}`}>
-          {item._table === 'ads' ? 'Anúncio' : 'Campanha'}
+        <span className={`text-xs font-bold px-2 py-1 rounded-md mb-2 inline-block ${tableBgColors[item._table] || 'bg-slate-100 text-slate-600'}`}>
+          {tableLabels[item._table] || item._table}
         </span>
-        <h4 className="font-bold text-lg text-slate-900">{item.title}</h4>
+        <h4 className="font-bold text-lg text-slate-900">{item.title || item.name}</h4>
         <p className="text-slate-500 text-sm mb-2 line-clamp-2">{item.description}</p>
         <p className="text-xs text-slate-400">Autor: {item.author_name || item.author?.name || 'Desconhecido'}</p>
       </div>

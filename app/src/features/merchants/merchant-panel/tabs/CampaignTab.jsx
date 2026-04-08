@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, Lock, Megaphone } from 'lucide-react';
 import { fetchCampaignsByMerchant, createMerchantCampaign, deleteCampaign } from '../../../../services/communityService';
 import { useToast } from '../../../../components/Toast';
+import { PLANS_CONFIG } from '../../../../constants/plans';
 
 const EMPTY_FORM = { title: '', description: '', discount: '', start_date: '', end_date: '' };
 
@@ -13,7 +14,8 @@ export default function CampaignTab({ merchant, onUpgrade }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
-  const isPremium = merchant?.plan === 'premium';
+  const planConfig = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
+  const isPremium = planConfig.hasCampaigns;
 
   useEffect(() => {
     if (!merchant?.id || merchant.id === 'temp_dev' || !isPremium) { setLoading(false); return; }

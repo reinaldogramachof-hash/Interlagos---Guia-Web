@@ -113,7 +113,7 @@ export async function fetchCampaignsByMerchant(merchantId) {
 export async function createMerchantCampaign(campaign) {
   const { data, error } = await supabase
     .from('campaigns')
-    .insert({ ...campaign, status: 'pending' })
+    .insert({ ...campaign, status: 'pending', neighborhood: NEIGHBORHOOD })
     .select()
     .single();
   if (error) throw error;
