@@ -211,3 +211,52 @@ export async function seedDatabase(merchants, ads, news, campaigns) {
 
   return true;
 }
+
+export async function backupDatabase() {
+  const [
+    { data: merchants },
+    { data: ads },
+    { data: news },
+    { data: campaigns },
+    { data: suggestions }
+  ] = await Promise.all([
+    supabase.from('merchants').select('*').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('ads').select('*').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('news').select('*').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('campaigns').select('*').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('suggestions').select('*').eq('neighborhood', NEIGHBORHOOD)
+  ]);
+
+  return {
+    merchants: merchants || [],
+    ads: ads || [],
+    news: news || [],
+    campaigns: campaigns || [],
+    suggestions: suggestions || []
+  };
+}
+
+export async function resetDatabase() {
+  const tables = [
+    'merchants',
+    'ads',
+    'news',
+    'campaigns',
+    'suggestions',
+    'click_events',
+  ];
+
+  const results = {};
+
+  for (const table of tables) {
+    const { count, error } = await supabase
+      .from(table)
+      .delete({ count: 'exact' })
+      .eq('neighborhood', NEIGHBORHOOD);
+    
+    if (error) throw error;
+    results[table] = count || 0;
+  }
+
+  return { success: true, deletedCounts: results };
+}
