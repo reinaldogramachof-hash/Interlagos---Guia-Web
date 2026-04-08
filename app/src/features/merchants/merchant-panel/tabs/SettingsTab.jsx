@@ -73,10 +73,14 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
         merchantData.is_active = false;
         merchantData.plan = 'free';
         const newMerchant = await createMerchant(merchantData);
-        
-        // Atualiza role do usuário para merchant
-        await updateUserProfile(currentUser.uid, { role: 'merchant' });
-        
+
+        // Atualiza role do usuário para merchant (não-bloqueante: merchant já foi criado)
+        try {
+          await updateUserProfile(currentUser.uid, { role: 'merchant' });
+        } catch (roleError) {
+          console.warn('SettingsTab: role update falhou (merchant criado):', roleError);
+        }
+
         showToast('Cadastro realizado! Aguarde aprovação.', 'success');
         onUpdate(newMerchant);
       }
