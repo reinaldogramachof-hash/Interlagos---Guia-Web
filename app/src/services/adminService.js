@@ -247,15 +247,23 @@ export async function resetDatabase() {
   ];
 
   const results = {};
+  const errors = [];
 
   for (const table of tables) {
     const { count, error } = await supabase
       .from(table)
       .delete({ count: 'exact' })
-      .eq('neighborhood', NEIGHBORHOOD);
-    
-    if (error) throw error;
-    results[table] = count || 0;
+      .ilike('neighborhood', NEIGHBORHOOD);
+
+    if (error) {
+      errors.push(`${table}: ${error.message}`);
+    } else {
+      results[table] = count || 0;
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Falha ao limpar tabelas:\n${errors.join('\n')}`);
   }
 
   return { success: true, deletedCounts: results };
