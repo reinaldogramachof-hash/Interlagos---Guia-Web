@@ -62,6 +62,16 @@ export async function createNews(newsData) {
   return data;
 }
 
+export async function fetchNewsByAuthor(authorId) {
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .eq('author_id', authorId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function deleteNews(id) {
   const { error } = await supabase
     .from('news')
