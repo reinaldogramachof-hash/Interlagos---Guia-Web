@@ -3,8 +3,7 @@ import useMerchantStore, { selectMerchants, selectMerchantsLoading, selectSelect
 
 import MerchantsView from '../features/merchants/MerchantsView';
 import AdminPanel from '../features/admin/AdminPanel';
-import MerchantPanel from '../features/merchants/MerchantPanel';
-import ResidentPanel from '../features/community/ResidentPanel';
+import UnifiedPanel from '../features/dashboard/UnifiedPanel';
 import NewsFeed from '../features/news/NewsFeed';
 import AdsView from '../features/ads/AdsView';
 import DonationsView from '../features/community/DonationsView';
@@ -46,8 +45,9 @@ export default function AppRouter({ requireAuth }) {
     case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} onRegisterFree={goToMerchantPanel} />;
     case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
     case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
-    case 'merchant-panel': return <MerchantPanel onClose={() => setCurrentView('profile')} />;
-    case 'resident-panel': return <ResidentPanel onClose={() => setCurrentView('profile')} />;
+    case 'merchant-panel': 
+    case 'resident-panel': 
+        return <UnifiedPanel onClose={() => setCurrentView('profile')} />;
     case 'polls': return <PollsView onRequireAuth={requireAuth} />;
     case 'support': return <SupportView />;
     case 'members-landing': return <MembersLandingView onNavigate={setCurrentView} />;

@@ -24,7 +24,7 @@ export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = subscribeToNotifications(currentUser?.uid, (notifs) => {
+        const unsubscribe = subscribeToNotifications(currentUser?.id, (notifs) => {
             setNotifications(notifs);
             setUnreadCount(notifs.filter(n => !n.read).length);
         });
@@ -32,7 +32,7 @@ export default function NotificationBell() {
     }, [currentUser]);
 
     const handleMarkAsRead = (id) => {
-        markNotificationAsRead(currentUser?.uid, id);
+        markNotificationAsRead(currentUser?.id, id);
     };
 
     const handleBellClick = () => {

@@ -37,12 +37,27 @@ export async function fetchCampaigns() {
 }
 
 export async function createCampaign(campaign) {
-  const { data, error } = await supabase
+  const sanitized = { ...campaign };
+  let { data, error } = await supabase
     .from('campaigns')
-    .insert(campaign)
+    .insert(sanitized)
     .select()
     .single();
+
+  if (error && (error.message?.includes('column') || error.hint?.includes('column') || error.message?.includes('schema cache'))) {
+    console.warn('communityService: Fallback resiliente ativado. Removendo type e requester_id da inserção.', error);
+    delete sanitized.type;
+    delete sanitized.requester_id;
+    
+    // Tenta re-inserir. Se falhar no fallback, devolve o erro pro componente tratar.
+    const retry = await supabase.from('campaigns').insert(sanitized).select().single();
+    if (retry.error) throw retry.error;
+    data = retry.data;
+    error = null;
+  }
+
   if (error) throw error;
+  
   await notifyAdmins(
     'Nova Campanha Social Pendente',
     `Uma campanha social "${data.title}" aguarda aprovação.`,

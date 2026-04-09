@@ -32,13 +32,7 @@ const COMMUNITY_ITEMS = [
     { id: 'history',     label: 'História do Bairro', icon: History,    desc: 'Conheça Interlagos' },
 ];
 
-const BUSINESS_ITEMS = [
-    { id: 'merchant-panel',   label: 'Meu Painel',           icon: LayoutDashboard, desc: 'Gerencie seu negócio',   requireAuth: true },
-    { id: 'support',          label: 'Suporte',               icon: MessageCircle,   desc: 'Tire suas dúvidas'                          },
-    { id: 'plans',            label: 'Planos e Preços',       icon: CreditCard,      desc: 'Básico · Pro · Premium'                     },
-    { id: 'merchant-landing', label: 'Anunciar meu Negócio',  icon: Store,           desc: 'Cadastre ou promova seu negócio'             },
-];
-
+// A seção de negócios (Business/Resident) será gerada dinamicamente dentro do componente
 const MEMBERS_ITEMS = [
     { id: 'members-landing', label: 'Seja Membro',         icon: Heart,  desc: 'Apoie o bairro' },
     { id: 'member-panel',    label: 'Meu Plano de Membro', icon: Medal,  desc: 'Benefícios e badge', requireAuth: true },
@@ -71,6 +65,27 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
         }
         onNavigate(id);
         onClose();
+    };
+
+    // ── Geração do Bloco Evolutivo (Morador VS Comerciante) ──
+    const renderEvolutionSection = () => {
+        if (!currentUser || !isMerchant) {
+            // Morador ou Não Logado (Foco no convite de evolução)
+            const residentItems = [
+                { id: 'resident-panel', label: 'Meu Painel', icon: Home, desc: 'Seus classificados e histórico', requireAuth: true },
+                { id: 'merchant-landing', label: 'Venda no Bairro', icon: Store, desc: 'Evolua para Comerciante e Anuncie' },
+                { id: 'support', label: 'Suporte', icon: MessageCircle, desc: 'Tire suas dúvidas' }
+            ];
+            return <SidebarMenuSection title="Minha Conta" items={residentItems} onNavigate={handleNav} />;
+        }
+
+        // Comerciante Ativo (Foco em gerenciamento comercial)
+        const merchantItems = [
+            { id: 'merchant-panel', label: 'Painel do Proprietário', icon: LayoutDashboard, desc: 'Gerencie sua loja e anúncios', requireAuth: true },
+            { id: 'plans', label: 'Planos e Upgrades', icon: CreditCard, desc: 'Básico · Pro · Premium' },
+            { id: 'support', label: 'Suporte', icon: MessageCircle, desc: 'Atendimento exclusivo' }
+        ];
+        return <SidebarMenuSection title="Meu Negócio" items={merchantItems} onNavigate={handleNav} />;
     };
 
     return (
@@ -116,7 +131,7 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                 <div className="flex-1 overflow-y-auto scrollbar-hide py-2">
                     <SidebarMenuSection title="Comunidade" items={COMMUNITY_ITEMS} onNavigate={handleNav} />
                     <Divider />
-                    <SidebarMenuSection title="Meu Negócio" items={BUSINESS_ITEMS} onNavigate={handleNav} />
+                    {renderEvolutionSection()}
                     <Divider />
                     <SidebarMenuSection title="Membros" items={MEMBERS_ITEMS} onNavigate={handleNav} />
 

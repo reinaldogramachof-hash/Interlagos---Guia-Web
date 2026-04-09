@@ -1,6 +1,7 @@
 import { useAuth } from '../features/auth/AuthContext';
 import { Menu, Download } from 'lucide-react';
 import usePwaInstall from '../hooks/usePwaInstall';
+import NotificationBell from './NotificationBell';
 
 export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
   const { currentUser } = useAuth();
@@ -56,8 +57,8 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
           </h1>
         </div>
 
-        {/* Direita — largura fixa para balancear */}
-        <div className="flex-shrink-0 w-16 flex justify-end">
+        {/* Direita — largura flexível para acomodar botões dinamicamente */}
+        <div className="flex-shrink-0 flex items-center justify-end min-w-[44px]">
           {!currentUser ? (
             <button
               onClick={onLoginOpen}
@@ -65,7 +66,11 @@ export default function AppHeader({ currentView, onLoginOpen, onSidebarOpen }) {
             >
               Entrar
             </button>
-          ) : null}
+          ) : (
+            <div className="flex items-center gap-1">
+              <NotificationBell />
+            </div>
+          )}
         </div>
       </div>
     </header>
