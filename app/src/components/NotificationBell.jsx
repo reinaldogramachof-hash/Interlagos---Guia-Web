@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../features/auth/AuthContext';
-import { subscribeToNotifications, markNotificationAsRead } from '../services/notificationService';
+import { subscribeToNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../services/notificationService';
 
+
+const TYPE_COLORS = {
+    success: 'bg-emerald-500',
+    error:   'bg-red-500',
+    warning: 'bg-amber-500',
+    info:    'bg-indigo-500',
+};
+const TYPE_BG = {
+    success: 'bg-emerald-50/50 dark:bg-emerald-900/10',
+    error:   'bg-red-50/50 dark:bg-red-900/10',
+    warning: 'bg-amber-50/50 dark:bg-amber-900/10',
+    info:    'bg-indigo-50/50 dark:bg-indigo-900/10',
+};
 
 export default function NotificationBell() {
     const { currentUser } = useAuth();
@@ -49,7 +62,12 @@ export default function NotificationBell() {
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                             <h3 className="font-bold text-slate-900 dark:text-white">Notificações</h3>
                             {unreadCount > 0 && (
-                                <span className="text-xs text-indigo-600 font-bold">{unreadCount} novas</span>
+                                <button
+                                    onClick={() => markAllNotificationsAsRead(currentUser?.id)}
+                                    className="text-xs text-indigo-600 font-bold hover:underline"
+                                >
+                                    Marcar tudo como lido
+                                </button>
                             )}
                         </div>
                         <div className="max-h-80 overflow-y-auto">
@@ -62,17 +80,19 @@ export default function NotificationBell() {
                                     <div
                                         key={notif.id}
                                         onClick={() => handleMarkAsRead(notif.id)}
-                                        className={`p-4 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer ${!notif.read ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''}`}
+                                        className={`p-4 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer ${!notif.read ? (TYPE_BG[notif.type] ?? TYPE_BG.info) : ''}`}
                                     >
                                         <div className="flex gap-3">
-                                            <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${!notif.read ? 'bg-indigo-500' : 'bg-transparent'}`} />
+                                            <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${!notif.read ? (TYPE_COLORS[notif.type] ?? 'bg-indigo-500') : 'bg-transparent'}`} />
                                             <div>
                                                 <p className={`text-sm ${!notif.read ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
                                                     {notif.title}
                                                 </p>
                                                 <p className="text-xs text-slate-500 mt-1">{notif.message}</p>
                                                 <p className="text-[10px] text-slate-400 mt-2">
-                                                    {notif.createdAt?.toDate ? notif.createdAt.toDate().toLocaleDateString() : 'Agora'}
+                                                    {notif.created_at
+                                                        ? new Date(notif.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                                                        : 'Agora'}
                                                 </p>
                                             </div>
                                         </div>

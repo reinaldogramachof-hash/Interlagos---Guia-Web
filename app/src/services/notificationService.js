@@ -42,3 +42,34 @@ export const subscribeToNotifications = (userId, callback) => {
 
   return () => supabase.removeChannel(channel);
 };
+
+export const notifyAdmins = async (title, message, type = 'info', refId = null) => {
+  const { data: admins, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['admin', 'master']);
+
+  if (error || !admins?.length) return;
+
+  const notifications = admins.map(admin => ({
+    user_id: admin.id,
+    title,
+    body: message,
+    type,
+    is_read: false,
+    ref_id: refId ?? null,
+  }));
+
+  const { error: insertError } = await supabase.from('notifications').insert(notifications);
+  if (insertError) console.error('notifyAdmins:', insertError);
+};
+
+export const markAllNotificationsAsRead = async (userId) => {
+  if (!userId) return;
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', userId)
+    .eq('is_read', false);
+  if (error) console.error('notificationService.markAll:', error);
+};

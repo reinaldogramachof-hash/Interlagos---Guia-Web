@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { createNotification } from './notificationService';
+import { createNotification, notifyAdmins } from './notificationService';
 
 const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 
@@ -43,6 +43,12 @@ export async function createCampaign(campaign) {
     .select()
     .single();
   if (error) throw error;
+  await notifyAdmins(
+    'Nova Campanha Social Pendente',
+    `Uma campanha social "${data.title}" aguarda aprovação.`,
+    'info',
+    data.id
+  ).catch(() => {});
   return data;
 }
 
@@ -117,6 +123,12 @@ export async function createMerchantCampaign(campaign) {
     .select()
     .single();
   if (error) throw error;
+  await notifyAdmins(
+    'Nova Campanha Pendente',
+    `Uma campanha "${data.title}" de comerciante aguarda aprovação.`,
+    'info',
+    data.id
+  ).catch(() => {});
   return data;
 }
 
@@ -150,5 +162,11 @@ export async function createTicket(ticket) {
     .select()
     .single();
   if (error) throw error;
+  await notifyAdmins(
+    'Novo Ticket de Suporte',
+    `Um novo ticket foi aberto${data?.subject ? `: "${data.subject}"` : ''}.`,
+    'warning',
+    data?.id ?? null
+  ).catch(() => {});
   return data;
 }

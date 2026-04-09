@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { notifyAdmins } from './notificationService';
 
 export async function fetchAds() {
   const { data, error } = await supabase
@@ -42,6 +43,12 @@ export async function createAd(adData) {
     .select()
     .single();
   if (error) throw error;
+  await notifyAdmins(
+    'Novo Classificado Pendente',
+    `Um novo anúncio "${data.title}" aguarda aprovação.`,
+    'info',
+    data.id
+  ).catch(() => {});
   return data;
 }
 

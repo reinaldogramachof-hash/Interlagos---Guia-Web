@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { createNotification } from './notificationService';
+import { createNotification, notifyAdmins } from './notificationService';
 
 export const getMerchants = async () => {
   const { data, error } = await supabase
@@ -56,6 +56,14 @@ export const createMerchant = async (data) => {
   }
 
   if (error) throw error;
+  if (result?.[0]) {
+    await notifyAdmins(
+      'Novo Comércio Aguardando Aprovação',
+      `O negócio "${result[0].name}" foi cadastrado e aguarda ativação.`,
+      'info',
+      result[0].id
+    ).catch(() => {});
+  }
   return result?.[0];
 };
 

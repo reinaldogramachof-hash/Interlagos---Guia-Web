@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { uploadImage } from './storageService';
+import { notifyAdmins } from './notificationService';
 
 const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 
@@ -52,6 +53,12 @@ export async function createNews(newsData) {
     .single();
 
   if (error) throw error;
+  await notifyAdmins(
+    'Nova Notícia Pendente',
+    `A notícia "${data.title}" foi enviada por um morador e aguarda aprovação.`,
+    'info',
+    data.id
+  ).catch(() => {});
   return data;
 }
 
@@ -73,16 +80,6 @@ export async function updateNews(id, data) {
     .single();
   if (error) throw error;
   return updatedData;
-}
-
-export async function fetchNewsByAuthor(authorId) {
-  const { data, error } = await supabase
-    .from('news')
-    .select('*')
-    .eq('author_id', authorId)
-    .order('created_at', { ascending: false });
-  if (error) throw error;
-  return data ?? [];
 }
 
 export async function updateNewsStatus(id, status) {
