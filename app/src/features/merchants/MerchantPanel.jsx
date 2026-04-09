@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, LayoutDashboard, Tag, Store, Settings, TrendingUp, BarChart3, Megaphone } from 'lucide-react';
+import { X, LayoutDashboard, Tag, Store, Settings, TrendingUp, BarChart3, Megaphone, User } from 'lucide-react';
 import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../auth/AuthContext';
@@ -13,6 +13,7 @@ import AdsTab from './merchant-panel/tabs/AdsTab';
 import SettingsTab from './merchant-panel/tabs/SettingsTab';
 import CampaignTab from './merchant-panel/tabs/CampaignTab';
 import ReportsTab from './merchant-panel/tabs/ReportsTab';
+import ResidentTabs from '../community/ResidentTabs';
 
 export default function MerchantPanel({ onClose }) {
     const { currentUser } = useAuth();
@@ -125,6 +126,9 @@ export default function MerchantPanel({ onClose }) {
                         <button onClick={() => setActiveTab('dashboard')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'dashboard' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
                             <LayoutDashboard size={18} /> Visão Geral
                         </button>
+                        <button onClick={() => setActiveTab('personal')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'personal' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                            <User size={18} /> Pessoal
+                        </button>
                         <button onClick={() => setActiveTab('ads')} className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === 'ads' ? 'bg-white dark:bg-slate-900 text-indigo-600 border-l-4 border-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
                             <Tag size={18} /> Meus Anúncios
                         </button>
@@ -142,11 +146,15 @@ export default function MerchantPanel({ onClose }) {
                     {/* Content */}
                     <div className="flex-1 bg-white dark:bg-slate-900 overflow-y-auto p-8">
                         {activeTab === 'dashboard' && (
-                            <DashboardTab 
-                                merchant={merchant} 
-                                myAds={myAds} 
-                                onUpgrade={() => setShowUpgradeModal(true)} 
+                            <DashboardTab
+                                merchant={merchant}
+                                myAds={myAds}
+                                onUpgrade={() => setShowUpgradeModal(true)}
                             />
+                        )}
+
+                        {activeTab === 'personal' && (
+                            <ResidentTabs currentUser={currentUser} />
                         )}
 
                         {activeTab === 'ads' && (

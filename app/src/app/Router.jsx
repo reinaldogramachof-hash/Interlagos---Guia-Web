@@ -47,7 +47,7 @@ export default function AppRouter({ requireAuth }) {
     case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
     case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
     case 'merchant-panel': return <MerchantPanel onClose={() => setCurrentView('profile')} />;
-    case 'resident-panel': return <ResidentPanel />;
+    case 'resident-panel': return <ResidentPanel onClose={() => setCurrentView('profile')} />;
     case 'polls': return <PollsView onRequireAuth={requireAuth} />;
     case 'support': return <SupportView />;
     case 'members-landing': return <MembersLandingView onNavigate={setCurrentView} />;

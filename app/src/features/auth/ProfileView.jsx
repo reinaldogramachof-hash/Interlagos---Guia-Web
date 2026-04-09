@@ -109,6 +109,18 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
           </span>
         </div>
 
+        {/* Card do Morador */}
+        {!isMerchant && !isAdmin && !isMaster && (
+          <div className="w-full mt-1">
+            <button
+              onClick={() => onNavigate('resident-panel')}
+              className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-colors"
+            >
+              Meu Painel
+            </button>
+          </div>
+        )}
+
         {/* Card do Comerciante */}
         {isMerchant && (
           <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mt-1">
