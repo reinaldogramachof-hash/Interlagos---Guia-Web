@@ -29,13 +29,14 @@ export default function TicketsTab({ onCountChange }) {
     try {
       await resolveTicket(ticketId, {
         status: resolution,
-        resolved_at: new Date().toISOString(),
-        resolved_by: currentUser.email,
+        resolved_by: currentUser.email || currentUser.displayName || currentUser.id,
       });
-      showToast(`Ticket ${resolution}.`, 'success');
+      const label = resolution === 'resolved' ? 'aprovado' : 'arquivado';
+      showToast(`Ticket ${label} com sucesso.`, 'success');
       fetchTickets();
     } catch (error) {
-      showToast('Erro ao resolver ticket.', 'error');
+      console.error('[TicketsTab] handleResolve error:', error);
+      showToast('Erro ao resolver ticket: ' + (error.message || 'desconhecido'), 'error');
     }
   };
 
@@ -56,8 +57,8 @@ export default function TicketsTab({ onCountChange }) {
                   <p className="text-xs text-slate-400 mt-1">Enviado por: {ticket.author?.display_name || (ticket.author_id ? String(ticket.author_id).slice(0, 8) : 'Sistema')}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => handleResolve(ticket.id, 'approved')} className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-emerald-200 flex items-center gap-2"><CheckCircle size={16} /> Aprovar</button>
-                  <button onClick={() => handleResolve(ticket.id, 'dismissed')} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-200">Arquivar</button>
+                  <button onClick={() => handleResolve(ticket.id, 'resolved')} className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-emerald-200 flex items-center gap-2"><CheckCircle size={16} /> Aprovar</button>
+                  <button onClick={() => handleResolve(ticket.id, 'rejected')} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-200">Arquivar</button>
                 </div>
               </div>
             </div>

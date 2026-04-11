@@ -177,15 +177,16 @@ export async function fetchOpenTickets() {
 }
 
 export async function resolveTicket(ticketId, ticketData) {
-  // Tenta o update completo
+  // Tenta o update completo (status + resolved_by)
   let { data, error } = await supabase
     .from('tickets')
     .update(ticketData)
     .eq('id', ticketId)
     .select();
 
-  // Retry resiliente: Se houver erro de coluna ausente (resolved_at/by), tenta apenas com o status
-  if (error && (error.message?.includes('column') || error.hint?.includes('column'))) {
+  // Retry resiliente: Se houver qualquer erro, tenta apenas com o status
+  if (error) {
+    console.warn('[resolveTicket] Primeiro attempt falhou, tentando fallback só com status:', error.message);
     const { data: retryData, error: retryError } = await supabase
       .from('tickets')
       .update({ status: ticketData.status })
@@ -201,11 +202,12 @@ export async function resolveTicket(ticketId, ticketData) {
   const result = data?.[0];
 
   if (result && result.author_id) {
+    const statusLabel = ticketData.status === 'resolved' ? 'aprovada' : 'arquivada';
     await createNotification(
       result.author_id,
       'Solicitação Resolvida',
-      `Sua solicitação #${String(result.id).slice(0, 8)} foi marcada como: ${ticketData.status}.`,
-      ticketData.status === 'approved' ? 'success' : 'info'
+      `Sua solicitação #${String(result.id).slice(0, 8)} foi ${statusLabel}.`,
+      ticketData.status === 'resolved' ? 'success' : 'info'
     );
   }
   return result;
