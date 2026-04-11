@@ -21,12 +21,14 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
         <Modal isOpen={isOpen} onClose={onClose} title="Notícia Completa">
             <div className="space-y-6">
                 {/* Imagem de Capa */}
-                <div className="-mx-4 -mt-4 mb-4 relative h-64">
-                    <img
-                        src={news.image_url}
-                        alt={news.title}
-                        className="w-full h-full object-cover"
-                    />
+                <div className="-mx-4 -mt-4 mb-4 relative h-64 bg-slate-100">
+                    {news.image_url && (
+                        <img
+                            src={news.image_url}
+                            alt={news.title}
+                            className="w-full h-full object-cover"
+                        />
+                    )}
                     <div className="absolute top-4 left-4">
                         <span className="bg-brand-600 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
                             {news.category}

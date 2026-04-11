@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { X, Send } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Send, Camera } from 'lucide-react';
 import { createNews } from '../../services/newsService';
+import { uploadImage } from '../../services/storageService';
 import { useToast } from '../../components/Toast';
 
 const NEWS_CATEGORIES = ['Geral', 'Eventos', 'Urgente', 'Trânsito', 'Esportes', 'Cultura', 'Obras', 'Saúde'];
@@ -20,17 +21,39 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('Geral');
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
   const showToast = useToast();
 
   if (!isOpen) return null;
 
   const isValid = title.trim().length >= 5 && content.trim().length >= 20;
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Imagem muito grande. Máximo 2MB.', 'error');
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return;
     setSaving(true);
+
     try {
+      let imageUrl = null;
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop();
+        const path = `news/${userId}/${Date.now()}.${ext}`;
+        imageUrl = await uploadImage('news-images', imageFile, path);
+      }
+
       await createNews({
         title: title.trim(),
         content: content.trim(),
@@ -38,8 +61,11 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
         author_id: userId,
         neighborhood: import.meta.env.VITE_NEIGHBORHOOD,
         status: 'active',
+        image_url: imageUrl,
       });
       showToast('Notícia publicada com sucesso!', 'success');
+      setImageFile(null);
+      setImagePreview(null);
       onCreated?.();
       onClose();
     } catch (err) {
@@ -84,6 +110,32 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
             >
               {NEWS_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-slate-500 mb-1 block">
+              Foto (opcional)
+            </label>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-28 bg-slate-50 border border-slate-200 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden"
+            >
+              {imagePreview ? (
+                <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <>
+                  <Camera size={20} className="text-slate-400" />
+                  <span className="text-xs text-slate-400">Toque para adicionar foto</span>
+                </>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
 
           <div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { createAd, updateAd } from '../../services/adsService';
-import { uploadImage } from '../../services/storageService';
+import { uploadImage, deleteImage } from '../../services/storageService';
 import Modal from '../../components/Modal';
 import ImageUpload from '../../components/ImageUpload';
 import { useToast } from '../../components/Toast';
@@ -56,6 +56,13 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
                 const ext = imageFile.name.split('.').pop();
                 const path = `ads/${user.uid}/${Date.now()}.${ext}`;
                 imageUrl = await uploadImage('ad-images', imageFile, path);
+                
+                if (initialAd?.image_url) {
+                    try {
+                        const oldPath = initialAd.image_url.split('/object/public/ad-images/')[1];
+                        if (oldPath) await deleteImage('ad-images', oldPath);
+                    } catch { /* ignorar falha silenciosa */ }
+                }
             }
             const parsedPrice = parseFloat(String(formData.price).replace(/[^\d.,]/g, '').replace(',', '.')) || null;
             if (isEditMode) {
@@ -96,7 +103,13 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
                                 <p className="text-sm text-gray-500 mb-4">Opcional — aumenta as chances de venda.</p>
                             </div>
                             <div className="flex justify-center">
-                                <ImageUpload preview={imageFile ? URL.createObjectURL(imageFile) : formData.image} onFileSelect={setImageFile} />
+                                <ImageUpload preview={imageFile ? URL.createObjectURL(imageFile) : formData.image} onFileSelect={(file) => {
+                                    if (file && file.size > 2 * 1024 * 1024) {
+                                        showToast('Imagem muito grande. Máximo 2MB.', 'error');
+                                        return;
+                                    }
+                                    setImageFile(file);
+                                }} />
                             </div>
                         </div>
                     )}

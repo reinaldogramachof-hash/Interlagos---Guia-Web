@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminFetchNews, createNews, adminDeleteNews, uploadNewsImage } from '../../../services/newsService';
 import { useAuth } from '../../auth/AuthContext';
-import { Bell, Trash2, Loader2 } from 'lucide-react';
+import { Bell, Trash2, Loader2, X } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 export default function NewsTab() {
@@ -9,6 +9,7 @@ export default function NewsTab() {
   const [newsList, setNewsList] = useState([]);
   const showToast = useToast();
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const fetchNews = async () => {
@@ -51,6 +52,7 @@ export default function NewsTab() {
 
       f.reset();
       setImageFile(null);
+      setImagePreview(null);
       showToast('Notícia publicada!', 'success');
       fetchNews();
     } catch {
@@ -82,9 +84,25 @@ export default function NewsTab() {
           <input 
             type="file" 
             accept="image/*" 
-            onChange={(e) => setImageFile(e.target.files[0])}
+            onChange={(e) => {
+              const file = e.target.files[0];
+              setImageFile(file || null);
+              setImagePreview(file ? URL.createObjectURL(file) : null);
+            }}
             className="w-full border p-2 rounded text-slate-900 bg-white" 
           />
+          {imagePreview && (
+            <div className="relative w-full h-40 rounded-xl overflow-hidden border border-slate-200">
+              <img src={imagePreview} className="w-full h-full object-cover" alt="Preview da capa" />
+              <button
+                type="button"
+                onClick={() => { setImageFile(null); setImagePreview(null); }}
+                className="absolute top-2 right-2 bg-white/80 text-slate-600 rounded-full p-1 hover:bg-white transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
           
           <select name="category" className="w-full border p-2 rounded text-slate-900">
             <option>Eventos</option>

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { PlusCircle, Trash2, Loader2, Camera } from 'lucide-react';
 import { fetchCampaignsByUser, deleteCampaign, createCampaign } from '../../../../services/communityService';
+import { uploadImage } from '../../../../services/storageService';
 import { useToast } from '../../../../components/Toast';
 
 const CAMPAIGN_TYPES = [
@@ -14,6 +15,9 @@ export default function MyCampaignsTab({ currentUser }) {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
   const showToast = useToast();
 
   const loadCampaigns = async () => {
@@ -41,11 +45,30 @@ export default function MyCampaignsTab({ currentUser }) {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Imagem muito grande. Máximo 2MB.', 'error');
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     const f = e.target;
+
     try {
+      let imageUrl = null;
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop();
+        const path = `campaigns/${currentUser.id}/${Date.now()}.${ext}`;
+        imageUrl = await uploadImage('campaign-images', imageFile, path);
+      }
+
       await createCampaign({
         title: f.title.value,
         description: f.description.value,
@@ -55,8 +78,11 @@ export default function MyCampaignsTab({ currentUser }) {
         author_id: currentUser.id,
         status: 'pending',
         merchant_id: null,
+        image_url: imageUrl,
       });
       showToast('Campanha enviada para análise!', 'success');
+      setImageFile(null);
+      setImagePreview(null);
       setShowForm(false);
       loadCampaigns();
     } catch {
@@ -96,6 +122,25 @@ export default function MyCampaignsTab({ currentUser }) {
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-1">Descricao</label>
             <textarea name="description" required rows="3" className="w-full border border-slate-200 dark:border-slate-600 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">
+              Foto (opcional)
+            </label>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-24 bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-600 rounded-lg flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors overflow-hidden"
+            >
+              {imagePreview ? (
+                <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <>
+                  <Camera size={16} className="text-slate-400" />
+                  <span className="text-xs text-slate-400">Adicionar foto</span>
+                </>
+              )}
+            </div>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

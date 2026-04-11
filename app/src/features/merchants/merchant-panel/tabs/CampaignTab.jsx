@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, Lock, Megaphone } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { PlusCircle, Trash2, Lock, Megaphone, Camera } from 'lucide-react';
 import { fetchCampaignsByMerchant, createMerchantCampaign, deleteCampaign } from '../../../../services/communityService';
+import { uploadImage } from '../../../../services/storageService';
 import { useToast } from '../../../../components/Toast';
 import { PLANS_CONFIG } from '../../../../constants/plans';
 
@@ -13,6 +14,9 @@ export default function CampaignTab({ merchant, onUpgrade }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const planConfig = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
   const isPremium = planConfig.hasCampaigns;
@@ -30,9 +34,18 @@ export default function CampaignTab({ merchant, onUpgrade }) {
     if (!form.title || !form.start_date || !form.end_date) return showToast('Preencha todos os campos obrigatórios.', 'error');
     setSaving(true);
     try {
-      const newCampaign = await createMerchantCampaign({ ...form, merchant_id: merchant.id });
+      let imageUrl = null;
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop();
+        const path = `campaigns/merchant_${merchant.id}/${Date.now()}.${ext}`;
+        imageUrl = await uploadImage('campaign-images', imageFile, path);
+      }
+
+      const newCampaign = await createMerchantCampaign({ ...form, merchant_id: merchant.id, image_url: imageUrl });
       setCampaigns(prev => [newCampaign, ...prev]);
       setForm(EMPTY_FORM);
+      setImageFile(null);
+      setImagePreview(null);
       setShowForm(false);
       showToast('Campanha criada! Aguarde aprovação.', 'success');
     } catch {
@@ -79,6 +92,34 @@ export default function CampaignTab({ merchant, onUpgrade }) {
           <h4 className="font-bold text-slate-800">Nova Campanha</h4>
           <input type="text" placeholder="Título da campanha *" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" required />
           <textarea placeholder="Descrição" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm h-20 resize-none" />
+          
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">Foto (opcional)</label>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-24 bg-white border border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
+            >
+              {imagePreview ? (
+                <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <>
+                  <Camera size={16} className="text-slate-400" />
+                  <span className="text-xs text-slate-400">Adicionar foto</span>
+                </>
+              )}
+            </div>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              if (file.size > 2 * 1024 * 1024) {
+                showToast('Imagem muito grande. Máximo 2MB.', 'error');
+                return;
+              }
+              setImageFile(file);
+              setImagePreview(URL.createObjectURL(file));
+            }} className="hidden" />
+          </div>
+
           <div className="grid grid-cols-3 gap-3">
             <input type="text" placeholder="Desconto (ex: 20%)" value={form.discount} onChange={e => setForm(p => ({ ...p, discount: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" />
             <input type="date" value={form.start_date} onChange={e => setForm(p => ({ ...p, start_date: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" required />

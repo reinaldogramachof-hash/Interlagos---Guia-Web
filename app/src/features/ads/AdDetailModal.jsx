@@ -17,9 +17,9 @@ export default function AdDetailModal({ isOpen, onClose, ad }) {
             <div className="space-y-6">
                 {/* Imagem Principal */}
                 <div className="-mx-4 -mt-4 mb-4 bg-gray-100 relative h-64 flex items-center justify-center overflow-hidden">
-                    {ad.image ? (
+                    {ad.image_url ? (
                         <img
-                            src={ad.image}
+                            src={ad.image_url}
                             alt={ad.title}
                             className="w-full h-full object-cover"
                         />
