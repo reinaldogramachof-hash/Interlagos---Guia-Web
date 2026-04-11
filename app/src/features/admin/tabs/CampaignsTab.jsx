@@ -23,6 +23,7 @@ export default function CampaignsTab() {
   useEffect(() => { fetchCampaigns(); }, []);
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Excluir esta campanha permanentemente?')) return;
     try {
       await deleteCampaign(id);
       showToast('Campanha excluída.', 'success');

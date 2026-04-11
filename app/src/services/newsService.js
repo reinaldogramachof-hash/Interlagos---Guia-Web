@@ -54,8 +54,8 @@ export async function createNews(newsData) {
 
   if (error) throw error;
   await notifyAdmins(
-    'Nova Notícia Pendente',
-    `A notícia "${data.title}" foi enviada por um morador e aguarda aprovação.`,
+    'Nova Notícia Publicada',
+    `A notícia "${data.title}" foi publicada por um morador.`,
     'info',
     data.id
   ).catch(() => {});

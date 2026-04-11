@@ -80,7 +80,9 @@ export async function approveItem(table, id) {
     const status = table === 'ads' ? 'approved' : 'active';
     updatePayload = { status };
     notifTitle = 'Aprovação Concluída';
-    notifMsg = `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" foi aprovado!`;
+    notifMsg = table === 'ads'
+      ? `Seu anúncio "${item.title}" foi aprovado!`
+      : `Sua campanha "${item.title}" foi aprovada!`;
   }
 
   const { error } = await supabase.from(table).update(updatePayload).eq('id', id);

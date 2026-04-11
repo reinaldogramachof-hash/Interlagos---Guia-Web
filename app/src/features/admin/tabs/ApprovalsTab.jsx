@@ -21,7 +21,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
             { key: 'communitySense',   label: 'O pedido faz sentido para a comunidade?' },
           ].map(({ key, label }) => (
             <label key={key} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
-              <input type="checkbox" checked={checks[key]} onChange={() => setChecks(p => ({ ...p, [key]: !p[key] }))} className="w-5 h-5 text-brand-600 rounded" />
+              <input type="checkbox" checked={checks[key]} onChange={() => setChecks(p => ({ ...p, [key]: !p[key] }))} className="w-5 h-5 text-indigo-600 rounded" />
               <span className="text-sm font-medium text-slate-700">{label}</span>
             </label>
           ))}
@@ -37,7 +37,7 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
   }
 
   const tableLabels = { ads: 'Anúncio', campaigns: 'Campanha', merchants: 'Novo Comércio' };
-  const tableBgColors = { ads: 'bg-slate-100 text-slate-600', campaigns: 'bg-brand-50 text-brand-600', merchants: 'bg-emerald-50 text-emerald-700' };
+  const tableBgColors = { ads: 'bg-slate-100 text-slate-600', campaigns: 'bg-indigo-50 text-indigo-600', merchants: 'bg-emerald-50 text-emerald-700' };
 
   return (
     <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex justify-between items-start">
@@ -48,9 +48,16 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
         <h4 className="font-bold text-lg text-slate-900">{item.title || item.name}</h4>
         <p className="text-slate-500 text-sm mb-2 line-clamp-2">{item.description}</p>
         <p className="text-xs text-slate-400">Autor: {item.author_name || item.author?.name || 'Desconhecido'}</p>
+        {item.image_url && (
+          <img
+            src={item.image_url}
+            alt="Imagem do item"
+            className="mt-2 w-full h-28 object-cover rounded-lg border border-slate-100"
+          />
+        )}
       </div>
       <div className="flex gap-2">
-        <button onClick={() => setIsReviewing(true)} className="bg-brand-50 text-brand-700 p-2 rounded-lg hover:bg-brand-100 font-bold text-sm flex items-center gap-1">
+        <button onClick={() => setIsReviewing(true)} className="bg-indigo-50 text-indigo-700 p-2 rounded-lg hover:bg-indigo-100 font-bold text-sm flex items-center gap-1">
           <Shield size={16} /> Revisar
         </button>
         <button onClick={() => onEscalate(item._table, item.id, item.title)} className="bg-yellow-50 text-yellow-700 p-2 rounded-lg hover:bg-yellow-100 font-bold text-sm" title="Escalar para Master">
