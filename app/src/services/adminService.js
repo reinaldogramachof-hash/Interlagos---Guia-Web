@@ -204,7 +204,7 @@ export async function resolveTicket(ticketId, ticketData) {
     await createNotification(
       result.author_id,
       'Solicitação Resolvida',
-      `Sua solicitação #${result.id.slice(0, 8)} foi marcada como: ${ticketData.status}.`,
+      `Sua solicitação #${String(result.id).slice(0, 8)} foi marcada como: ${ticketData.status}.`,
       ticketData.status === 'approved' ? 'success' : 'info'
     );
   }

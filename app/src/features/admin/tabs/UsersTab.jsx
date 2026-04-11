@@ -79,7 +79,7 @@ export default function UsersTab() {
                       ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
                       : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
                     }
-                    <div><div className="font-bold text-slate-900">{user.display_name || 'Sem Nome'}</div><div className="text-xs text-slate-400">{user.id.slice(0, 8)}…</div></div>
+                    <div><div className="font-bold text-slate-900">{user.display_name || 'Sem Nome'}</div><div className="text-xs text-slate-400">{String(user.id).slice(0, 8)}…</div></div>
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.role === 'master' ? 'bg-purple-100 text-purple-700' : user.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
