@@ -51,12 +51,12 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }, { data: merchants }] = await Promise.all([
     supabase.from('ads').select('*, profiles!seller_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
-    supabase.from('campaigns').select('*').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
+    supabase.from('campaigns').select('*, profiles!author_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
     supabase.from('merchants').select('*, profiles!owner_id(display_name)').eq('is_active', false).eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
   ]);
   return [
     ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name || 'Anônimo' })),
-    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: 'Comunidade' })),
+    ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.profiles?.display_name || 'Morador' })),
     ...(merchants || []).map(m => ({ ...m, _table: 'merchants', author_name: m.profiles?.display_name || 'Anônimo' })),
   ];
 }

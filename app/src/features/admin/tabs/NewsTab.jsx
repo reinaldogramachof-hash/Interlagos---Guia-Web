@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminFetchNews, createNews, deleteNews, uploadNewsImage } from '../../../services/newsService';
+import { adminFetchNews, createNews, adminDeleteNews, uploadNewsImage } from '../../../services/newsService';
 import { useAuth } from '../../auth/AuthContext';
 import { Bell, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
@@ -62,7 +62,7 @@ export default function NewsTab() {
 
   const handleDelete = async (id) => {
     try {
-      await deleteNews(id);
+      await adminDeleteNews(id);
       showToast('Notícia excluída!', 'success');
       fetchNews();
     } catch (e) {
@@ -72,8 +72,8 @@ export default function NewsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-brand-50 p-6 rounded-card border border-brand-100">
-        <h3 className="font-bold text-brand-700 mb-4 flex items-center gap-2"><Bell size={20} /> Publicar Notícia Oficial</h3>
+      <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+        <h3 className="font-bold text-indigo-700 mb-4 flex items-center gap-2"><Bell size={20} /> Publicar Notícia Oficial</h3>
         <form onSubmit={handlePublish} className="space-y-4">
           <input name="title" placeholder="Título" className="w-full border p-2 rounded text-slate-900" required />
           <textarea name="summary" placeholder="Resumo (Aparece no feed)..." className="w-full border p-2 rounded text-slate-900" rows="2" required />
@@ -97,7 +97,7 @@ export default function NewsTab() {
             <option>Cultura</option>
             <option>Geral</option>
           </select>
-          <button type="submit" disabled={isPublishing} className="w-full bg-brand-600 text-white py-2 rounded-pill font-bold hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <button type="submit" disabled={isPublishing} className="w-full bg-indigo-600 text-white py-2 rounded-full font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             {isPublishing ? <><Loader2 size={16} className="animate-spin" /> Publicando...</> : 'Publicar'}
           </button>
         </form>
@@ -107,7 +107,7 @@ export default function NewsTab() {
         {newsList.map(item => (
           <div key={item.id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-start">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-1 rounded-pill mb-2 inline-block">{item.category}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full mb-2 inline-block">{item.category}</span>
               <h4 className="font-bold text-slate-900">{item.title}</h4>
               <p className="text-sm text-slate-500 line-clamp-2">{item.summary || item.content}</p>
               <div className="text-xs text-slate-400 mt-2">{new Date(item.created_at).toLocaleDateString('pt-BR')}</div>

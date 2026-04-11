@@ -45,11 +45,8 @@ export async function createCampaign(campaign) {
     .single();
 
   if (error && (error.message?.includes('column') || error.hint?.includes('column') || error.message?.includes('schema cache'))) {
-    console.warn('communityService: Fallback resiliente ativado. Removendo type e requester_id da inserção.', error);
+    console.warn('communityService: Fallback resiliente ativado. Removendo type da inserção.', error);
     delete sanitized.type;
-    delete sanitized.requester_id;
-    
-    // Tenta re-inserir. Se falhar no fallback, devolve o erro pro componente tratar.
     const retry = await supabase.from('campaigns').insert(sanitized).select().single();
     if (retry.error) throw retry.error;
     data = retry.data;
@@ -71,7 +68,7 @@ export async function fetchCampaignsByUser(userId) {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
-    .eq('requester_id', userId)
+    .eq('author_id', userId)
     .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];

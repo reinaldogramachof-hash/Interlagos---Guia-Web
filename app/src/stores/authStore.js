@@ -43,7 +43,7 @@ const useAuthStore = create((set, get) => ({
   },
 
   _fetchProfile: async (userId) => {
-    const queryWithTimeout = (query, ms = 6000) =>
+    const queryWithTimeout = (query, ms = 15000) =>
       Promise.race([
         query,
         new Promise((_, rej) => setTimeout(() => rej(new Error('query_timeout')), ms)),

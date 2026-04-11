@@ -11,7 +11,7 @@ export default function MyNewsTab({ currentUser, onCreateNews }) {
   const loadNews = async () => {
     setLoading(true);
     try {
-      const data = await fetchNewsByAuthor(currentUser.uid);
+      const data = await fetchNewsByAuthor(currentUser.id);
       setNews(data);
     } catch {
       showToast('Erro ao carregar notícias.', 'error');
@@ -25,7 +25,7 @@ export default function MyNewsTab({ currentUser, onCreateNews }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Excluir esta notícia?')) return;
     try {
-      await deleteNews(id);
+      await deleteNews(id, currentUser.id);
       setNews(prev => prev.filter(n => n.id !== id));
       showToast('Notícia excluída.', 'success');
     } catch {

@@ -17,7 +17,7 @@ export default function FavoritesTab({ loading, favorites }) {
                     {favorites.map(fav => (
                         <div key={fav.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-4 shadow-sm">
                             <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center text-2xl">
-                                {fav.image ? <img src={fav.image} className="w-full h-full object-cover rounded-lg" onError={e => { e.target.onerror=null; e.target.src='/placeholder.jpg'; }} /> : '❤️'}
+                                {fav.image ? <img src={fav.image} className="w-full h-full object-cover rounded-lg" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} /> : '❤️'}
                             </div>
                             <div>
                                 <span className="text-xs font-bold text-indigo-600 uppercase">{fav.type === 'merchant' ? 'Comércio' : fav.type}</span>

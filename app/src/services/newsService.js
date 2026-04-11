@@ -67,16 +67,18 @@ export async function fetchNewsByAuthor(authorId) {
     .from('news')
     .select('*')
     .eq('author_id', authorId)
+    .eq('neighborhood', NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
 
-export async function deleteNews(id) {
+export async function deleteNews(id, authorId) {
   const { error } = await supabase
     .from('news')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('author_id', authorId);
   if (error) throw error;
   return true;
 }
@@ -100,3 +102,13 @@ export async function updateNewsStatus(id, status) {
   if (error) throw error;
   return true;
 }
+
+export async function adminDeleteNews(id) {
+  const { error } = await supabase
+    .from('news')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+  return true;
+}
+

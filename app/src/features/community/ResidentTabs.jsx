@@ -48,13 +48,13 @@ export default function ResidentTabs({ currentUser }) {
 
       <NewsResponsibilityModal
         isOpen={showResponsibility}
-        userId={currentUser.uid}
+        userId={currentUser.id}
         onConfirm={handleAcceptResponsibility}
         onCancel={() => setShowResponsibility(false)}
       />
       <CreateNewsModal
         isOpen={showCreateNews}
-        userId={currentUser.uid}
+        userId={currentUser.id}
         onClose={() => setShowCreateNews(false)}
       />
     </div>

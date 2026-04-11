@@ -19,7 +19,7 @@ export default function MyCampaignsTab({ currentUser }) {
   const loadCampaigns = async () => {
     setLoading(true);
     try {
-      const data = await fetchCampaignsByUser(currentUser.uid);
+      const data = await fetchCampaignsByUser(currentUser.id);
       setCampaigns(data);
     } catch {
       showToast('Erro ao carregar campanhas.', 'error');
@@ -52,7 +52,7 @@ export default function MyCampaignsTab({ currentUser }) {
         type: f.type.value,
         end_date: f.end_date.value || null,
         neighborhood: import.meta.env.VITE_NEIGHBORHOOD,
-        requester_id: currentUser.uid,
+        author_id: currentUser.id,
         status: 'pending',
         merchant_id: null,
       });
