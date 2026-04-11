@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Camera, Save, Loader2 } from 'lucide-react';
 import { uploadImage } from '../../../../services/storageService';
+import { supabase } from '../../../../lib/supabaseClient';
 import { createMerchant, updateMerchant } from '../../../../services/merchantService';
 import { updateUserProfile } from '../../../../services/authService';
 import { useToast } from '../../../../components/Toast';
@@ -74,11 +75,15 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
         merchantData.plan = 'free';
         const newMerchant = await createMerchant(merchantData);
 
-        // Atualiza role do usuário para merchant (não-bloqueante: merchant já foi criado)
+        // Atualiza role do usuário para merchant apenas se não for admin/master
         try {
-          await updateUserProfile(currentUser.uid, { role: 'merchant' });
+          // Extrai as roles antigas para não fazer downgrade
+          const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser.uid).single();
+          if (prof && prof.role !== 'master' && prof.role !== 'admin') {
+            await updateUserProfile(currentUser.uid, { role: 'merchant' });
+          }
         } catch (roleError) {
-          console.warn('SettingsTab: role update falhou (merchant criado):', roleError);
+          console.warn('SettingsTab: role update falhou:', roleError);
         }
 
         showToast('Cadastro realizado! Aguarde aprovação.', 'success');

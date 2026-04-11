@@ -20,12 +20,7 @@ import FavoritesTab from '../community/resident-panel/tabs/FavoritesTab';
 import ResidentSettingsTab from '../community/resident-panel/tabs/SettingsTab';
 
 export default function UnifiedPanel({ onClose }) {
-    const { currentUser, isMerchant, isMaster, isAdmin } = useAuth();
-    // Determinando o papel base para a UI ("merchant" ou "resident")
-    // Se for admin/master, mostramos a interface de resident a não ser que tenham um perfil ativo de merchant.
-    // Mas primariamente a refatoração focou em isMerchant vs !isMerchant.
-    const isCommercial = isMerchant || isAdmin || isMaster; 
-    // Vamos checar estritamente se o layout deve ser comercial ou residencial.
+    const { currentUser, isMerchant } = useAuth();
     // Comerciantes logados veem o painel roxo. Moradores o painel verde.
     const uiMode = isMerchant ? 'merchant' : 'resident';
 
