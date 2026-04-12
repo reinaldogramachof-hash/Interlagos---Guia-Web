@@ -29,6 +29,7 @@ export async function fetchCampaigns() {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
     .eq('status', 'active')
     .is('merchant_id', null)          // apenas ações sociais, sem cupons de comerciantes
     .order('start_date', { ascending: false });
@@ -68,6 +69,7 @@ export async function fetchCampaignsByUser(userId) {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
     .eq('author_id', userId)
     .order('start_date', { ascending: false });
   if (error) throw error;
@@ -78,6 +80,7 @@ export async function adminFetchCampaigns() {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
     .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];
@@ -112,6 +115,17 @@ export async function deleteCampaign(id) {
   return true;
 }
 
+export async function updateCampaign(id, data) {
+  const { data: updated, error } = await supabase
+    .from('campaigns')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return updated;
+}
+
 export async function voteSuggestion(id) {
   const { error } = await supabase.rpc('increment_suggestion_votes', { suggestion_id: id });
   if (error) throw error;
@@ -122,6 +136,7 @@ export async function fetchCampaignsByMerchant(merchantId) {
   const { data, error } = await supabase
     .from('campaigns')
     .select('*')
+    .eq('neighborhood', NEIGHBORHOOD)
     .eq('merchant_id', merchantId)
     .order('start_date', { ascending: false });
   if (error) throw error;

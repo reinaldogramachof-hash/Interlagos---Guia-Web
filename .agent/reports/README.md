@@ -28,3 +28,4 @@ Leia o arquivo mais recente em @.agent/reports/
 |---|---|---|---|---|
 | 2026-04-11 | Claude + Deep Think + Fast Mode | Painéis morador/admin — fluxos notícias e campanhas | ✅ Concluída | [2026-04-11_18-00_paineis-morador-admin-fluxos-noticias-campanhas.md](2026-04-11_18-00_paineis-morador-admin-fluxos-noticias-campanhas.md) |
 | 2026-04-11 | Claude Sonnet 4.6 + Fast Mode | Auditoria Torre de Controle — tokens, notificações, UX admin | ✅ Concluída | [2026-04-11_19-30_auditoria-torre-controle-admin.md](2026-04-11_19-30_auditoria-torre-controle-admin.md) |
+| 2026-04-12 | Claude Sonnet 4.6 + Subagentes | Painéis morador/comerciante — edição inline, favoritos ricos, responsividade | ✅ Concluída | [2026-04-12_14-00_paineis-morador-comerciante-edicao-inline-responsividade.md](2026-04-12_14-00_paineis-morador-comerciante-edicao-inline-responsividade.md) |

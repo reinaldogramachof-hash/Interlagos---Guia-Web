@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Camera, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, ChevronRight, ChevronLeft, Check, Plus, X } from 'lucide-react';
 import { createAd, updateAd } from '../../services/adsService';
-import { uploadImage, deleteImage } from '../../services/storageService';
+import { uploadImage } from '../../services/storageService';
 import Modal from '../../components/Modal';
-import ImageUpload from '../../components/ImageUpload';
 import { useToast } from '../../components/Toast';
+import { processImage } from '../../utils/imageProcessor';
+import ImageGrid from './ImageGrid';
 
 const CategoryStep = ({ selected, onSelect }) => {
     const categories = ['Vendas', 'Empregos', 'Imóveis', 'Serviços'];
@@ -26,24 +27,59 @@ const CategoryStep = ({ selected, onSelect }) => {
     );
 };
 
-const EMPTY_FORM = { category: '', title: '', price: '', whatsapp: '', description: '', image: '' };
+const EMPTY_FORM = { category: '', title: '', price: '', whatsapp: '', description: '', gallery_urls: [] };
 
 export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null }) {
     const isEditMode = !!initialAd;
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
     const [formData, setFormData] = useState(() => initialAd
-        ? { category: initialAd.category ?? '', title: initialAd.title ?? '', price: initialAd.price != null ? String(initialAd.price) : '', whatsapp: initialAd.whatsapp ?? '', description: initialAd.description ?? '', image: initialAd.image_url ?? '' }
+        ? { 
+            category: initialAd.category ?? '', 
+            title: initialAd.title ?? '', 
+            price: initialAd.price != null ? String(initialAd.price) : '', 
+            whatsapp: initialAd.whatsapp ?? '', 
+            description: initialAd.description ?? '', 
+            gallery_urls: initialAd.gallery_urls ?? [] 
+          }
         : EMPTY_FORM
     );
-    const [imageFile, setImageFile] = useState(null);
+
+    const [images, setImages] = useState(() => 
+        (isEditMode ? [initialAd?.image_url, ...(initialAd?.gallery_urls || [])].filter(Boolean) : []).map(url => ({ url, file: null }))
+    );
     const showToast = useToast();
+
+    useEffect(() => {
+        if (isOpen && !isEditMode) {
+            setFormData(EMPTY_FORM);
+            setImages([]);
+            setStep(1);
+        }
+    }, [isOpen, isEditMode]);
 
     const resetAndClose = () => {
         onClose();
         setStep(1);
-        setImageFile(null);
-        setFormData(EMPTY_FORM);
+        setImages(isEditMode ? [initialAd?.image_url, ...(initialAd?.gallery_urls || [])].filter(Boolean).map(url => ({ url, file: null })) : []);
+        setFormData(isEditMode ? { ...formData } : EMPTY_FORM);
+    };
+
+    const handleAddImage = async (file) => {
+        if (images.length >= 7) return showToast('Limite de 7 fotos atingido.', 'error');
+        try {
+            const processedFile = await processImage(file);
+            setImages([...images, { url: URL.createObjectURL(processedFile), file: processedFile }]);
+        } catch(e) {
+            showToast('Erro ao processar imagem.', 'error');
+        }
+    };
+
+    const handleRemoveImage = (index) => {
+        const newImages = [...images];
+        newImages.splice(index, 1);
+        setImages(newImages);
     };
 
     const handleSubmit = async (e) => {
@@ -51,33 +87,41 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
         if (!user) return showToast("Logue para publicar!", "error");
         setIsSubmitting(true);
         try {
-            let imageUrl = formData.image;
-            if (imageFile) {
-                const ext = imageFile.name.split('.').pop();
-                const path = `ads/${user.uid}/${Date.now()}.${ext}`;
-                imageUrl = await uploadImage('ad-images', imageFile, path);
-                
-                if (initialAd?.image_url) {
-                    try {
-                        const oldPath = initialAd.image_url.split('/object/public/ad-images/')[1];
-                        if (oldPath) await deleteImage('ad-images', oldPath);
-                    } catch { /* ignorar falha silenciosa */ }
-                }
+            const uploadedUrls = await Promise.all(images.filter(i => i.file).map(async (img, idx) => {
+                const path = `ads/${user.uid}/${Date.now()}_${idx}.jpg`;
+                return await uploadImage('ad-images', img.file, path);
+            }));
+
+            const finalUrls = [];
+            let uploadIdx = 0;
+            for (const img of images) {
+                finalUrls.push(img.file ? uploadedUrls[uploadIdx++] : img.url);
             }
+
             const parsedPrice = parseFloat(String(formData.price).replace(/[^\d.,]/g, '').replace(',', '.')) || null;
+            const payload = { 
+                ...formData, 
+                image_url: finalUrls[0] || null, 
+                gallery_urls: finalUrls.slice(1),
+                price: parsedPrice 
+            };
+
             if (isEditMode) {
-                await updateAd(initialAd.id, { ...formData, image_url: imageUrl, price: parsedPrice });
+                await updateAd(initialAd.id, payload);
                 showToast("Anúncio atualizado!", "success");
             } else {
-                await createAd({ ...formData, image_url: imageUrl, status: 'pending', seller_id: user.uid, price: parsedPrice, expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() });
+                await createAd({ 
+                    ...payload, 
+                    status: 'pending', 
+                    seller_id: user.uid, 
+                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() 
+                });
                 showToast("Sucesso! Aguarde aprovação.", "success");
             }
             resetAndClose();
         } catch (error) {
-            console.error(error);
             showToast(isEditMode ? "Erro ao atualizar anúncio." : "Erro ao publicar anúncio. Tente novamente.", "error");
-        }
-        finally { setIsSubmitting(false); }
+        } finally { setIsSubmitting(false); }
     };
 
     return (
@@ -95,25 +139,7 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
 
                 <form onSubmit={handleSubmit}>
                     {step === 1 && <CategoryStep selected={formData.category} onSelect={cat => setFormData({ ...formData, category: cat })} />}
-
-                    {step === 2 && (
-                        <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                            <div className="text-center">
-                                <h3 className="text-lg font-bold text-gray-800">Adicione uma Foto</h3>
-                                <p className="text-sm text-gray-500 mb-4">Opcional — aumenta as chances de venda.</p>
-                            </div>
-                            <div className="flex justify-center">
-                                <ImageUpload preview={imageFile ? URL.createObjectURL(imageFile) : formData.image} onFileSelect={(file) => {
-                                    if (file && file.size > 2 * 1024 * 1024) {
-                                        showToast('Imagem muito grande. Máximo 2MB.', 'error');
-                                        return;
-                                    }
-                                    setImageFile(file);
-                                }} />
-                            </div>
-                        </div>
-                    )}
-
+                    {step === 2 && <ImageGrid images={images} onAdd={handleAddImage} onRemove={handleRemoveImage} />}
                     {step === 3 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                             <input type="text" placeholder="Título" className="w-full p-3 rounded-xl border border-gray-200 outline-none" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required />
@@ -136,7 +162,7 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
                                 Próximo <ChevronRight size={20} />
                             </button>
                         ) : (
-                            <button type="submit" disabled={isSubmitting} className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors shadow-lg shadow-green-200">
+                            <button type="submit" disabled={isSubmitting || !formData.title || !formData.price || !formData.whatsapp || !formData.description} className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors shadow-lg shadow-green-200">
                                 {isSubmitting ? 'Enviando...' : <><Check size={20} /> Publicar</>}
                             </button>
                         )}

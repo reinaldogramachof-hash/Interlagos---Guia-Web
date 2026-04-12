@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, User, Store, Menu } from 'lucide-react';
+import { X, TrendingUp, User, Store } from 'lucide-react';
 import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
-import { getFavorites } from '../../services/favoritesService';
 import { useAuth } from '../auth/AuthContext';
 import CreateAdWizard from '../ads/CreateAdWizard';
 import { useToast } from '../../components/Toast';
 import UpgradeModal from '../merchants/UpgradeModal';
 import { PLANS_CONFIG } from '../../constants/plans';
 
-import DashboardTab from '../merchants/merchant-panel/tabs/DashboardTab';
-import AdsTab from '../merchants/merchant-panel/tabs/AdsTab';
-import MerchantSettingsTab from '../merchants/merchant-panel/tabs/SettingsTab';
-import CampaignTab from '../merchants/merchant-panel/tabs/CampaignTab';
-import ReportsTab from '../merchants/merchant-panel/tabs/ReportsTab';
-
 import ResidentTabs from '../community/ResidentTabs';
-import FavoritesTab from '../community/resident-panel/tabs/FavoritesTab';
-import ResidentSettingsTab from '../community/resident-panel/tabs/SettingsTab';
-import PollsTab from '../community/resident-panel/tabs/PollsTab';
-import SuggestionsTab from '../community/resident-panel/tabs/SuggestionsTab';
 import PanelSidebar from './PanelSidebar';
+import MerchantTabs from '../merchants/MerchantTabs';
+import MerchantSettingsTab from '../merchants/merchant-panel/tabs/SettingsTab';
 
 export default function UnifiedPanel({ onClose }) {
     const { currentUser, isMerchant } = useAuth();
     const uiMode = isMerchant ? 'merchant' : 'resident';
-    const [activeTab, setActiveTab] = useState(uiMode === 'merchant' ? 'dashboard' : 'personal');
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState(uiMode === 'merchant' ? 'business' : 'personal');
     
     const [merchant, setMerchant] = useState(null);
     const [myAds, setMyAds] = useState([]);
@@ -34,8 +24,6 @@ export default function UnifiedPanel({ onClose }) {
     const [showCreateAd, setShowCreateAd] = useState(false);
     const [adToEdit, setAdToEdit] = useState(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [favorites, setFavorites] = useState([]);
-    const [loadingFavs, setLoadingFavs] = useState(false);
     
     const showToast = useToast();
 
@@ -44,13 +32,8 @@ export default function UnifiedPanel({ onClose }) {
         getMerchantByOwner(currentUser.id || currentUser.uid)
             .then(data => setMerchant(data || { id: 'temp_dev', name: currentUser.displayName, plan: 'basic', views: 0, clicks: 0 }))
             .catch(() => showToast('Erro ao carregar dados comerciais.', 'error'));
-    }, [currentUser, uiMode]);
-
-    useEffect(() => {
-        if (!currentUser) return;
-        if (activeTab === 'ads' && uiMode === 'merchant') fetchMyAds();
-        if (activeTab === 'favorites') fetchMyFavorites();
-    }, [activeTab, currentUser, uiMode]);
+        fetchMyAds();
+    }, [currentUser?.id, uiMode]);
 
     const fetchMyAds = async () => {
         setLoadingAds(true);
@@ -59,15 +42,6 @@ export default function UnifiedPanel({ onClose }) {
             setMyAds(data);
         } catch (error) { console.error("Error fetching ads:", error); }
         finally { setLoadingAds(false); }
-    };
-
-    const fetchMyFavorites = async () => {
-        setLoadingFavs(true);
-        try {
-            const data = await getFavorites(currentUser.id || currentUser.uid);
-            setFavorites(data);
-        } catch (error) { console.error("Error loading favs:", error); }
-        finally { setLoadingFavs(false); }
     };
 
     const handleDeleteAd = async (adId) => {
@@ -99,9 +73,6 @@ export default function UnifiedPanel({ onClose }) {
             <div className="bg-white dark:bg-slate-900 w-full min-h-[calc(100vh-160px)] flex flex-col overflow-hidden">
                 <div className={`${theme.bg} p-6 flex justify-between items-center shrink-0`}>
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setSidebarOpen(true)} className="md:hidden text-white p-2 bg-white/10 rounded-lg hover:bg-white/20">
-                            <Menu size={24} />
-                        </button>
                         <div>
                             <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
                                 {uiMode === 'merchant' ? <Store className={theme.icon} /> : <User className={theme.icon} />} 
@@ -126,22 +97,66 @@ export default function UnifiedPanel({ onClose }) {
                     </div>
                 </div>
 
+                {/* Segmented control mobile — substitui o drawer hamburguer */}
+                <div className="md:hidden flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 border-b border-slate-200 dark:border-slate-700">
+                    {uiMode === 'merchant' && (
+                        <button
+                            onClick={() => setActiveTab('business')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                activeTab === 'business'
+                                    ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm'
+                                    : 'text-slate-500'
+                            }`}
+                        >
+                            <Store size={13} /> Meu Negócio
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setActiveTab('personal')}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-colors ${
+                            activeTab === 'personal'
+                                ? `bg-white dark:bg-slate-700 ${uiMode === 'merchant' ? 'text-indigo-600' : 'text-emerald-600'} shadow-sm`
+                                : 'text-slate-500'
+                        }`}
+                    >
+                        <User size={13} /> Pessoal
+                    </button>
+                    {uiMode === 'resident' && (
+                        <button
+                            onClick={() => setActiveTab('merchant-setup')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                activeTab === 'merchant-setup'
+                                    ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm'
+                                    : 'text-indigo-500'
+                            }`}
+                        >
+                            <Store size={13} /> Cadastrar Loja
+                        </button>
+                    )}
+                </div>
+
                 <div className="flex flex-1 overflow-hidden">
                     <PanelSidebar 
                         uiMode={uiMode} 
                         activeTab={activeTab} 
                         onTabChange={setActiveTab} 
-                        isOpen={sidebarOpen} 
-                        onClose={() => setSidebarOpen(false)} 
                     />
 
                     <div className="flex-1 bg-white dark:bg-slate-900 overflow-y-auto p-4 md:p-8">
-                        {activeTab === 'dashboard' && uiMode === 'merchant' && <DashboardTab merchant={merchant} myAds={myAds} onUpgrade={() => setShowUpgradeModal(true)} />}
+                        {activeTab === 'business' && uiMode === 'merchant' && (
+                            <MerchantTabs
+                                merchant={merchant}
+                                currentUser={currentUser}
+                                myAds={myAds}
+                                loadingAds={loadingAds}
+                                onUpgrade={() => setShowUpgradeModal(true)}
+                                onCreateAdClick={handleCreateAdClick}
+                                onDeleteAd={handleDeleteAd}
+                                onEditAd={(ad) => { setAdToEdit(ad); setShowCreateAd(true); }}
+                                onMerchantUpdate={setMerchant}
+                            />
+                        )}
                         {activeTab === 'personal' && <ResidentTabs currentUser={currentUser} />}
-                        {activeTab === 'favorites' && <FavoritesTab loading={loadingFavs} favorites={favorites} />}
-                        {activeTab === 'polls' && uiMode === 'resident' && <PollsTab currentUser={currentUser} />}
-                        {activeTab === 'suggestions' && uiMode === 'resident' && <SuggestionsTab currentUser={currentUser} />}
-                        {activeTab === 'settings' && (uiMode === 'merchant' ? <MerchantSettingsTab merchant={merchant} currentUser={currentUser} onUpdate={setMerchant} /> : <ResidentSettingsTab currentUser={currentUser} />)}
                         {activeTab === 'merchant-setup' && uiMode === 'resident' && (
                             <div className="animate-in fade-in duration-300">
                                 <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-6 rounded-2xl mb-8 text-white shadow-xl shadow-indigo-600/20">
@@ -153,9 +168,6 @@ export default function UnifiedPanel({ onClose }) {
                                 </div>
                             </div>
                         )}
-                        {activeTab === 'ads' && uiMode === 'merchant' && <AdsTab myAds={myAds} loading={loadingAds} onCreateClick={handleCreateAdClick} onDeleteClick={handleDeleteAd} onEditClick={(ad) => { setAdToEdit(ad); setShowCreateAd(true); }} />}
-                        {activeTab === 'reports' && uiMode === 'merchant' && <ReportsTab merchant={merchant} onUpgrade={() => setShowUpgradeModal(true)} />}
-                        {activeTab === 'campaigns' && uiMode === 'merchant' && <CampaignTab merchant={merchant} onUpgrade={() => setShowUpgradeModal(true)} />}
                     </div>
                 </div>
             </div>
