@@ -1,4 +1,4 @@
-import { Search, Store, MapPin, X } from 'lucide-react';
+import { Search, Store, MapPin, X, Star } from 'lucide-react';
 import { SkeletonCard } from '../../components/SkeletonCard';
 import EmptyState from '../../components/EmptyState';
 import PremiumCarousel from './PremiumCarousel';
@@ -174,6 +174,12 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${plan.bg} ${plan.text}`}>
                       {plan.label}
                     </span>
+                    {/* Badge de destaque pro/premium */}
+                    {(merchant.plan === 'pro' || merchant.plan === 'premium') && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
+                        <Star size={10} fill="currentColor" /> Destaque
+                      </span>
+                    )}
                     {/* Endereço resumido */}
                     {merchant.address && (
                       <span className="text-[10px] text-gray-400 flex items-center gap-0.5 truncate max-w-[120px]">

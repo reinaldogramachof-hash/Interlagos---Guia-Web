@@ -4,6 +4,7 @@ import { uploadImage } from '../../../../services/storageService';
 import { createMerchant, updateMerchant } from '../../../../services/merchantService';
 import { useToast } from '../../../../components/Toast';
 import { categories } from '../../../../constants/categories';
+import { PLANS_CONFIG } from '../../../../constants/plans';
 import { validateBusinessData } from '../../../../utils/validation';
 import ImageSection from './ImageSection';
 import MerchantContactFields from './MerchantContactFields';
@@ -13,6 +14,8 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(merchant?.image_url || '');
+  const planConfig = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
+  const categoryLimit = planConfig.categoryLimit;
 
   const [formData, setFormData] = useState({
     name: merchant?.name || '',
@@ -21,6 +24,8 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
     phone: merchant?.phone || '',
     whatsapp: merchant?.whatsapp || '',
     instagram: merchant?.instagram || '',
+    website: merchant?.website || '',
+    opening_hours: merchant?.opening_hours || '',
     address: merchant?.address || '',
   });
 
@@ -105,12 +110,15 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
                 {/* R7: maxLength={200} no campo name */}
                 <input name="name" value={formData.name} onChange={handleChange} maxLength={200} placeholder="Ex: Padaria do Bairro" className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base sm:text-sm" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Categoria</label>
-                <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base sm:text-sm">
-                  {formCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
-                </select>
-              </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase ml-1">Categoria</label>
+                  <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base sm:text-sm">
+                    {formCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
+                  </select>
+                  <p className="text-[10px] text-slate-400 ml-1 mt-0.5">
+                    {categoryLimit >= 999 ? 'Categorias ilimitadas no seu plano' : `Seu plano inclui até ${categoryLimit} categoria${categoryLimit > 1 ? 's' : ''}`}
+                  </p>
+                </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500 uppercase ml-1">Descrição Curta</label>

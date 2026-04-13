@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Tag, MousePointer, Lock } from 'lucide-react';
 import { PLANS_CONFIG } from '../../../../constants/plans';
+import VerificationCard from '../../../../components/VerificationCard';
+import useAuthStore from '../../../../stores/authStore';
+import { getMerchantStats } from '../../../../services/statsService';
 
-export default function DashboardTab({ merchant, myAds, onUpgrade }) {
+export default function DashboardTab({ merchant, myAds, onUpgrade, currentUser, onNavigate }) {
+  const profile = useAuthStore(s => s.profile);
   const plan = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
   const adLimit = plan.adLimit;
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    if (!merchant?.id || !merchant?.neighborhood) return;
+    getMerchantStats(merchant.id, merchant.neighborhood).then(setStats);
+  }, [merchant?.id, merchant?.neighborhood]);
 
   return (
     <div className="space-y-6">
@@ -15,7 +25,7 @@ export default function DashboardTab({ merchant, myAds, onUpgrade }) {
             <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600"><Eye size={20} /></div>
             <h3 className="text-indigo-900 font-bold">Visualizações</h3>
           </div>
-          <p className="text-2xl md:text-3xl font-bold text-indigo-600">{merchant?.views || 0}</p>
+          <p className="text-2xl md:text-3xl font-bold text-indigo-600">{stats ? stats.views : '-'}</p>
         </div>
 
         {/* Anúncios Ativos */}
@@ -36,7 +46,7 @@ export default function DashboardTab({ merchant, myAds, onUpgrade }) {
             <h3 className="text-amber-900 font-bold">Cliques no Zap</h3>
           </div>
           {plan.hasStats ? (
-            <p className="text-2xl md:text-3xl font-bold text-amber-600">{merchant?.clicks || 0}</p>
+            <p className="text-2xl md:text-3xl font-bold text-amber-600">{stats ? stats.contacts : '-'}</p>
           ) : (
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-2 text-slate-400 font-bold text-lg">
@@ -49,6 +59,13 @@ export default function DashboardTab({ merchant, myAds, onUpgrade }) {
           )}
         </div>
       </div>
+
+      <VerificationCard
+        profile={profile}
+        merchant={merchant}
+        currentUser={currentUser}
+        onNavigate={onNavigate}
+      />
 
       {/* Gráfico de Desempenho */}
       <div className="border border-slate-200 rounded-2xl p-6 relative overflow-hidden">

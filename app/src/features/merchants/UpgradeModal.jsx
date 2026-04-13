@@ -17,7 +17,7 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
 
             if (currentUser) {
                 await createNotification(
-                    currentUser.uid,
+                    currentUser.id || currentUser.uid,
                     'Plano Atualizado!',
                     `Parabéns! Seu plano foi atualizado para ${plan.toUpperCase()}. Aproveite os novos recursos!`,
                     'success'
@@ -46,7 +46,7 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
         {
             id: 'pro',
             name: 'Pro',
-            price: 'R$ 39,90/mês',
+            price: 'R$ 49,90/mês',
             icon: Zap,
             color: 'text-indigo-600',
             bg: 'bg-indigo-50',
@@ -56,7 +56,7 @@ export default function UpgradeModal({ isOpen, onClose, currentPlan, merchantId,
         {
             id: 'premium',
             name: 'Premium',
-            price: 'R$ 79,90/mês',
+            price: 'R$ 99,90/mês',
             icon: Crown,
             color: 'text-amber-500',
             bg: 'bg-amber-50',

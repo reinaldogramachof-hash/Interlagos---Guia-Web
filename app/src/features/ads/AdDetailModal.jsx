@@ -24,7 +24,7 @@ export default function AdDetailModal({ isOpen, onClose, ad, currentUser }) {
     const handleWhatsApp = () => {
         if (ad.whatsapp) {
             const number = ad.whatsapp.replace(/\D/g, '');
-            window.open(`https://wa.me/55${number}?text=Olá, vi seu anúncio "${ad.title}" no App Interlagos!`, '_blank');
+            window.open(`https://wa.me/55${number}?text=Olá, vi seu anúncio "${ad.title}" no Tem No Bairro!`, '_blank');
         }
     };
 

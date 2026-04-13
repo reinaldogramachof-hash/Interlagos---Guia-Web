@@ -1,5 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import { Lock, Eye, MousePointer, TrendingUp, BarChart3 } from 'lucide-react';
 import { PLANS_CONFIG, hasPlanAccess } from '../../../../constants/plans';
+import { getMerchantStats } from '../../../../services/statsService';
 
 const COLOR_MAP = {
   indigo:  { bg: 'bg-indigo-50 dark:bg-indigo-900/20',   border: 'border-indigo-100 dark:border-indigo-800',   icon: 'text-indigo-600',  value: 'text-indigo-700 dark:text-indigo-300'  },
@@ -25,6 +27,12 @@ function StatCard({ icon: Icon, label, value, color }) {
 
 export default function ReportsTab({ merchant, onUpgrade }) {
   const hasPro = hasPlanAccess(merchant?.plan ?? 'free', 'pro');
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    if (!merchant?.id || !merchant?.neighborhood || !hasPro) return;
+    getMerchantStats(merchant.id, merchant.neighborhood).then(setStats);
+  }, [merchant?.id, merchant?.neighborhood, hasPro]);
 
   if (!hasPro) {
     return (
@@ -41,8 +49,8 @@ export default function ReportsTab({ merchant, onUpgrade }) {
     );
   }
 
-  const views = merchant?.views ?? 0;
-  const clicks = merchant?.clicks ?? 0;
+  const views = stats?.views ?? 0;
+  const clicks = stats?.contacts ?? 0;
   const conversion = views > 0 ? ((clicks / views) * 100).toFixed(1) : '0.0';
 
   return (

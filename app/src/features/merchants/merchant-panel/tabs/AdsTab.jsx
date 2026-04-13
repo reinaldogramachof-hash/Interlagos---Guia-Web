@@ -7,7 +7,7 @@ import { useToast } from '../../../../components/Toast';
 import { useAuth } from '../../../auth/AuthContext';
 import ImageGrid from '../../../ads/ImageGrid';
 
-export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick }) {
+export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick, photoLimit = 1 }) {
   const { currentUser } = useAuth();
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
@@ -33,7 +33,7 @@ export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick })
   const handleCancelEdit = () => { setExpandedId(null); setEditForm({}); setEditImages([]); };
 
   const handleAddImage = async (file) => {
-    if (editImages.length >= 7) return showToast('Limite de 7 fotos.', 'error');
+    if (editImages.length >= Math.max(1, photoLimit)) return showToast(`Limite de ${Math.max(1, photoLimit)} foto(s) atingido.`, 'error');
     try {
       const processed = await processImage(file);
       setEditImages(prev => [...prev, { url: URL.createObjectURL(processed), file: processed }]);

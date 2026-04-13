@@ -29,7 +29,7 @@ const CategoryStep = ({ selected, onSelect }) => {
 
 const EMPTY_FORM = { category: '', title: '', price: '', whatsapp: '', description: '', gallery_urls: [] };
 
-export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null }) {
+export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null, photoLimit = 7 }) {
     const isEditMode = !!initialAd;
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +67,7 @@ export default function CreateAdWizard({ isOpen, onClose, user, initialAd = null
     };
 
     const handleAddImage = async (file) => {
-        if (images.length >= 7) return showToast('Limite de 7 fotos atingido.', 'error');
+    if (images.length >= photoLimit) return showToast(`Limite de ${photoLimit} fotos atingido.`, 'error');
         try {
             const processedFile = await processImage(file);
             setImages([...images, { url: URL.createObjectURL(processedFile), file: processedFile }]);

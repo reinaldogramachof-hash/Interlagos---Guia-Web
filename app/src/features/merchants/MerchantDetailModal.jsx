@@ -39,7 +39,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
 
     const handleWhatsApp = () => {
         if (merchant?.id) incrementMerchantContactClick(merchant.id);
-        const message = `Olá, vi sua loja no Tem No Bairro! (Parque Interlagos, SJC)`;
+        const message = `Olá, vi sua loja no Tem No Bairro!`;
         const phone = merchant.whatsapp ? merchant.whatsapp.replace(/\D/g, '') : '';
         if (phone) {
             window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(message)}`, '_blank');

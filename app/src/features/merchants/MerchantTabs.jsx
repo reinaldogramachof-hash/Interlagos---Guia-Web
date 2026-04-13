@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Tag, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Tag, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck, LifeBuoy, MessageSquare } from 'lucide-react';
+import { PLANS_CONFIG, hasPlanAccess } from '../../constants/plans';
 import DashboardTab from './merchant-panel/tabs/DashboardTab';
 import AdsTab from './merchant-panel/tabs/AdsTab';
 import CampaignTab from './merchant-panel/tabs/CampaignTab';
@@ -11,9 +12,10 @@ const TABS = [
   { id: 'dashboard', label: 'Visão Geral',  icon: LayoutDashboard, minPlan: 'free' },
   { id: 'ads',       label: 'Anúncios',     icon: Tag,             minPlan: 'basic' },
   { id: 'campaigns', label: 'Campanhas',    icon: Megaphone,       minPlan: 'premium' },
-  { id: 'reports',   label: 'Relatórios',   icon: BarChart3,       minPlan: 'premium' },
+  { id: 'reports',   label: 'Relatórios',   icon: BarChart3,       minPlan: 'pro' },
   { id: 'settings',  label: 'Configurações',icon: Settings,        minPlan: 'free' },
   { id: 'terms',     label: 'Termos',       icon: ShieldCheck,    minPlan: 'free' },
+  { id: 'support',   label: 'Suporte',      icon: LifeBuoy,       minPlan: 'free' },
 ];
 
 const UpgradeAccess = ({ title, desc, onUpgrade }) => (
@@ -37,18 +39,17 @@ export default function MerchantTabs({
 }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const plan = merchant?.plan || 'free';
+  const photoLimit = PLANS_CONFIG[plan]?.photoLimit ?? 1;
 
   const hasAccess = (tabId) => {
     const tab = TABS.find(t => t.id === tabId);
     if (!tab || tab.minPlan === 'free') return true;
-    if (tab.minPlan === 'basic' && plan !== 'free') return true;
-    if (tab.minPlan === 'premium' && plan === 'premium') return true;
-    return false;
+    return hasPlanAccess(plan, tab.minPlan);
   };
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto pb-1 -mx-1 px-1 relative">
+      <div className="overflow-x-auto pb-1 -mx-1 px-1">
         <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-max min-w-full">
           {TABS.map(({ id, label, icon: Icon }) => {
             const blocked = !hasAccess(id);
@@ -68,14 +69,21 @@ export default function MerchantTabs({
             );
           })}
         </div>
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent" aria-hidden="true" />
       </div>
 
-      {activeTab === 'dashboard' && <DashboardTab merchant={merchant} myAds={myAds} onUpgrade={onUpgrade} />}
+      {activeTab === 'dashboard' && (
+        <DashboardTab 
+          merchant={merchant} 
+          myAds={myAds} 
+          onUpgrade={onUpgrade} 
+          currentUser={currentUser}
+          onNavigate={setActiveTab}
+        />
+      )}
       
       {activeTab === 'ads' && (
         hasAccess('ads') 
-          ? <AdsTab myAds={myAds} loading={loadingAds} onCreateClick={onCreateAdClick} onDeleteClick={onDeleteAd} onEditClick={onEditAd} />
+          ? <AdsTab myAds={myAds} loading={loadingAds} onCreateClick={onCreateAdClick} onDeleteClick={onDeleteAd} onEditClick={onEditAd} photoLimit={photoLimit} />
           : <UpgradeAccess 
               title="Classificados PRO" 
               desc="Aumente seu alcance! Publique anúncios detalhados de seus produtos no guia do bairro." 
@@ -105,6 +113,20 @@ export default function MerchantTabs({
 
       {activeTab === 'settings' && <MerchantSettingsTab merchant={merchant} currentUser={currentUser} onUpdate={onMerchantUpdate} />}
       {activeTab === 'terms' && <TermsTab onAccepted={() => {}} />}
+      {activeTab === 'support' && (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center animate-in fade-in duration-500">
+          <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <MessageSquare size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Suporte via Plataforma</h3>
+          <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
+            Comerciantes possuem atendimento prioritário via chat interno. Em breve você poderá abrir tickets diretamente por aqui.
+          </p>
+          <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs text-slate-400 inline-block">
+            Módulo em desenvolvimento
+          </div>
+        </div>
+      )}
     </div>
   );
 }
