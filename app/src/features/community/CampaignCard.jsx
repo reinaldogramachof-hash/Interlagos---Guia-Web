@@ -1,9 +1,12 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
 
-export default function CampaignCard({ item, cat, onWhatsApp }) {
+export default function CampaignCard({ item, cat, onWhatsApp, onClick }) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-white/5 hover:shadow-md transition-all">
+        <div 
+            onClick={onClick}
+            className={`bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-white/5 hover:shadow-md transition-all ${onClick ? 'cursor-pointer' : ''}`}
+        >
             <div className="flex justify-between items-start mb-3">
                 <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${cat.bg} ${cat.color}`}>
                     {cat.icon && <cat.icon size={12} />}
@@ -17,9 +20,9 @@ export default function CampaignCard({ item, cat, onWhatsApp }) {
             <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-2 leading-tight">{item.title}</h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-3">{item.description}</p>
 
-            {item.image && (
+            {item.image_url && (
                 <div className="mb-4 h-40 rounded-xl overflow-hidden bg-slate-100">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                 </div>
             )}
 

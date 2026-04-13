@@ -36,8 +36,8 @@ function ModerationCard({ item, onApprove, onReject, onEscalate }) {
     );
   }
 
-  const tableLabels = { ads: 'Anúncio', campaigns: 'Campanha', merchants: 'Novo Comércio' };
-  const tableBgColors = { ads: 'bg-slate-100 text-slate-600', campaigns: 'bg-indigo-50 text-indigo-600', merchants: 'bg-emerald-50 text-emerald-700' };
+  const tableLabels = { ads: 'Anúncio', campaigns: 'Campanha', merchants: 'Novo Comércio', news: 'Notícia' };
+  const tableBgColors = { ads: 'bg-slate-100 text-slate-600', campaigns: 'bg-indigo-50 text-indigo-600', merchants: 'bg-emerald-50 text-emerald-700', news: 'bg-blue-50 text-blue-600' };
 
   return (
     <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex justify-between items-start">

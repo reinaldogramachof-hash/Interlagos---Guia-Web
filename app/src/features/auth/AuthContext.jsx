@@ -33,9 +33,13 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const loading = useAuthStore(s => s.loading);
+  const session = useAuthStore(s => s.session);
   // init() é chamado em main.jsx — não chamar aqui para evitar double-invoke do StrictMode
 
-  if (loading) {
+  // [Bug#4] Bloqueamos rendering apenas no loading inicial (sem session conhecida).
+  // Se session existe mas profile ainda está carregando (ex: offline),
+  // deixamos o app renderizar — o usuário está logado; o restante do perfil é cosmético.
+  if (loading && !session) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">

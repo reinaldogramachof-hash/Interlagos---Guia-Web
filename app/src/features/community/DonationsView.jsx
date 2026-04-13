@@ -4,6 +4,7 @@ import { fetchCampaigns } from '../../services/communityService';
 import { useAuth } from '../auth/AuthContext';
 import CampaignCard from './CampaignCard';
 import CreateCampaignForm from './CreateCampaignForm';
+import CampaignDetailModal from './CampaignDetailModal';
 import { useToast } from '../../components/Toast';
 
 const categories = [
@@ -21,6 +22,7 @@ export default function DonationsView() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [_showLoginModal, setShowLoginModal] = useState(false);
 
     // Carregar itens APROVADOS com realtime
@@ -115,7 +117,13 @@ export default function DonationsView() {
                     filteredItems.map((item) => {
                         const cat = categories.find(c => c.id === item.type) || categories[4];
                         return (
-                            <CampaignCard key={item.id} item={item} cat={cat} onWhatsApp={() => handleWhatsApp(item)} />
+                            <CampaignCard 
+                                key={item.id} 
+                                item={item} 
+                                cat={cat} 
+                                onWhatsApp={(e) => { e.stopPropagation(); handleWhatsApp(item); }}
+                                onClick={() => setSelectedCampaign({ ...item, authorName: item.profiles?.display_name || 'Morador' })}
+                            />
                         );
                     })
                 )}
@@ -138,6 +146,14 @@ export default function DonationsView() {
                     onClose={() => setShowCreateModal(false)} 
                 />
             )}
+
+            {/* Detail Modal */}
+            <CampaignDetailModal
+                isOpen={!!selectedCampaign}
+                campaign={selectedCampaign}
+                onClose={() => setSelectedCampaign(null)}
+                onWhatsApp={() => handleWhatsApp(selectedCampaign)}
+            />
         </div>
     );
 }

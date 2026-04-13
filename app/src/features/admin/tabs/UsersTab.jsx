@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchUsers, updateUserRole } from '../../../services/adminService';
-import { User, Search, X } from 'lucide-react';
+import { fetchUserConsents } from '../../../services/consentService';
+import { User, Search } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 // Nota: criação de usuário via Supabase Admin requer Edge Function (service_role key).
@@ -9,6 +10,7 @@ import { useToast } from '../../../components/Toast';
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [consentsMap, setConsentsMap] = useState({});
   const showToast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -17,6 +19,19 @@ export default function UsersTab() {
     try {
       const data = await fetchUsers();
       setUsers(data);
+
+      // Carregar status de aceite dos termos para os primeiros 20 usuários
+      const topUsers = data.slice(0, 20);
+      const results = await Promise.allSettled(topUsers.map(u => fetchUserConsents(u.id)));
+      const map = {};
+      topUsers.forEach((u, i) => {
+        const r = results[i];
+        if (r.status === 'fulfilled') {
+          const termConsent = r.value.find(c => c.consent_type === 'platform_terms_v1');
+          map[u.id] = termConsent ? termConsent.created_at || termConsent.accepted_at : null;
+        }
+      });
+      setConsentsMap(map);
     } catch (error) {
       showToast('Erro ao carregar usuários.', 'error');
     } finally {
@@ -69,7 +84,7 @@ export default function UsersTab() {
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
-              <tr><th className="p-4">Usuário</th><th className="p-4">Função</th><th className="p-4 text-right">Ações</th></tr>
+              <tr><th className="p-4">Usuário</th><th className="p-4">Função</th><th className="p-4">Termos</th><th className="p-4 text-right">Ações</th></tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map(user => (
@@ -85,6 +100,15 @@ export default function UsersTab() {
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.role === 'master' ? 'bg-purple-100 text-purple-700' : user.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
                       {user.role || 'resident'}
                     </span>
+                  </td>
+                  <td className="p-4">
+                    {consentsMap[user.id] !== undefined ? (
+                      consentsMap[user.id]
+                        ? <span className="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✓ Aceito</span>
+                        : <span className="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Pendente</span>
+                    ) : (
+                      <span className="text-slate-300 text-xs">—</span>
+                    )}
                   </td>
                   <td className="p-4 text-right space-x-2">
                     {user.role !== 'master' && (

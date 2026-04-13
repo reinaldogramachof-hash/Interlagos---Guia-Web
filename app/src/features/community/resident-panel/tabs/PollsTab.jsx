@@ -80,7 +80,7 @@ export default function PollsTab({ currentUser }) {
           return (
             <div key={poll.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
               <div className="flex justify-between items-start mb-3">
-                <h2 className="text-gray-900 dark:text-white font-medium text-sm leading-relaxed pr-8">{poll.question}</h2>
+                <h2 className="text-gray-900 dark:text-white font-medium text-sm leading-relaxed pr-8 break-words">{poll.question}</h2>
                 <span className={`text-[10px] px-2 py-1 rounded-full flex items-center gap-1 shrink-0 ${isClosed ? 'bg-slate-100 dark:bg-slate-700 text-slate-400' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600'}`}>
                   {isClosed ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                   {isClosed ? 'Encerrada' : 'Aberta'}
@@ -109,7 +109,12 @@ export default function PollsTab({ currentUser }) {
 
               {!showResults && (
                 <button disabled={isClosed || isVoting} className="w-full py-2.5 rounded-full text-sm font-medium transition-all bg-emerald-600 hover:bg-emerald-700 text-white active:scale-95 disabled:opacity-50 min-h-[44px]">
-                  {isVoting ? 'Registrando...' : 'Selecione uma opção acima para votar'}
+                  {isVoting ? 'Registrando...' : (
+                    <>
+                      <span className="hidden sm:inline">Selecione uma opção acima para votar</span>
+                      <span className="sm:hidden">Selecione uma opção</span>
+                    </>
+                  )}
                 </button>
               )}
 

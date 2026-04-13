@@ -49,15 +49,17 @@ export async function escalateItem(ticketData, targetCollection, targetId) {
 }
 
 export async function fetchPendingItems() {
-  const [{ data: ads }, { data: campaigns }, { data: merchants }] = await Promise.all([
+  const [{ data: ads }, { data: campaigns }, { data: merchants }, { data: news }] = await Promise.all([
     supabase.from('ads').select('*, profiles!seller_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
     supabase.from('campaigns').select('*, profiles!author_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD),
     supabase.from('merchants').select('*, profiles!owner_id(display_name)').eq('is_active', false).eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
+    supabase.from('news').select('*, profiles!author_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
   ]);
   return [
     ...(ads || []).map(a => ({ ...a, _table: 'ads', author_name: a.profiles?.display_name || 'Anônimo' })),
     ...(campaigns || []).map(c => ({ ...c, _table: 'campaigns', author_name: c.profiles?.display_name || 'Morador' })),
     ...(merchants || []).map(m => ({ ...m, _table: 'merchants', author_name: m.profiles?.display_name || 'Anônimo' })),
+    ...(news || []).map(n => ({ ...n, _table: 'news', author_name: n.profiles?.display_name || 'Morador' })),
   ];
 }
 
@@ -76,6 +78,10 @@ export async function approveItem(table, id) {
     updatePayload = { is_active: true };
     notifTitle = 'Comércio Aprovado!';
     notifMsg = `Seu negócio "${item.name}" está ativo e já aparece no bairro!`;
+  } else if (table === 'news') {
+    updatePayload = { status: 'active' };
+    notifTitle = 'Notícia Aprovada!';
+    notifMsg = `Sua notícia "${item.title}" foi aprovada e já está visível no feed do bairro!`;
   } else {
     const status = table === 'ads' ? 'approved' : 'active';
     updatePayload = { status };
@@ -121,12 +127,12 @@ export async function rejectItem(table, id) {
 
   const userId = item.seller_id || item.author_id || item.requester_id || item.user_id;
   if (userId) {
-    await createNotification(
-      userId,
-      'Item Rejeitado',
-      `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`,
-      'warning'
-    );
+    const title = table === 'news' ? 'Notícia Removida' : 'Item Rejeitado';
+    const msg = table === 'news'
+      ? `Sua notícia "${item.title}" foi removida por não atender às diretrizes da comunidade. Você pode corrigir e publicar novamente.`
+      : `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`;
+
+    await createNotification(userId, title, msg, 'warning');
   }
   return true;
 }

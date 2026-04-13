@@ -26,7 +26,12 @@ export const subscribeMerchants = (callback) => {
   getMerchants().then(callback);
 
   const channel = supabase.channel('merchants-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, () => {
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'merchants',
+      filter: `neighborhood=eq.${import.meta.env.VITE_NEIGHBORHOOD}`
+    }, () => {
       getMerchants().then(callback);
     })
     .subscribe();
@@ -36,6 +41,12 @@ export const subscribeMerchants = (callback) => {
 
 export const createMerchant = async (data) => {
   const sanitizedData = { ...data };
+
+  // R5: normaliza whatsapp (espelha updateMerchant)
+  if (sanitizedData.whatsapp) {
+    sanitizedData.whatsapp = sanitizedData.whatsapp.replace(/\D/g, '');
+  }
+
   let { data: result, error } = await supabase.from('merchants').insert(sanitizedData).select();
 
   // Retry resiliente: Se o schema estiver antigo
@@ -57,11 +68,21 @@ export const createMerchant = async (data) => {
 
   if (error) throw error;
   if (result?.[0]) {
+    const createdMerchant = result[0];
+    
+    // Escalação de Role: Morador -> Comerciante
+    if (createdMerchant.owner_id) {
+      await supabase
+        .from('profiles')
+        .update({ role: 'merchant' })
+        .eq('id', createdMerchant.owner_id);
+    }
+
     await notifyAdmins(
       'Novo Comércio Aguardando Aprovação',
-      `O negócio "${result[0].name}" foi cadastrado e aguarda ativação.`,
+      `O negócio "${createdMerchant.name}" foi cadastrado e aguarda ativação.`,
       'info',
-      result[0].id
+      createdMerchant.id
     ).catch(() => {});
   }
   return result?.[0];

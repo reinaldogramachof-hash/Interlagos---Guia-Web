@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { validateEmail, validateName, sanitizeInput } from '../utils/validation';
+import { validateEmail, validateName, sanitizeInput, sanitizeObject } from '../utils/validation';
 
 export const getUserRole = async (userId) => {
   const { data, error } = await supabase
@@ -42,9 +42,18 @@ export const createUserProfile = async (user, additionalData = {}) => {
 };
 
 export const updateUserProfile = async (userId, data) => {
+  // R4: sanitiza tags HTML de todos os campos string
+  const cleanData = sanitizeObject(data);
+
+  if (cleanData.display_name !== undefined && cleanData.display_name !== null) {
+    if (!validateName(cleanData.display_name)) {
+      throw new Error('Nome de exibção inválido.');
+    }
+  }
+
   const { data: result, error } = await supabase
     .from('profiles')
-    .update(data)
+    .update(cleanData)
     .eq('id', userId)
     .select()
     .single();

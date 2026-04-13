@@ -7,8 +7,7 @@ export async function fetchPolls() {
     .from('polls')
     .select(`
       *,
-      poll_options (id, text, display_order),
-      poll_votes (count)
+      poll_options (id, text, display_order, poll_votes(option_id))
     `)
     .eq('neighborhood', NEIGHBORHOOD)
     .in('status', ['active', 'closed'])
@@ -22,6 +21,17 @@ export async function fetchPollVoteCounts(pollId) {
     .from('poll_votes')
     .select('option_id')
     .eq('poll_id', pollId);
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchUserVotesForPolls(userId, pollIds) {
+  if (!userId || !pollIds.length) return [];
+  const { data, error } = await supabase
+    .from('poll_votes')
+    .select('poll_id')
+    .eq('user_id', userId)
+    .in('poll_id', pollIds);
   if (error) throw error;
   return data ?? [];
 }

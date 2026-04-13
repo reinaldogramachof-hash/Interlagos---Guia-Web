@@ -7,6 +7,7 @@ import CreateAdWizard from './CreateAdWizard';
 import EmptyState from '../../components/EmptyState';
 import { incrementAdClick } from '../../services/statsService';
 import { useToast } from '../../components/Toast';
+import { useAuth } from '../auth/AuthContext';
 
 const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Veículos', 'Eletrônicos', 'Doações'];
 
@@ -14,6 +15,7 @@ const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Ve�
 
 export default function AdsView({ onRequireAuth }) {
     const showToast = useToast();
+    const { currentUser } = useAuth();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -124,6 +126,7 @@ export default function AdsView({ onRequireAuth }) {
                 isOpen={!!selectedAd}
                 onClose={() => setSelectedAd(null)}
                 ad={selectedAd}
+                currentUser={currentUser}
             />
             <CreateAdWizard
                 isOpen={isWizardOpen}

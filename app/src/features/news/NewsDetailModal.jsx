@@ -1,8 +1,24 @@
-import { Calendar, MapPin, Share2, Clock, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, MapPin, Share2, Clock, User, Heart } from 'lucide-react';
 import Modal from '../../components/Modal';
+import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService';
+import NewsComments from './NewsComments';
 
-export default function NewsDetailModal({ isOpen, onClose, news }) {
+export default function NewsDetailModal({ isOpen, onClose, news, currentUser }) {
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    useEffect(() => {
+        if (!currentUser?.id || !news?.id) return;
+        checkIsFavorite(currentUser.id, news.id).then(setIsFavorite);
+    }, [news?.id, currentUser?.id]);
+
     if (!news) return null;
+
+    const handleToggleFavorite = async () => {
+        if (!currentUser?.id) return;
+        const next = await toggleFavorite(currentUser.id, news.id, 'news');
+        setIsFavorite(next);
+    };
 
     const handleShare = () => {
         if (navigator.share) {
@@ -65,8 +81,18 @@ export default function NewsDetailModal({ isOpen, onClose, news }) {
                     )}
                 </div>
 
+                <div className="border-t border-slate-100 mt-4 pt-4">
+                    <NewsComments newsId={news.id} />
+                </div>
+
                 {/* Ações */}
                 <div className="border-t border-gray-100 pt-6 flex gap-3">
+                    <button
+                        onClick={handleToggleFavorite}
+                        className={`p-3 rounded-xl transition-all ${isFavorite ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    >
+                        <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
+                    </button>
                     <button
                         onClick={handleShare}
                         className="flex-1 bg-brand-50 text-brand-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-brand-50 transition-colors"

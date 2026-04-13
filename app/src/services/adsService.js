@@ -6,15 +6,21 @@ export async function fetchAds() {
     .from('ads')
     .select('*')
     .eq('status', 'approved')
+    .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
 
 export function subscribeAds(callback) {
-  callback();
+  fetchAds().then(callback);
   const channel = supabase.channel('ads-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, callback)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'ads',
+      filter: `neighborhood=eq.${import.meta.env.VITE_NEIGHBORHOOD}`
+    }, callback)
     .subscribe();
   return () => supabase.removeChannel(channel);
 }

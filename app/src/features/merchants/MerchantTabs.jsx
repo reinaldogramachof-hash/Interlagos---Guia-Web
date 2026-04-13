@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Tag, Megaphone, BarChart3, Settings, Lock, Star } from 'lucide-react';
+import { LayoutDashboard, Tag, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck } from 'lucide-react';
 import DashboardTab from './merchant-panel/tabs/DashboardTab';
 import AdsTab from './merchant-panel/tabs/AdsTab';
 import CampaignTab from './merchant-panel/tabs/CampaignTab';
 import ReportsTab from './merchant-panel/tabs/ReportsTab';
 import MerchantSettingsTab from './merchant-panel/tabs/SettingsTab';
+import TermsTab from '../terms/TermsTab';
 
 const TABS = [
   { id: 'dashboard', label: 'Visão Geral',  icon: LayoutDashboard, minPlan: 'free' },
@@ -12,6 +13,7 @@ const TABS = [
   { id: 'campaigns', label: 'Campanhas',    icon: Megaphone,       minPlan: 'premium' },
   { id: 'reports',   label: 'Relatórios',   icon: BarChart3,       minPlan: 'premium' },
   { id: 'settings',  label: 'Configurações',icon: Settings,        minPlan: 'free' },
+  { id: 'terms',     label: 'Termos',       icon: ShieldCheck,    minPlan: 'free' },
 ];
 
 const UpgradeAccess = ({ title, desc, onUpgrade }) => (
@@ -102,6 +104,7 @@ export default function MerchantTabs({
       )}
 
       {activeTab === 'settings' && <MerchantSettingsTab merchant={merchant} currentUser={currentUser} onUpdate={onMerchantUpdate} />}
+      {activeTab === 'terms' && <TermsTab onAccepted={() => {}} />}
     </div>
   );
 }

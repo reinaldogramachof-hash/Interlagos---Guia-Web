@@ -87,7 +87,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                         <X size={20} />
                     </button>
 
-                    <div className="absolute bottom-0 left-0 p-8 w-full">
+                    <div className="absolute bottom-0 left-0 p-4 sm:p-6 w-full">
                         <div className="flex justify-between items-end">
                             <div>
                                 <span className="inline-block px-3 py-1 bg-brand-600 text-white text-xs font-bold rounded-full mb-3 shadow-lg">
@@ -112,7 +112,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                 </div>
 
                 {/* Content */}
-                <div className="p-8 overflow-y-auto">
+                <div className="p-4 sm:p-6 overflow-y-auto overflow-x-hidden">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Main Info */}
                         <div className="md:col-span-2 space-y-6">

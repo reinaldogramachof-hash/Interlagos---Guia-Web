@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Save, Loader2 } from 'lucide-react';
 import { uploadImage } from '../../../../services/storageService';
 import { createMerchant, updateMerchant } from '../../../../services/merchantService';
-import { updateUserProfile, getUserRole } from '../../../../services/authService';
 import { useToast } from '../../../../components/Toast';
 import { categories } from '../../../../constants/categories';
+import { validateBusinessData } from '../../../../utils/validation';
 import ImageSection from './ImageSection';
 import MerchantContactFields from './MerchantContactFields';
 
@@ -41,17 +41,28 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name) return showToast('O nome é obrigatório', 'error');
-    setLoading(true);
 
+    // R6: validateBusinessData substitui o guard simples de !name
+    const { valid, errors } = validateBusinessData(formData);
+    if (!valid) return showToast(errors[0], 'error');
+
+    setLoading(true);
     try {
+      // R6: currentUser.id || currentUser.uid (uid deprecado)
+      const userId = currentUser.id || currentUser.uid;
+
       let imageUrl = merchant?.image_url || '';
       if (imageFile) {
-        const path = `merchants/${currentUser.uid}/${Date.now()}.${imageFile.name.split('.').pop()}`;
+        const path = `merchants/${userId}/${Date.now()}.${imageFile.name.split('.').pop()}`;
         imageUrl = await uploadImage('merchant-images', imageFile, path);
       }
 
-      const merchantData = { ...formData, image_url: imageUrl, owner_id: currentUser.uid, neighborhood: import.meta.env.VITE_NEIGHBORHOOD };
+      const merchantData = {
+        ...formData,
+        image_url: imageUrl,
+        owner_id: userId,
+        neighborhood: import.meta.env.VITE_NEIGHBORHOOD,
+      };
 
       if (merchant?.id && merchant.id !== 'temp_dev') {
         await updateMerchant(merchant.id, merchantData);
@@ -61,19 +72,14 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
         merchantData.is_active = false;
         merchantData.plan = 'free';
         const newMerchant = await createMerchant(merchantData);
-        
-        try {
-          const role = await getUserRole(currentUser.uid);
-          if (role !== 'master' && role !== 'admin') {
-            await updateUserProfile(currentUser.uid, { role: 'merchant' });
-          }
-        } catch (roleError) { console.warn('SettingsTab: role update falhou:', roleError); }
-
         showToast('Cadastro realizado! Aguarde aprovação.', 'success');
         onUpdate(newMerchant);
       }
-    } catch (error) { showToast('Erro ao salvar.', 'error'); }
-    finally { setLoading(false); }
+    } catch (error) {
+      showToast('Erro ao salvar.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formCategories = categories.filter(c => c.id !== 'Todos');
@@ -96,22 +102,25 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 uppercase ml-1">Nome do Negócio</label>
-                <input name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Padaria do Bairro" className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm" />
+                {/* R7: maxLength={200} no campo name */}
+                <input name="name" value={formData.name} onChange={handleChange} maxLength={200} placeholder="Ex: Padaria do Bairro" className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base sm:text-sm" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 uppercase ml-1">Categoria</label>
-                <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm">
+                <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base sm:text-sm">
                   {formCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
                 </select>
               </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500 uppercase ml-1">Descrição Curta</label>
-              <textarea name="description" value={formData.description} onChange={handleChange} rows="3" placeholder="Conte um pouco..." className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm" />
+              {/* R7: maxLength={5000} no textarea description */}
+              <textarea name="description" value={formData.description} onChange={handleChange} rows="3" maxLength={5000} placeholder="Conte um pouco..." className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-base sm:text-sm" />
             </div>
           </div>
         </div>
 
+        {/* R7: maxLength={100} em instagram (dentro de MerchantContactFields via formData) */}
         <MerchantContactFields formData={formData} onChange={handleChange} />
 
         <div className="pt-4 flex justify-end">

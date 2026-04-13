@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Newspaper, Heart, Star, Lightbulb, BarChart2, Settings } from 'lucide-react';
+import { ShoppingBag, Newspaper, Heart, Star, Lightbulb, BarChart2, Settings, ShieldCheck } from 'lucide-react';
 import MyAdsTab from './resident-panel/tabs/MyAdsTab';
 import MyNewsTab from './resident-panel/tabs/MyNewsTab';
 import MyCampaignsTab from './resident-panel/tabs/MyCampaignsTab';
@@ -8,6 +8,7 @@ import SuggestionsTab from './resident-panel/tabs/SuggestionsTab';
 import PollsTab from './resident-panel/tabs/PollsTab';
 import ActivitiesTab from './resident-panel/tabs/ActivitiesTab';
 import SettingsTab from './resident-panel/tabs/SettingsTab';
+import TermsTab from '../terms/TermsTab';
 import NewsResponsibilityModal from '../news/NewsResponsibilityModal';
 import CreateNewsModal from '../news/CreateNewsModal';
 
@@ -20,6 +21,7 @@ const TABS = [
   { id: 'polls',       label: 'Enquetes',       icon: BarChart2 },
   { id: 'activities',  label: 'Atividades',     icon: BarChart2 },
   { id: 'settings',    label: 'Configurações',  icon: Settings },
+  { id: 'terms',        label: 'Termos',          icon: ShieldCheck },
 ];
 
 export default function ResidentTabs({ currentUser }) {
@@ -64,6 +66,7 @@ export default function ResidentTabs({ currentUser }) {
       {activeTab === 'polls'       && <PollsTab        currentUser={currentUser} />}
       {activeTab === 'activities'  && <ActivitiesTab   currentUser={currentUser} />}
       {activeTab === 'settings'    && <SettingsTab     currentUser={currentUser} />}
+      {activeTab === 'terms'       && <TermsTab        onAccepted={() => {}} />}
 
       <NewsResponsibilityModal
         isOpen={showResponsibility}

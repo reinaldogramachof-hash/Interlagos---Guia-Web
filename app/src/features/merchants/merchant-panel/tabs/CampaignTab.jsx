@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { PlusCircle, Trash2, Lock, Megaphone, Camera } from 'lucide-react';
+import { PlusCircle, Trash2, Lock, Megaphone, Camera, Loader2 } from 'lucide-react';
 import { fetchCampaignsByMerchant, createMerchantCampaign, deleteCampaign } from '../../../../services/communityService';
 import { uploadImage } from '../../../../services/storageService';
 import { useToast } from '../../../../components/Toast';
@@ -88,7 +88,7 @@ export default function CampaignTab({ merchant, onUpgrade }) {
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+        <form onSubmit={handleCreate} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 md:p-6 space-y-4">
           <h4 className="font-bold text-slate-800">Nova Campanha</h4>
           <input type="text" placeholder="Título da campanha *" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" required />
           <textarea placeholder="Descrição" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm h-20 resize-none" />
@@ -120,7 +120,7 @@ export default function CampaignTab({ merchant, onUpgrade }) {
             }} className="hidden" />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
             <input type="text" placeholder="Desconto (ex: 20%)" value={form.discount} onChange={e => setForm(p => ({ ...p, discount: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" />
             <input type="date" value={form.start_date} onChange={e => setForm(p => ({ ...p, start_date: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" required />
             <input type="date" value={form.end_date} onChange={e => setForm(p => ({ ...p, end_date: e.target.value }))} className="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm" required />
@@ -133,7 +133,7 @@ export default function CampaignTab({ merchant, onUpgrade }) {
       )}
 
       {loading ? (
-        <p className="text-center text-slate-400 py-8">Carregando...</p>
+        <div className="flex justify-center py-8"><Loader2 className="animate-spin text-slate-400" size={28} /></div>
       ) : campaigns.length === 0 ? (
         <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
           <Megaphone className="mx-auto text-slate-300 mb-3" size={32} />

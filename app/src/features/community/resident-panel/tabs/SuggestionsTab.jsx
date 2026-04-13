@@ -69,13 +69,13 @@ export default function SuggestionsTab({ currentUser }) {
         <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tipo de Mensagem</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
               {[{ val: 'Ideia', icon: Lightbulb, color: 'text-yellow-500' }, { val: 'Problema', icon: AlertCircle, color: 'text-red-500' }, { val: 'Outro', icon: MessageSquare, color: 'text-emerald-500' }].map(t => (
                 <label key={t.val} className="cursor-pointer">
                   <input type="radio" name="type" value={t.val} className="peer sr-only" defaultChecked={t.val === 'Ideia'} />
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/30 transition-all">
+                  <div className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/30 transition-all">
                     <t.icon className={`mb-1 ${t.color}`} size={20} />
-                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">{t.val}</span>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">{t.val}</span>
                   </div>
                 </label>
               ))}
@@ -115,7 +115,7 @@ export default function SuggestionsTab({ currentUser }) {
                   </div>
                   <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{s.description}</p>
                 </div>
-                <button onClick={() => handleVote(s.id)} disabled={votedIds.has(s.id)} className={`flex flex-col items-center gap-0.5 p-2 rounded-xl h-fit transition-all ${votedIds.has(s.id) ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600'}`}>
+                <button onClick={() => handleVote(s.id)} disabled={votedIds.has(s.id)} className={`flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl min-h-[44px] min-w-[44px] transition-all ${votedIds.has(s.id) ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600'}`}>
                   <ChevronUp size={20} strokeWidth={3} />
                   <span className="text-xs font-black leading-none">{s.votes || 0}</span>
                 </button>

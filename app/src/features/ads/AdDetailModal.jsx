@@ -1,9 +1,25 @@
-import React from 'react';
-import { MessageCircle, Clock, Tag, User, MapPin, Share2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MessageCircle, Clock, Tag, User, AlertTriangle, ShieldCheck, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import Modal from '../../components/Modal';
+import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService';
 
-export default function AdDetailModal({ isOpen, onClose, ad }) {
+export default function AdDetailModal({ isOpen, onClose, ad, currentUser }) {
+    const [currentImg, setCurrentImg] = useState(0);
+    const [isFavorite, setIsFavorite] = useState(false);
+    
+    useEffect(() => { setCurrentImg(0); }, [ad]);
+    useEffect(() => {
+        if (!currentUser?.id || !ad?.id) return;
+        checkIsFavorite(currentUser.id, ad.id).then(setIsFavorite);
+    }, [ad?.id, currentUser?.id]);
+
     if (!ad) return null;
+
+    const handleToggleFavorite = async () => {
+        if (!currentUser?.id) return;
+        const next = await toggleFavorite(currentUser.id, ad.id, 'ad');
+        setIsFavorite(next);
+    };
 
     const handleWhatsApp = () => {
         if (ad.whatsapp) {
@@ -13,24 +29,71 @@ export default function AdDetailModal({ isOpen, onClose, ad }) {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Detalhes do Anúncio">
+        <Modal isOpen={isOpen} onClose={onClose} title="Detalhes do Anúncio" action={
+            <button onClick={handleToggleFavorite} className={`p-2 rounded-full transition-all ${isFavorite ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+            </button>
+        }>
             <div className="space-y-6">
                 {/* Imagem Principal */}
-                <div className="-mx-4 -mt-4 mb-4 bg-gray-100 relative h-64 flex items-center justify-center overflow-hidden">
-                    {ad.image_url ? (
-                        <img
-                            src={ad.image_url}
-                            alt={ad.title}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="text-gray-400 flex flex-col items-center">
-                            <Tag size={48} className="mb-2 opacity-50" />
-                            <span className="text-sm">Sem imagem</span>
-                        </div>
-                    )}
-                    <div className="absolute top-4 left-4">
-                        <span className="bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                <div className="-mx-4 -mt-4 mb-4 bg-black relative h-64 flex flex-col justify-end group">
+                    {(() => {
+                        const allImages = [ad.image_url, ...(ad.gallery_urls || [])].filter(Boolean);
+                        if (allImages.length === 0) {
+                            return (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400">
+                                    <Tag size={48} className="mb-2 opacity-50" />
+                                    <span className="text-sm">Sem imagem</span>
+                                </div>
+                            );
+                        }
+                        return (
+                            <>
+                                <img
+                                    key={currentImg}
+                                    src={allImages[currentImg]}
+                                    alt={ad.title}
+                                    className="absolute inset-0 w-full h-full object-contain bg-black animate-in fade-in duration-300"
+                                />
+                                
+                                {allImages.length > 1 && (
+                                    <>
+                                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-full pointer-events-none z-20">
+                                            {currentImg + 1} / {allImages.length}
+                                        </div>
+                                        
+                                        <button 
+                                            onClick={() => setCurrentImg(i => Math.max(0, i - 1))}
+                                            disabled={currentImg === 0}
+                                            className="absolute left-0 top-0 bottom-0 min-w-[44px] flex items-center justify-center bg-gradient-to-r from-black/20 to-transparent disabled:opacity-0 transition-opacity z-20"
+                                        >
+                                            <div className="bg-black/50 text-white rounded-full p-1"><ChevronLeft size={20}/></div>
+                                        </button>
+                                        
+                                        <button 
+                                            onClick={() => setCurrentImg(i => Math.min(allImages.length - 1, i + 1))}
+                                            disabled={currentImg === allImages.length - 1}
+                                            className="absolute right-0 top-0 bottom-0 min-w-[44px] flex items-center justify-center bg-gradient-to-l from-black/20 to-transparent disabled:opacity-0 transition-opacity z-20"
+                                        >
+                                            <div className="bg-black/50 text-white rounded-full p-1"><ChevronRight size={20}/></div>
+                                        </button>
+
+                                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
+                                            {allImages.map((_, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setCurrentImg(i)}
+                                                    className={`w-2 h-2 rounded-full transition-colors ${currentImg === i ? 'bg-indigo-600' : 'bg-white/50 backdrop-blur'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        );
+                    })()}
+                    <div className="absolute top-4 left-4 pointer-events-none z-20">
+                        <span className="bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
                             {ad.category}
                         </span>
                     </div>

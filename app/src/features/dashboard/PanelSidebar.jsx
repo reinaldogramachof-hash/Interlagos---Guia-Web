@@ -1,5 +1,5 @@
 import React from 'react';
-import { Store, User } from 'lucide-react';
+import { Store, User, ShieldCheck } from 'lucide-react';
 
 export default function PanelSidebar({ 
     uiMode, 
@@ -32,6 +32,18 @@ export default function PanelSidebar({
                 }`}
             >
                 <User size={18} /> Pessoal
+            </button>
+
+            {/* Termos e Políticas */}
+            <button
+                onClick={() => onTabChange('terms')}
+                className={`p-4 text-left font-bold text-sm flex items-center gap-3 transition-colors ${
+                    activeTab === 'terms'
+                        ? 'bg-white dark:bg-slate-900 border-l-4 shadow-sm text-indigo-600 border-indigo-600'
+                        : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900'
+                }`}
+            >
+                <ShieldCheck size={18} /> Termos e Políticas
             </button>
 
             {/* CTA Cadastro — apenas para moradores sem negócio */}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { CheckCircle, User, FileText, MapPin, ArrowRight } from 'lucide-react';
 import { recordConsent } from '../../services/consentService';
 import { updateUserProfile } from '../../services/authService';
@@ -74,15 +74,15 @@ function StepTerms({ onNext }) {
   );
 }
 
-// ── Passo 2: Dados pessoais ───────────────────────────────────────────────────
+// ── Passo 2: Dados pessoais — R1: campo phone removido ────────────────────────
 const NEIGHBORHOODS = ['Interlagos', 'Parque Residencial Cocaia', 'Jardim Riviera', 'Outro'];
 
 function StepProfile({ onNext }) {
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
 
-  const isValid = fullName.trim().length >= 3 && phone.trim().length > 0 && neighborhood;
+  // R1: phone removido — coluna não existe em profiles
+  const isValid = fullName.trim().length >= 3 && neighborhood;
 
   return (
     <div className="space-y-5">
@@ -104,17 +104,7 @@ function StepProfile({ onNext }) {
             placeholder="Seu nome completo"
             value={fullName}
             onChange={e => setFullName(e.target.value)}
-            minLength={3}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none text-slate-900 text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-bold text-slate-500 mb-1 block">Telefone / WhatsApp *</label>
-          <input
-            type="tel"
-            placeholder="(11) 99999-9999"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
+            maxLength={120}
             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none text-slate-900 text-sm"
           />
         </div>
@@ -133,8 +123,9 @@ function StepProfile({ onNext }) {
         </div>
       </div>
 
+      {/* R1: onNext passa apenas { fullName, neighborhood } */}
       <button
-        onClick={() => onNext({ fullName: fullName.trim(), phone: phone.trim(), neighborhood })}
+        onClick={() => onNext({ fullName: fullName.trim(), neighborhood })}
         disabled={!isValid}
         className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
       >
@@ -178,6 +169,8 @@ export default function OnboardingModal({ isOpen, onComplete }) {
   const [profileData, setProfileData] = useState(null);
   const [saving, setSaving] = useState(false);
   const session = useAuthStore(s => s.session);
+  // R3: timestamp real do aceite dos termos
+  const termsAcceptedAtRef = useRef(null);
 
   useScrollLock(isOpen);
 
@@ -185,17 +178,26 @@ export default function OnboardingModal({ isOpen, onComplete }) {
 
   const userId = session?.user?.id;
 
+  const handleTermsNext = () => {
+    // R3: captura o timestamp no momento em que o usuário clica "Continuar" no Step 1
+    termsAcceptedAtRef.current = new Date().toISOString();
+    setStep(2);
+  };
+
   const handleFinish = async () => {
     if (!userId) return;
     setSaving(true);
     try {
       await recordConsent(userId, 'terms_of_use');
       await recordConsent(userId, 'privacy_policy');
+      // R2: salva display_name junto com full_name
+      // R3: usa o timestamp real do aceite (Step 1), não o de conclusão
       await updateUserProfile(userId, {
         full_name: profileData?.fullName || null,
+        display_name: profileData?.fullName || null,
         neighborhood: profileData?.neighborhood || null,
         onboarding_completed: true,
-        terms_accepted_at: new Date().toISOString(),
+        terms_accepted_at: termsAcceptedAtRef.current || new Date().toISOString(),
       });
       onComplete?.();
     } catch (err) {
@@ -212,7 +214,6 @@ export default function OnboardingModal({ isOpen, onComplete }) {
       className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300"
     >
       <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-        {/* Barra de progresso */}
         <div className="h-1.5 bg-slate-100">
           <div
             className="h-full bg-indigo-600 transition-all duration-500 rounded-full"
@@ -227,15 +228,11 @@ export default function OnboardingModal({ isOpen, onComplete }) {
         </div>
 
         <div className="px-6 pb-8">
-          {step === 1 && (
-            <StepTerms onNext={() => setStep(2)} />
-          )}
+          {step === 1 && <StepTerms onNext={handleTermsNext} />}
           {step === 2 && (
             <StepProfile onNext={(data) => { setProfileData(data); setStep(3); }} />
           )}
-          {step === 3 && (
-            <StepDone onFinish={handleFinish} saving={saving} />
-          )}
+          {step === 3 && <StepDone onFinish={handleFinish} saving={saving} />}
         </div>
       </div>
     </div>

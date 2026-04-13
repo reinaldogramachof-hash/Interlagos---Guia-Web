@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { BarChart2, Clock, CheckCircle2, Loader2 } from 'lucide-react';
-import { fetchPolls, fetchPollVoteCounts, checkUserVoted, submitVote } from '../../services/pollsService';
+import { BarChart2, Clock, CheckCircle2 } from 'lucide-react';
+import { fetchPolls, fetchUserVotesForPolls, checkUserVoted, submitVote } from '../../services/pollsService';
 import { useAuth } from '../auth/AuthContext';
 
 const PollsView = ({ onRequireAuth }) => {
@@ -18,7 +18,12 @@ const PollsView = ({ onRequireAuth }) => {
 
   useEffect(() => {
     if (currentUser && polls.length > 0) {
-      polls.forEach(poll => loadUserVoteStatus(poll.id));
+      const pollIds = polls.map(p => p.id);
+      fetchUserVotesForPolls(currentUser.id, pollIds).then(votes => {
+        const map = {};
+        votes.forEach(v => { map[v.poll_id] = true; });
+        setUserVotes(map);
+      }).catch(() => {});
     }
   }, [currentUser, polls]);
 
@@ -28,21 +33,20 @@ const PollsView = ({ onRequireAuth }) => {
       setError(null);
       const data = await fetchPolls();
       setPolls(data);
-      data.forEach(poll => loadVoteCounts(poll.id));
-    } catch (err) {
+      // Derive voteCounts from join — zero extra requests
+      const counts = {};
+      data.forEach(poll => {
+        counts[poll.id] = {};
+        poll.poll_options?.forEach(opt => {
+          counts[poll.id][opt.id] = opt.poll_votes?.length ?? 0;
+        });
+      });
+      setVoteCounts(counts);
+    } catch {
       setError('Não foi possível carregar as enquetes.');
     } finally {
       setLoading(false);
     }
-  }
-
-  async function loadVoteCounts(pollId) {
-    const votes = await fetchPollVoteCounts(pollId);
-    const counts = {};
-    votes.forEach(v => {
-      counts[v.option_id] = (counts[v.option_id] || 0) + 1;
-    });
-    setVoteCounts(prev => ({ ...prev, [pollId]: counts }));
   }
 
   async function loadUserVoteStatus(pollId) {
@@ -62,7 +66,7 @@ const PollsView = ({ onRequireAuth }) => {
       const result = await submitVote(poll.id, optionId, currentUser.id);
       if (result?.success) {
         setUserVotes(prev => ({ ...prev, [poll.id]: true }));
-        await loadVoteCounts(poll.id);
+        await loadUserVoteStatus(poll.id);
       }
     } catch {
       // voto já computado ou erro silencioso
@@ -73,15 +77,24 @@ const PollsView = ({ onRequireAuth }) => {
 
   if (loading) {
     return (
-      <div className="p-4 min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-brand-600" />
+      <div className="space-y-4 p-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 animate-pulse space-y-3">
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+            <div className="space-y-2">
+              <div className="h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl" />
+              <div className="h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 min-h-screen bg-white flex items-center justify-center">
+      <div className="p-4 min-h-[50vh] bg-white flex items-center justify-center">
         <p className="text-sm text-red-500 text-center">{error}</p>
       </div>
     );
@@ -89,7 +102,7 @@ const PollsView = ({ onRequireAuth }) => {
 
   if (polls.length === 0) {
     return (
-      <div className="p-4 min-h-screen bg-white flex flex-col items-center justify-center gap-2">
+      <div className="p-4 min-h-[50vh] bg-white flex flex-col items-center justify-center gap-2">
         <BarChart2 className="w-10 h-10 text-gray-300" />
         <p className="text-sm text-gray-400 text-center">Nenhuma enquete disponível no momento.</p>
       </div>

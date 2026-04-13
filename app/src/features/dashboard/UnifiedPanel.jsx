@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, User, Store } from 'lucide-react';
+import { X, TrendingUp, User, Store, ShieldCheck } from 'lucide-react';
 import { getMerchantByOwner } from '../../services/merchantService';
 import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../auth/AuthContext';
@@ -7,6 +7,8 @@ import CreateAdWizard from '../ads/CreateAdWizard';
 import { useToast } from '../../components/Toast';
 import UpgradeModal from '../merchants/UpgradeModal';
 import { PLANS_CONFIG } from '../../constants/plans';
+import { hasAcceptedCurrentTerms } from '../../services/consentService';
+import TermsTab from '../terms/TermsTab';
 
 import ResidentTabs from '../community/ResidentTabs';
 import PanelSidebar from './PanelSidebar';
@@ -26,6 +28,14 @@ export default function UnifiedPanel({ onClose }) {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     
     const showToast = useToast();
+
+    // Auto-redirect para termos se não aceitos
+    useEffect(() => {
+        if (!currentUser?.id) return;
+        hasAcceptedCurrentTerms(currentUser.id).then(accepted => {
+            if (!accepted) setActiveTab('terms');
+        }).catch(() => {});
+    }, [currentUser?.id]);
 
     useEffect(() => {
         if (!currentUser || uiMode !== 'merchant') return;
@@ -133,6 +143,16 @@ export default function UnifiedPanel({ onClose }) {
                             <Store size={13} /> Cadastrar Loja
                         </button>
                     )}
+                    <button
+                        onClick={() => setActiveTab('terms')}
+                        className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-colors ${
+                            activeTab === 'terms'
+                                ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm'
+                                : 'text-slate-500'
+                        }`}
+                    >
+                        <ShieldCheck size={13} /> Termos
+                    </button>
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
@@ -167,6 +187,9 @@ export default function UnifiedPanel({ onClose }) {
                                     <MerchantSettingsTab merchant={{id: 'temp_dev'}} currentUser={currentUser} onUpdate={setMerchant} />
                                 </div>
                             </div>
+                        )}
+                        {activeTab === 'terms' && (
+                            <TermsTab onAccepted={() => setActiveTab(uiMode === 'merchant' ? 'business' : 'personal')} />
                         )}
                     </div>
                 </div>

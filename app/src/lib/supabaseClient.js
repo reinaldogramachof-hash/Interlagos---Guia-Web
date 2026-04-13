@@ -12,6 +12,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    // Chave explícita evita conflito se dois módulos criarem o cliente.
+    // Sem isso, o Supabase usa 'sb-<ref>-auth-token' como padrão.
+    storageKey: 'tnb-auth-token',
+    // Garante uso do localStorage nativo (imune a SW, já que SW não tem
+    // acesso ao localStorage da página principal).
+    storage: window.localStorage,
   },
   realtime: {
     params: { eventsPerSecond: 10 },

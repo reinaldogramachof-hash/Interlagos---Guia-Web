@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Responsividade global ─────────────────────────────────────────────────── */
+
+/* Previne overflow horizontal em qualquer viewport */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Corrige zoom automático do iOS Safari em inputs com font-size < 16px.
+   O iOS faz zoom quando font-size < 16px. Esta regra força 16px em mobile
+   sem alterar o visual desktop (Tailwind já usa rem, desktop fica inalterado). */
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch targets mínimos de 44px para acessibilidade mobile (WCAG 2.5.5) */
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

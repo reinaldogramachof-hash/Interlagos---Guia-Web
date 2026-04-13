@@ -22,43 +22,72 @@ export async function fetchNews() {
     .eq('neighborhood', NEIGHBORHOOD)
     .eq('status', 'active')
     .order('created_at', { ascending: false });
-  if (error) throw error;
+  
+  if (error) {
+    console.error('newsService.fetchNews error:', error);
+    throw error;
+  }
   return data ?? [];
 }
 
 export function subscribeNews(callback) {
-  callback(); // carrega inicial
+  // Chamada inicial
+  callback(); 
+  
   const channel = supabase.channel('news-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'news', filter: `neighborhood=eq.${NEIGHBORHOOD}` }, callback)
+    .on('postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public', 
+        table: 'news', 
+        filter: `neighborhood=eq.${NEIGHBORHOOD}` 
+      }, 
+      () => callback() // Wrap to ensure any async callback is handled
+    )
     .subscribe();
-  return () => supabase.removeChannel(channel);
+    
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
 export async function adminFetchNews() {
   const { data, error } = await supabase
     .from('news')
     .select('*')
-    .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
+    .eq('neighborhood', NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
 
 export async function createNews(newsData) {
-  const payload = { neighborhood: NEIGHBORHOOD, ...newsData };
+  // Garante que o neighborhood esteja presente se não enviado pelo form
+  const payload = { 
+    neighborhood: NEIGHBORHOOD, 
+    status: 'pending', // Default robusto
+    ...newsData 
+  };
+  
   const { data, error } = await supabase
     .from('news')
     .insert(payload)
     .select()
     .single();
 
-  if (error) throw error;
-  await notifyAdmins(
+  if (error) {
+    console.error('newsService.createNews error:', error);
+    throw error;
+  }
+
+  // Notificação silenciosa (não quebra o fluxo de criação se falhar)
+  notifyAdmins(
     'Nova Notícia Publicada',
-    `A notícia "${data.title}" foi publicada por um morador.`,
+    `A notícia "${data.title}" foi enviada para revisão por um morador.`,
     'info',
     data.id
-  ).catch(() => {});
+  ).catch(err => console.error('Failed to notify admins:', err));
+
   return data;
 }
 
@@ -112,3 +141,43 @@ export async function adminDeleteNews(id) {
   return true;
 }
 
+export const fetchComments = async (newsId) => {
+  const { data, error } = await supabase
+    .from('news_comments')
+    .select('id, content, created_at, author_id, profiles(display_name, photo_url)')
+    .eq('news_id', newsId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data || [];
+};
+
+export const createComment = async ({ newsId, authorId, content, neighborhood }) => {
+  const { data, error } = await supabase
+    .from('news_comments')
+    .insert({ news_id: newsId, author_id: authorId, content: content.trim(), neighborhood })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+export const deleteComment = async (commentId) => {
+  const { error } = await supabase
+    .from('news_comments')
+    .delete()
+    .eq('id', commentId);
+  if (error) throw error;
+};
+
+export const fetchCommentCounts = async (newsIds) => {
+  if (!newsIds?.length) return {};
+  const { data, error } = await supabase
+    .from('news_comments')
+    .select('news_id')
+    .in('news_id', newsIds);
+  if (error) return {};
+  return (data || []).reduce((acc, row) => {
+    acc[row.news_id] = (acc[row.news_id] || 0) + 1;
+    return acc;
+  }, {});
+};

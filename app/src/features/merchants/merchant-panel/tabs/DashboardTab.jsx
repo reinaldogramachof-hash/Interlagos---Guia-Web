@@ -8,35 +8,35 @@ export default function DashboardTab({ merchant, myAds, onUpgrade }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
         {/* Visualizações */}
-        <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
+        <div className="bg-indigo-50 p-4 md:p-6 rounded-2xl border border-indigo-100">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600"><Eye size={20} /></div>
             <h3 className="text-indigo-900 font-bold">Visualizações</h3>
           </div>
-          <p className="text-3xl font-bold text-indigo-600">{merchant?.views || 0}</p>
+          <p className="text-2xl md:text-3xl font-bold text-indigo-600">{merchant?.views || 0}</p>
         </div>
 
         {/* Anúncios Ativos */}
-        <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+        <div className="bg-emerald-50 p-4 md:p-6 rounded-2xl border border-emerald-100">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600"><Tag size={20} /></div>
             <h3 className="text-emerald-900 font-bold">Anúncios Ativos</h3>
           </div>
-          <p className="text-3xl font-bold text-emerald-600">
+          <p className="text-2xl md:text-3xl font-bold text-emerald-600">
             {myAds.length} / {adLimit >= 999 ? '∞' : adLimit}
           </p>
         </div>
 
         {/* Cliques no Zap */}
-        <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100">
+        <div className="bg-amber-50 p-4 md:p-6 rounded-2xl border border-amber-100">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-amber-100 rounded-lg text-amber-600"><MousePointer size={20} /></div>
             <h3 className="text-amber-900 font-bold">Cliques no Zap</h3>
           </div>
           {plan.hasStats ? (
-            <p className="text-3xl font-bold text-amber-600">{merchant?.clicks || 0}</p>
+            <p className="text-2xl md:text-3xl font-bold text-amber-600">{merchant?.clicks || 0}</p>
           ) : (
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-2 text-slate-400 font-bold text-lg">
@@ -63,10 +63,9 @@ export default function DashboardTab({ merchant, myAds, onUpgrade }) {
             </button>
           </div>
         )}
-        <div className="h-48 bg-slate-50 rounded-xl flex items-end justify-around p-4 gap-2">
-          {[40, 60, 30, 80, 50, 90, 70].map((h, i) => (
-            <div key={i} className="w-full bg-indigo-200 rounded-t-lg" style={{ height: `${h}%` }} />
-          ))}
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-4 md:p-10 text-center">
+          <p className="text-sm font-semibold text-slate-500">Histórico mensal</p>
+          <p className="text-xs text-slate-400 mt-1">Analytics detalhados em breve</p>
         </div>
       </div>
 

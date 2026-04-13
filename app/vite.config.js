@@ -84,6 +84,10 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
+          // [Bug#2 - mitigação] skipWaiting garante que o novo SW não fica em waiting,
+          // evitando que duas versões concorrentes interceptem o redirect do OAuth.
+          skipWaiting: true,
+          clientsClaim: true,
           // NetworkFirst para API Supabase: tenta rede, cai no cache se offline
           runtimeCaching: [
             {
@@ -92,7 +96,9 @@ export default defineConfig(({ mode }) => {
               options: {
                 cacheName: 'supabase-api',
                 expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 }, // 24h
-                networkTimeoutSeconds: 5,
+                // [Bug#2] Timeout alinhado com _fetchProfile (8s) para evitar
+                // que respostas lentas caiam em cache stale durante o OAuth redirect.
+                networkTimeoutSeconds: 8,
               },
             },
             // CacheFirst para imagens estáticas e Unsplash
@@ -115,7 +121,9 @@ export default defineConfig(({ mode }) => {
           ],
           // Garante que o SW controle todas as rotas (SPA)
           navigateFallback: `${basePath}index.html`,
-          navigateFallbackDenylist: [/^\/api\//],
+          // [Bug#2] Denylista de rotas com hash fragment OAuth (#access_token=...).
+          // O SW não deve interferir com a URL de callback do provider.
+          navigateFallbackDenylist: [/^\/api\//, /#access_token=/],
           // Aumenta o limite de assets pré-cacheados para o SPA
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB
         },

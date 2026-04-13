@@ -47,7 +47,7 @@ function useLocalLike(id) {
 }
 
 // Card de notícia individual
-export default function NewsCard({ item, onClick }) {
+export default function NewsCard({ item, onClick, onCommentClick, commentCount }) {
     const [liked, toggleLike] = useLocalLike(item.id);
     const catColor = CATEGORY_COLORS[item.category] ?? CATEGORY_COLORS.default;
     const author = item.author ?? item.author_name ?? 'Interlagos Conectado';
@@ -116,11 +116,11 @@ export default function NewsCard({ item, onClick }) {
 
                 {/* Comentar */}
                 <button
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); (onCommentClick ?? onClick)?.(); }}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
                 >
                     <MessageCircle size={15} />
-                    Comentar
+                    {commentCount > 0 ? `${commentCount} Comentários` : 'Comentar'}
                 </button>
 
                 {/* Compartilhar WhatsApp */}
