@@ -51,17 +51,41 @@ export default function TermsTab({ onAccepted }) {
 
   if (status === 'accepted') {
     return (
-      <div className="max-w-2xl mx-auto animate-in fade-in duration-500">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center space-y-4">
-          <CheckCircle size={56} className="mx-auto text-emerald-500" strokeWidth={1.5} />
-          <h3 className="text-xl font-bold text-emerald-900">Termos aceitos</h3>
-          {acceptedAt && (
-            <p className="text-sm text-emerald-700">Registrado em {acceptedAt}</p>
-          )}
-          <p className="text-sm text-emerald-600">
-            Obrigado por usar a plataforma com responsabilidade.
-          </p>
-          <p className="text-xs text-emerald-500 mt-2">Versão: {TERMS_VERSION}</p>
+      <div className="max-w-2xl mx-auto animate-in fade-in duration-500 space-y-6">
+        {/* Banner de confirmação — compacto */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-4">
+          <CheckCircle size={32} className="text-emerald-500 shrink-0" strokeWidth={1.5} />
+          <div>
+            <p className="font-bold text-emerald-900 text-sm">Termos aceitos</p>
+            {acceptedAt && (
+              <p className="text-xs text-emerald-700">Registrado em {acceptedAt}</p>
+            )}
+            <p className="text-xs text-emerald-500 mt-0.5">Versão: {TERMS_VERSION}</p>
+          </div>
+        </div>
+
+        {/* Artigos em modo leitura — idênticos ao pending, sem checkbox/botão */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
+            <ShieldCheck size={20} className="text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base text-slate-900">
+              Termos de Uso e Política de Privacidade
+            </h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
+              Versão 1.0 — Abril/2026
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-h-[50vh] overflow-y-auto space-y-5">
+          {TERMS_ARTICLES.map((art, i) => (
+            <div key={i}>
+              <h4 className="font-bold text-slate-800 text-sm mb-1">{art.title}</h4>
+              <p className="text-sm text-slate-600 leading-relaxed">{art.body}</p>
+            </div>
+          ))}
         </div>
       </div>
     );

@@ -1,17 +1,20 @@
 import React from 'react';
-import { MapPin, Store, Newspaper, Megaphone, Heart, Siren, History, Lightbulb, Users, ShieldCheck, DollarSign, Star } from 'lucide-react';
+import { MapPin, Store, Newspaper, Megaphone, Heart, Siren, History, Lightbulb, Users, ShieldCheck, ShieldAlert, DollarSign, Star } from 'lucide-react';
 
 export default function Sidebar({ currentView, setCurrentView, _handleAdminClick, className }) {
-    const menuItems = [
-        { id: 'merchants', label: 'Comércios', icon: <Store size={20} /> },
-        { id: 'news', label: 'Notícias', icon: <Newspaper size={20} /> },
-        { id: 'ads', label: 'Classificados', icon: <Megaphone size={20} /> },
-        { id: 'donations', label: 'Doações', icon: <Heart size={20} /> },
-        { id: 'utility', label: 'Utilidade Pública', icon: <Siren size={20} /> },
-        { id: 'history', label: 'História', icon: <History size={20} /> },
-        { id: 'suggestions', label: 'Sugestões', icon: <Lightbulb size={20} /> },
-        { id: 'management', label: 'Gestão', icon: <ShieldCheck size={20} /> },
-        { id: 'plans', label: 'Planos', icon: <DollarSign size={20} /> },
+    const MAIN_ITEMS = [
+        { id: 'merchants',  label: 'Comércios',          icon: <Store size={20} /> },
+        { id: 'news',       label: 'Notícias',           icon: <Newspaper size={20} /> },
+        { id: 'ads',        label: 'Classificados',     icon: <Megaphone size={20} /> },
+        { id: 'donations',  label: 'Doações',            icon: <Heart size={20} /> },
+        { id: 'utility',    label: 'Utilidade Pública', icon: <Siren size={20} /> },
+        { id: 'history',    label: 'História',           icon: <History size={20} /> },
+        { id: 'suggestions',label: 'Sugestões',          icon: <Lightbulb size={20} /> },
+        { id: 'management', label: 'Gestão',             icon: <ShieldCheck size={20} /> },
+        { id: 'plans',      label: 'Planos',             icon: <DollarSign size={20} /> },
+    ];
+    const SYSTEM_ITEMS = [
+        { id: 'security', label: 'Central de Segurança', icon: <ShieldAlert size={20} /> },
     ];
 
     return (
@@ -32,7 +35,7 @@ export default function Sidebar({ currentView, setCurrentView, _handleAdminClick
                 </div>
 
                 <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-hide -mt-6">
-                    {menuItems.map((item) => (
+                    {MAIN_ITEMS.map((item) => (
                         <button
                             key={item.id}
                             onClick={() => setCurrentView(item.id)}
@@ -42,6 +45,27 @@ export default function Sidebar({ currentView, setCurrentView, _handleAdminClick
                                 }`}
                         >
                             <div className={`transition-colors ${currentView === item.id ? 'text-white' : 'text-slate-500 group-hover:text-white'}`}>
+                                {item.icon}
+                            </div>
+                            {item.label}
+                        </button>
+                    ))}
+
+                    {/* Separador de seção Sistema */}
+                    <div className="pt-3 pb-1 px-4">
+                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.18em]">Sistema</p>
+                    </div>
+
+                    {SYSTEM_ITEMS.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setCurrentView(item.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${currentView === item.id
+                                ? 'bg-slate-700 text-white shadow-lg font-semibold'
+                                : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                                }`}
+                        >
+                            <div className={`transition-colors ${currentView === item.id ? 'text-white' : 'text-slate-600 group-hover:text-slate-300'}`}>
                                 {item.icon}
                             </div>
                             {item.label}

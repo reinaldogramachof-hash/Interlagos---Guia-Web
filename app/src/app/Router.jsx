@@ -19,6 +19,7 @@ import SupportView from '../features/support/SupportView';
 import MembersLandingView from '../features/members/MembersLandingView';
 import MemberPanelView from '../features/members/MemberPanelView';
 import CouponsView from '../features/merchants/CouponsView';
+import SecurityView from '../features/security/SecurityView';
 
 export default function AppRouter({ requireAuth }) {
   const currentView = useUiStore(selectCurrentView);
@@ -34,6 +35,7 @@ export default function AppRouter({ requireAuth }) {
   const goToMerchantPanel = () => requireAuth(() => setCurrentView('merchant-panel'));
 
   switch (currentView) {
+    case 'security': return <SecurityView />;
     case 'news': return <NewsFeed />;
     case 'ads': return <AdsView onRequireAuth={requireAuth} />;
     case 'donations': return <DonationsView />;

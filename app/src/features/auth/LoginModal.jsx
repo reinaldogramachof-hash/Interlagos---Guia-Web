@@ -97,9 +97,63 @@ function PartnerForm({ email, setEmail, password, setPassword, showPassword, set
   );
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const isStandalone = () =>
+  window.navigator.standalone === true ||
+  window.matchMedia('(display-mode: standalone)').matches;
+
+// ── Sub-componente: checkbox de termos ────────────────────────────────────
+function TermsCheckbox({ termsAccepted, setTermsAccepted }) {
+  return (
+    <label className="flex items-start gap-2 cursor-pointer group">
+      <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 accent-indigo-600 flex-shrink-0" />
+      <span className="text-xs text-slate-500 group-hover:text-slate-700 leading-relaxed">
+        Li e aceito os <span className="font-semibold text-indigo-600">Termos de Uso</span> e a <span className="font-semibold text-indigo-600">Política de Privacidade</span>
+      </span>
+    </label>
+  );
+}
+
+// ── Sub-componente: conteúdo da aba Morador ────────────────────────────────
+function ResidentLoginContent({ standalone, magicSent, email, setEmail, otpCode, setOtpCode,
+  loading, termsAccepted, setTermsAccepted, onSendOtp, onVerifyOtp, onGoogleLogin, onClearOtp }) {
+
+  if (magicSent) {
+    return <OtpVerification email={email} otpCode={otpCode} setOtpCode={setOtpCode}
+      loading={loading} onVerify={onVerifyOtp} onResend={onClearOtp} />;
+  }
+
+  return (
+    <>
+      <TermsCheckbox termsAccepted={termsAccepted} setTermsAccepted={setTermsAccepted} />
+      {standalone ? (
+        <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 text-center">
+          <p className="text-xs text-indigo-700 font-medium leading-relaxed">
+            Você está usando o app instalado. Use o código por e-mail para entrar.
+          </p>
+        </div>
+      ) : (
+        <>
+          <button onClick={onGoogleLogin} disabled={loading || !termsAccepted}
+            className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
+            {loading ? <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" /> : <><span className="w-5 h-5 flex items-center justify-center font-black text-blue-500 text-lg leading-none group-hover:scale-110 transition-transform">G</span> Entrar com Google</>}
+          </button>
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-slate-100" />
+            <span className="flex-shrink-0 mx-4 text-slate-300 text-[10px] font-bold uppercase tracking-wider">ou entre com código</span>
+            <div className="flex-grow border-t border-slate-100" />
+          </div>
+        </>
+      )}
+      <ResidentEmailForm email={email} setEmail={setEmail} loading={loading} termsAccepted={termsAccepted} onSubmit={onSendOtp} />
+    </>
+  );
+}
+
 // ── Componente principal ─────────────────────────────────────────────────────
 export default function LoginModal({ onClose, onSuccess }) {
   useScrollLock(true);
+  const standalone = isStandalone();
 
   const [loginType, setLoginType]         = useState('resident');
   const [loading, setLoading]             = useState(false);
@@ -116,10 +170,7 @@ export default function LoginModal({ onClose, onSuccess }) {
   const handleTabSwitch = (tab) => {
     setLoginType(tab); setError(''); setMagicSent(false); setOtpCode(''); setTermsAccepted(false);
   };
-
-  const handleClose = () => {
-    setMagicSent(false); setOtpCode(''); setTermsAccepted(false); onClose();
-  };
+  const handleClose = () => { setMagicSent(false); setOtpCode(''); setTermsAccepted(false); onClose(); };
 
   const handleGoogleLogin = async () => {
     setLoading(true); setError('');
@@ -127,14 +178,12 @@ export default function LoginModal({ onClose, onSuccess }) {
     catch { setError('Erro ao conectar com Google.'); }
     finally { setLoading(false); }
   };
-
   const handleSendOtp = async (e) => {
     e.preventDefault(); setLoading(true); setError('');
     try { await signInWithMagicLink(email); setMagicSent(true); }
     catch { setError('Erro ao enviar código. Verifique o e-mail.'); }
     finally { setLoading(false); }
   };
-
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (otpCode.length < 6) return;
@@ -143,7 +192,6 @@ export default function LoginModal({ onClose, onSuccess }) {
     catch { setError('Código inválido ou expirado. Tente novamente.'); }
     finally { setLoading(false); }
   };
-
   const handlePasswordLogin = async (e) => {
     e.preventDefault(); setLoading(true); setError('');
     try { await signInWithPassword(email, password); onSuccess?.(); onClose(); }
@@ -151,23 +199,12 @@ export default function LoginModal({ onClose, onSuccess }) {
     finally { setLoading(false); }
   };
 
-  const TermsCheckbox = () => (
-    <label className="flex items-start gap-2 cursor-pointer group">
-      <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 accent-indigo-600 flex-shrink-0" />
-      <span className="text-xs text-slate-500 group-hover:text-slate-700 leading-relaxed">
-        Li e aceito os <span className="font-semibold text-indigo-600">Termos de Uso</span> e a <span className="font-semibold text-indigo-600">Política de Privacidade</span>
-      </span>
-    </label>
-  );
-
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
       <div className={`bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20 relative ${loginType === 'partner' ? 'ring-4 ring-slate-900/10' : ''}`}>
-
         <button onClick={handleClose} className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
           <X size={18} />
         </button>
-
         <div className={`relative px-6 pt-7 pb-12 transition-colors duration-500 ${loginType === 'partner' ? 'bg-slate-900' : 'bg-indigo-600'}`}>
           <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.5)_1px,transparent_0)] bg-[size:20px_20px]" />
           <div className="relative z-10 text-center">
@@ -182,7 +219,6 @@ export default function LoginModal({ onClose, onSuccess }) {
             </p>
           </div>
         </div>
-
         <div className="relative -mt-6 px-6 mb-4">
           <div className="bg-white p-1 rounded-xl shadow-lg border border-slate-100 flex">
             <button onClick={() => handleTabSwitch('resident')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${loginType === 'resident' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -193,44 +229,24 @@ export default function LoginModal({ onClose, onSuccess }) {
             </button>
           </div>
         </div>
-
         <div className="px-6 pb-6">
           {error && (
             <div className="bg-red-50 border border-red-100 text-red-600 text-xs font-bold p-3 rounded-xl mb-5 flex items-center gap-2 animate-in slide-in-from-top-2">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500" /> {error}
             </div>
           )}
-
           {loginType === 'resident' && (
-            <div className="space-y-4">
-              {magicSent ? (
-                <OtpVerification email={email} otpCode={otpCode} setOtpCode={setOtpCode}
-                  loading={loading} onVerify={handleVerifyOtp}
-                  onResend={() => { setMagicSent(false); setOtpCode(''); setError(''); }} />
-              ) : (
-                <>
-                  <TermsCheckbox />
-                  <button onClick={handleGoogleLogin} disabled={loading || !termsAccepted}
-                    className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" /> : <><span className="w-5 h-5 flex items-center justify-center font-black text-blue-500 text-lg leading-none group-hover:scale-110 transition-transform">G</span> Entrar com Google</>}
-                  </button>
-                  <div className="relative flex py-1 items-center">
-                    <div className="flex-grow border-t border-slate-100" />
-                    <span className="flex-shrink-0 mx-4 text-slate-300 text-[10px] font-bold uppercase tracking-wider">ou entre com código</span>
-                    <div className="flex-grow border-t border-slate-100" />
-                  </div>
-                  <ResidentEmailForm email={email} setEmail={setEmail} loading={loading} termsAccepted={termsAccepted} onSubmit={handleSendOtp} />
-                </>
-              )}
-            </div>
+            <ResidentLoginContent standalone={standalone} magicSent={magicSent} email={email}
+              setEmail={setEmail} otpCode={otpCode} setOtpCode={setOtpCode} loading={loading}
+              termsAccepted={termsAccepted} setTermsAccepted={setTermsAccepted}
+              onSendOtp={handleSendOtp} onVerifyOtp={handleVerifyOtp} onGoogleLogin={handleGoogleLogin}
+              onClearOtp={() => { setMagicSent(false); setOtpCode(''); setError(''); }} />
           )}
-
           {loginType === 'partner' && (
             <PartnerForm email={email} setEmail={setEmail} password={password} setPassword={setPassword}
               showPassword={showPassword} setShowPassword={setShowPassword}
               loading={loading} termsAccepted={termsAccepted} onSubmit={handlePasswordLogin} />
           )}
-
           <p className="mt-5 text-center text-[10px] text-slate-300 font-bold uppercase tracking-widest">Versão Beta 2.0</p>
         </div>
       </div>

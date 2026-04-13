@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Tag, PlusCircle } from 'lucide-react';
 import AdCard from './AdCard';
-import { fetchAds, subscribeAds } from '../../services/adsService';
+import { subscribeAds } from '../../services/adsService';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
 import EmptyState from '../../components/EmptyState';
 import { incrementAdClick } from '../../services/statsService';
-import { useToast } from '../../components/Toast';
 import { useAuth } from '../auth/AuthContext';
 
 const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Veículos', 'Eletrônicos', 'Doações'];
@@ -14,7 +13,6 @@ const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Ve�
 
 
 export default function AdsView({ onRequireAuth }) {
-    const showToast = useToast();
     const { currentUser } = useAuth();
     const [selectedAd, setSelectedAd] = useState(null);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -24,19 +22,15 @@ export default function AdsView({ onRequireAuth }) {
 
     useEffect(() => {
         let cancelled = false;
-        const loadAds = async () => {
-            try {
-                const data = await fetchAds();
-                if (!cancelled) setAds(data);
-            } catch (error) {
-                console.error('Erro ao carregar anúncios:', error);
-                showToast('Erro ao carregar anúncios.', 'error');
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
+        setLoading(true);
 
-        const unsubscribe = subscribeAds(loadAds);
+        const unsubscribe = subscribeAds((data) => {
+            if (!cancelled) {
+                setAds(data);
+                setLoading(false);
+            }
+        });
+
         return () => {
             cancelled = true;
             unsubscribe();

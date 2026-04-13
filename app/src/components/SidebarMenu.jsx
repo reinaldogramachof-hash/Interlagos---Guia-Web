@@ -8,6 +8,7 @@ import {
     Heart,
     Lightbulb,
     ShieldCheck,
+    ShieldAlert,
     LayoutDashboard,
     Store,
     LogIn,
@@ -36,6 +37,10 @@ const COMMUNITY_ITEMS = [
 const MEMBERS_ITEMS = [
     { id: 'members-landing', label: 'Seja Membro',         icon: Heart,  desc: 'Apoie o bairro' },
     { id: 'member-panel',    label: 'Meu Plano de Membro', icon: Medal,  desc: 'Benefícios e badge', requireAuth: true },
+];
+
+const SYSTEM_ITEMS = [
+    { id: 'security', label: 'Central de Segurança', icon: ShieldAlert, desc: 'Termos, privacidade e conduta' },
 ];
 
 // ─── SidebarMenu ──────────────────────────────────────────────────────────────
@@ -138,14 +143,17 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                     {(isAdmin || isMaster) && (
                         <>
                             <Divider />
-                            <SidebarMenuSection 
-                                title="Administração" 
-                                items={[{ id: 'admin', label: 'Painel Administrativo', icon: ShieldCheck, desc: 'Gestão do sistema', requireAuth: true }]} 
-                                onNavigate={handleNav} 
-                                accent 
+                            <SidebarMenuSection
+                                title="Administração"
+                                items={[{ id: 'admin', label: 'Painel Administrativo', icon: ShieldCheck, desc: 'Gestão do sistema', requireAuth: true }]}
+                                onNavigate={handleNav}
+                                accent
                             />
                         </>
                     )}
+
+                    <Divider />
+                    <SidebarMenuSection title="Sistema" items={SYSTEM_ITEMS} onNavigate={handleNav} />
                 </div>
 
                 {canInstall && !isInstalled && (
