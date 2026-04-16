@@ -4,6 +4,7 @@ import { useToast } from '../../../../components/Toast';
 import { updateUserProfile } from '../../../../services/authService';
 import { uploadImage } from '../../../../services/storageService';
 import useAuthStore from '../../../../stores/authStore';
+import VerificationCard from '../../../../components/VerificationCard';
 
 // R8: opções de bairro para o select
 const NEIGHBORHOOD_OPTIONS = [
@@ -21,6 +22,7 @@ export default function SettingsTab({ currentUser }) {
   const [loading, setLoading]           = useState(false);
   const [displayName, setDisplayName]   = useState(currentUser?.displayName || '');
   const [fullName, setFullName]         = useState(profile?.full_name || '');
+  const [phone, setPhone]               = useState(profile?.phone || '');
   const [neighborhood, setNeighborhood] = useState(profile?.neighborhood || '');
   const [photoFile, setPhotoFile]       = useState(null);
   const [photoPreview, setPhotoPreview] = useState(currentUser?.photoURL || '');
@@ -55,6 +57,7 @@ export default function SettingsTab({ currentUser }) {
         photo_url: photoURL,
         // R8: campos full_name e neighborhood agora editáveis
         full_name: fullName.trim() || null,
+        phone: phone.trim() || null,
         neighborhood: neighborhood || null,
       });
 
@@ -68,8 +71,16 @@ export default function SettingsTab({ currentUser }) {
   };
 
   return (
-    <div className="max-w-2xl animate-in fade-in duration-500">
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Configurações de Perfil</h3>
+    <div className="max-w-2xl animate-in fade-in duration-500 space-y-8">
+      <div>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Configurações de Perfil</h3>
+        <VerificationCard
+          profile={profile}
+          merchant={null}
+          currentUser={currentUser}
+          onNavigate={() => {}} // Já está em settings
+        />
+      </div>
       <form onSubmit={handleSave} className="space-y-6">
         {/* Foto + nome de exibição */}
         <div className="flex flex-col md:flex-row items-center gap-8">
@@ -115,8 +126,8 @@ export default function SettingsTab({ currentUser }) {
           </div>
         </div>
 
-        {/* R8: campos full_name e neighborhood */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+        {/* R8: campos full_name, phone e neighborhood */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase ml-1">Nome Completo</label>
             <input
@@ -126,6 +137,22 @@ export default function SettingsTab({ currentUser }) {
               placeholder="Seu nome completo"
               className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-base sm:text-sm"
             />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-500 uppercase ml-1">
+              Telefone / WhatsApp
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+              placeholder="11999998888"
+              maxLength={11}
+              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-base sm:text-sm"
+            />
+            <p className="text-[10px] text-slate-400 ml-1">
+              Apenas números. Verificação de perfil.
+            </p>
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase ml-1">Bairro</label>

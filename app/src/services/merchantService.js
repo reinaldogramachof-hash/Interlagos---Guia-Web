@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { createNotification, notifyAdmins } from './notificationService';
+import { PLAN_RANK } from '../constants/plans';
 
 export const getMerchants = async () => {
   const { data, error } = await supabase
@@ -9,7 +10,9 @@ export const getMerchants = async () => {
     .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) { console.error('merchantService.getMerchants:', error); return []; }
-  return data;
+  
+  // Ordena por prioridade de plano (hasTopSearch)
+  return data.sort((a, b) => (PLAN_RANK[b.plan] ?? 0) - (PLAN_RANK[a.plan] ?? 0));
 };
 
 export const adminGetMerchants = async () => {
@@ -19,7 +22,9 @@ export const adminGetMerchants = async () => {
     .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
     .order('created_at', { ascending: false });
   if (error) { console.error('merchantService.adminGetMerchants:', error); return []; }
-  return data;
+
+  // Mesmo critério de sorteio para o admin
+  return data.sort((a, b) => (PLAN_RANK[b.plan] ?? 0) - (PLAN_RANK[a.plan] ?? 0));
 };
 
 export const subscribeMerchants = (callback) => {

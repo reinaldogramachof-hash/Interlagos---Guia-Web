@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Tag, MousePointer, Lock } from 'lucide-react';
+import { Eye, MousePointer, Lock, ImageIcon } from 'lucide-react';
 import { PLANS_CONFIG } from '../../../../constants/plans';
 import VerificationCard from '../../../../components/VerificationCard';
 import useAuthStore from '../../../../stores/authStore';
 import { getMerchantStats } from '../../../../services/statsService';
+import { getMerchantPosts } from '../../../../services/merchantPostsService';
 
-export default function DashboardTab({ merchant, myAds, onUpgrade, currentUser, onNavigate }) {
+export default function DashboardTab({ merchant, onUpgrade, currentUser, onNavigate }) {
   const profile = useAuthStore(s => s.profile);
   const plan = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
-  const adLimit = plan.adLimit;
+  const postLimit = plan.postLimit;
   const [stats, setStats] = useState(null);
+  const [postCount, setPostCount] = useState(0);
 
   useEffect(() => {
     if (!merchant?.id || !merchant?.neighborhood) return;
     getMerchantStats(merchant.id, merchant.neighborhood).then(setStats);
+    getMerchantPosts(merchant.id).then(p => setPostCount(p.length));
   }, [merchant?.id, merchant?.neighborhood]);
 
   return (
@@ -28,14 +31,14 @@ export default function DashboardTab({ merchant, myAds, onUpgrade, currentUser, 
           <p className="text-2xl md:text-3xl font-bold text-indigo-600">{stats ? stats.views : '-'}</p>
         </div>
 
-        {/* Anúncios Ativos */}
+        {/* Posts na Vitrine */}
         <div className="bg-emerald-50 p-4 md:p-6 rounded-2xl border border-emerald-100">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600"><Tag size={20} /></div>
-            <h3 className="text-emerald-900 font-bold">Anúncios Ativos</h3>
+            <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600"><ImageIcon size={20} /></div>
+            <h3 className="text-emerald-900 font-bold">Posts na Vitrine</h3>
           </div>
           <p className="text-2xl md:text-3xl font-bold text-emerald-600">
-            {myAds.length} / {adLimit >= 999 ? '∞' : adLimit}
+            {postCount} / {postLimit >= 999 ? '∞' : postLimit}
           </p>
         </div>
 
@@ -93,8 +96,8 @@ export default function DashboardTab({ merchant, myAds, onUpgrade, currentUser, 
             <h4 className="font-bold text-slate-800">Desbloqueie mais recursos</h4>
             <p className="text-sm text-slate-500">
               {merchant?.plan === 'free'
-                ? 'Faça upgrade para o plano Básico e publique até 3 anúncios.'
-                : 'Upgrade para Pro: estatísticas, links sociais e anúncios ilimitados.'}
+                ? 'Faça upgrade para o plano Básico e publique até 3 anuncios.'
+                : 'Upgrade para Pro: estatísticas, links sociais e posts ilimitados na Vitrine.'}
             </p>
           </div>
           <button onClick={onUpgrade} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-indigo-700 whitespace-nowrap">

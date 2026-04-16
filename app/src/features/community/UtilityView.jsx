@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Phone, Shield, Bus, Stethoscope, AlertTriangle, Search, Flame, Users, Trees, Heart, Loader2 } from 'lucide-react';
+import { Phone, Shield, Bus, Stethoscope, AlertTriangle, Search, Flame, Users, Trees, Heart, Loader2, Clock } from 'lucide-react';
 import { fetchPublicServices } from '../../services/communityService';
+import BusScheduleModal from './BusScheduleModal';
 
 const ICON_MAP = {
   shield: Shield,
@@ -18,6 +19,7 @@ export default function UtilityView({ onServiceClick }) {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
+  const [busLine, setBusLine] = useState(null);
 
   useEffect(() => {
     fetchPublicServices()
@@ -73,6 +75,7 @@ export default function UtilityView({ onServiceClick }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map(s => {
             const Icon = ICON_MAP[s.icon_type] || Phone;
+            const busLineKey = s.name.includes('315') ? '315' : s.name.includes('316') ? '316' : null;
             return (
               <div
                 key={s.id}
@@ -96,12 +99,22 @@ export default function UtilityView({ onServiceClick }) {
                   )}
                   {s.hours && <p className="text-xs text-slate-400 font-medium mb-1">{s.hours}</p>}
                   <p className="text-sm text-slate-500 line-clamp-2">{s.description}</p>
+                  {busLineKey && (
+                    <button
+                      onClick={e => { e.stopPropagation(); setBusLine(busLineKey); }}
+                      className="mt-2 text-xs font-bold text-brand-600 hover:underline flex items-center gap-1"
+                    >
+                      <Clock size={12} /> Ver Horários Completos
+                    </button>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      <BusScheduleModal isOpen={!!busLine} onClose={() => setBusLine(null)} line={busLine} />
     </div>
   );
 }

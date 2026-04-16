@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Newspaper, PlusCircle } from 'lucide-react';
+import { Newspaper, PlusCircle, Search, X } from 'lucide-react';
 import { fetchNews, subscribeNews, fetchCommentCounts } from '../../services/newsService';
 import { hasConsent } from '../../services/consentService';
 import NewsDetailModal from './NewsDetailModal';
@@ -18,6 +18,7 @@ export default function NewsFeed() {
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [searchTerm, setSearchTerm] = useState('');
     const [showResponsibility, setShowResponsibility] = useState(false);
     const [showCreateNews, setShowCreateNews] = useState(false);
     const [commentCounts, setCommentCounts] = useState({});
@@ -57,9 +58,13 @@ export default function NewsFeed() {
         };
     }, []);
 
-    const filteredNews = selectedCategory === 'Todos'
-        ? news
-        : news.filter(item => item.category === selectedCategory);
+    const filteredNews = news.filter(item => {
+        const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
+        const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              item.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              item.summary?.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     const handlePublishClick = async () => {
         if (!userId) return;
@@ -81,51 +86,71 @@ export default function NewsFeed() {
     return (
         <div className="pb-4 animate-in fade-in duration-300">
 
-            {/* Banner do Jornal */}
-            <div className="relative h-32 overflow-hidden shadow-md">
-                <img
-                    src="/capa.jpg"
-                    alt="Jornal do Bairro"
-                    className="w-full h-full object-cover"
-                    onError={e => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800'; }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/90 via-indigo-900/60 to-transparent flex items-center justify-between px-5">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/20">
-                            <Newspaper size={24} className="text-white" />
+            {/* Cabecalho Fixo Integrado */}
+            <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md pb-2 shadow-sm border-b border-gray-200">
+                {/* Banner do Jornal */}
+                <div className="relative h-28 overflow-hidden">
+                    <img
+                        src="/capa.jpg"
+                        alt="Jornal do Bairro"
+                        className="w-full h-full object-cover"
+                        onError={e => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/90 via-indigo-900/60 to-transparent flex items-center justify-between px-5">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/20">
+                                <Newspaper size={24} className="text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-white leading-tight tracking-tight">Jornal do Bairro</h2>
+                                <p className="text-indigo-200 text-[10px] font-bold uppercase tracking-wider">Informaçōes Úteis e Reais</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-xl font-black text-white leading-tight tracking-tight">Jornal do Bairro</h2>
-                            <p className="text-indigo-200 text-[10px] font-bold uppercase tracking-wider">Informaçōes Úteis e Reais</p>
-                        </div>
+                        {userId && (
+                            <button
+                                onClick={handlePublishClick}
+                                className="flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-95"
+                            >
+                                <PlusCircle size={16} />
+                                Publicar
+                            </button>
+                        )}
                     </div>
-                    {userId && (
-                        <button
-                            onClick={handlePublishClick}
-                            className="flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-95"
-                        >
-                            <PlusCircle size={16} />
-                            Publicar
-                        </button>
-                    )}
                 </div>
-            </div>
 
-            {/* Filtros de Categoria */}
-            <div className="overflow-x-auto whitespace-nowrap flex gap-2 px-3 py-3 border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-14 z-10 no-scrollbar">
-                {CATEGORIES.map(cat => (
-                    <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedCategory === cat
-                                ? 'bg-brand-600 text-white shadow-md shadow-brand-600/10'
-                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                            }`}
-                    >
-                        {cat === 'Urgente' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-                        {cat}
-                    </button>
-                ))}
+                {/* Busca e Filtros de Categoria */}
+                <div className="px-3 pt-3 space-y-2">
+                    <div className="relative">
+                      <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        placeholder="Buscar notícias..."
+                        className="w-full pl-9 pr-9 py-2 bg-white border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm"
+                      />
+                      {searchTerm && (
+                        <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="overflow-x-auto whitespace-nowrap flex gap-2 pb-1 no-scrollbar">
+                        {CATEGORIES.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all min-h-[36px] flex items-center ${selectedCategory === cat
+                                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/10'
+                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-brand-300'
+                                    }`}
+                            >
+                                {cat === 'Urgente' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             {/* Feed */}

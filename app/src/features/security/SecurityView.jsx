@@ -11,39 +11,39 @@ import {
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'overview',  label: 'Visão Geral',       icon: Shield },
-  { id: 'terms',     label: 'Termos de Uso',      icon: FileText },
-  { id: 'privacy',   label: 'Privacidade & LGPD', icon: Lock },
-  { id: 'cookies',   label: 'Cookies',            icon: Database },
-  { id: 'conduct',   label: 'Conduta',            icon: AlertTriangle },
-  { id: 'about',     label: 'Sobre',              icon: Info },
+  { id: 'overview', label: 'Visão Geral', icon: Shield },
+  { id: 'terms', label: 'Termos de Uso', icon: FileText },
+  { id: 'privacy', label: 'Privacidade & LGPD', icon: Lock },
+  { id: 'cookies', label: 'Cookies', icon: Database },
+  { id: 'conduct', label: 'Conduta', icon: AlertTriangle },
+  { id: 'about', label: 'Sobre', icon: Info },
 ];
 
 // ─── Sub-componente: Aba Visão Geral ──────────────────────────────────────────
 function OverviewTab() {
   const commitments = [
-    { icon: Shield,      color: 'indigo', title: 'Seus dados protegidos',    desc: 'Infraestrutura criptografada, sem venda para terceiros.' },
-    { icon: Lock,        color: 'emerald', title: 'Autenticação segura',      desc: 'OAuth 2.0 + OTP — sem senhas frágeis.' },
-    { icon: ShieldAlert, color: 'amber',   title: 'Moderação ativa',          desc: 'Conteúdo revisado por equipe dedicada 24h.' },
-    { icon: FileText,    color: 'blue',    title: 'Termos transparentes',     desc: 'Linguagem clara, sem letras miúdas importantes.' },
-    { icon: Scale,       color: 'purple',  title: 'LGPD compliance',          desc: 'Lei 13.709/2018 respeitada integralmente.' },
-    { icon: Users,       color: 'slate',   title: 'Comunidade responsável',   desc: 'Código de conduta para um bairro digital saudável.' },
+    { icon: Shield, color: 'indigo', title: 'Seus dados protegidos', desc: 'Infraestrutura criptografada, sem venda para terceiros.' },
+    { icon: Lock, color: 'emerald', title: 'Autenticação segura', desc: 'OAuth 2.0 + OTP — sem senhas frágeis.' },
+    { icon: ShieldAlert, color: 'amber', title: 'Moderação ativa', desc: 'Conteúdo revisado por equipe dedicada 24h.' },
+    { icon: FileText, color: 'blue', title: 'Termos transparentes', desc: 'Linguagem clara, sem letras miúdas importantes.' },
+    { icon: Scale, color: 'purple', title: 'LGPD compliance', desc: 'Lei 13.709/2018 respeitada integralmente.' },
+    { icon: Users, color: 'slate', title: 'Comunidade responsável', desc: 'Código de conduta para um bairro digital saudável.' },
   ];
   const colorMap = {
-    indigo:  'bg-indigo-50  border-indigo-100  text-indigo-600',
+    indigo: 'bg-indigo-50  border-indigo-100  text-indigo-600',
     emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600',
-    amber:   'bg-amber-50   border-amber-100   text-amber-600',
-    blue:    'bg-blue-50    border-blue-100    text-blue-600',
-    purple:  'bg-purple-50  border-purple-100  text-purple-600',
-    slate:   'bg-slate-50   border-slate-100   text-slate-600',
+    amber: 'bg-amber-50   border-amber-100   text-amber-600',
+    blue: 'bg-blue-50    border-blue-100    text-blue-600',
+    purple: 'bg-purple-50  border-purple-100  text-purple-600',
+    slate: 'bg-slate-50   border-slate-100   text-slate-600',
   };
   const iconBgMap = {
-    indigo:  'bg-indigo-100',
+    indigo: 'bg-indigo-100',
     emerald: 'bg-emerald-100',
-    amber:   'bg-amber-100',
-    blue:    'bg-blue-100',
-    purple:  'bg-purple-100',
-    slate:   'bg-slate-100',
+    amber: 'bg-amber-100',
+    blue: 'bg-blue-100',
+    purple: 'bg-purple-100',
+    slate: 'bg-slate-100',
   };
 
   return (
@@ -105,20 +105,20 @@ function TermsTabLocal() {
 // ─── Sub-componente: Aba Privacidade ─────────────────────────────────────────
 const LGPD_RIGHTS = [
   { label: 'Confirmação de tratamento', desc: 'Saber se seus dados são processados.' },
-  { label: 'Acesso',                    desc: 'Ver todos os dados que temos sobre você.' },
-  { label: 'Correção',                  desc: 'Corrigir dados incompletos ou incorretos.' },
-  { label: 'Anonimização/Exclusão',     desc: 'Eliminar dados desnecessários.' },
-  { label: 'Portabilidade',             desc: 'Levar seus dados para outro serviço.' },
-  { label: 'Exclusão',                  desc: 'Apagar dados tratados com consentimento.' },
-  { label: 'Informação de terceiros',   desc: 'Saber com quem compartilhamos seus dados.' },
-  { label: 'Revogação',                 desc: 'Retirar consentimento a qualquer momento.' },
+  { label: 'Acesso', desc: 'Ver todos os dados que temos sobre você.' },
+  { label: 'Correção', desc: 'Corrigir dados incompletos ou incorretos.' },
+  { label: 'Anonimização/Exclusão', desc: 'Eliminar dados desnecessários.' },
+  { label: 'Portabilidade', desc: 'Levar seus dados para outro serviço.' },
+  { label: 'Exclusão', desc: 'Apagar dados tratados com consentimento.' },
+  { label: 'Informação de terceiros', desc: 'Saber com quem compartilhamos seus dados.' },
+  { label: 'Revogação', desc: 'Retirar consentimento a qualquer momento.' },
 ];
 
 const PRIVACY_ICON_MAP = {
   database: Database,
   settings: Shield,
-  share2:   Users,
-  shield:   Lock,
+  share2: Users,
+  shield: Lock,
 };
 
 function PrivacyTab() {
@@ -202,8 +202,8 @@ const COOKIE_CARDS = [
 ];
 
 const COOKIE_COLOR_MAP = {
-  blue:    { card: 'border-blue-100',    icon: 'bg-blue-100 text-blue-600',    badge: 'bg-blue-50 text-blue-700' },
-  indigo:  { card: 'border-indigo-100',  icon: 'bg-indigo-100 text-indigo-600', badge: 'bg-indigo-50 text-indigo-700' },
+  blue: { card: 'border-blue-100', icon: 'bg-blue-100 text-blue-600', badge: 'bg-blue-50 text-blue-700' },
+  indigo: { card: 'border-indigo-100', icon: 'bg-indigo-100 text-indigo-600', badge: 'bg-indigo-50 text-indigo-700' },
   emerald: { card: 'border-emerald-100', icon: 'bg-emerald-100 text-emerald-600', badge: 'bg-emerald-50 text-emerald-700' },
 };
 
@@ -263,18 +263,18 @@ function CookiesTab() {
 // ─── Sub-componente: Aba Conduta ─────────────────────────────────────────────
 const CONDUCT_STYLE = {
   critical: {
-    badge:    'bg-red-100 text-red-800 border-red-200',
-    card:     'border-red-100',
+    badge: 'bg-red-100 text-red-800 border-red-200',
+    card: 'border-red-100',
     iconColor: 'text-red-500',
   },
   severe: {
-    badge:    'bg-orange-100 text-orange-800 border-orange-200',
-    card:     'border-orange-100',
+    badge: 'bg-orange-100 text-orange-800 border-orange-200',
+    card: 'border-orange-100',
     iconColor: 'text-orange-500',
   },
   moderate: {
-    badge:    'bg-amber-100 text-amber-800 border-amber-200',
-    card:     'border-amber-100',
+    badge: 'bg-amber-100 text-amber-800 border-amber-200',
+    card: 'border-amber-100',
     iconColor: 'text-amber-500',
   },
 };
@@ -357,7 +357,7 @@ function AboutTab() {
             {[
               ['Versão', 'Beta 2.0'],
               ['Bairros ativos', '1 (Parque Interlagos)'],
-              ['Lançamento', '2025'],
+              ['Lançamento', '2026'],
               ['Tecnologia', 'React 19 + Supabase'],
               ['Hospedagem', 'Hostgator Brasil'],
             ].map(([dt, dd]) => (
@@ -447,12 +447,12 @@ export default function SecurityView() {
   const renderTab = () => {
     switch (activeTab) {
       case 'overview': return <OverviewTab />;
-      case 'terms':    return <TermsTabLocal />;
-      case 'privacy':  return <PrivacyTab />;
-      case 'cookies':  return <CookiesTab />;
-      case 'conduct':  return <ConductTab />;
-      case 'about':    return <AboutTab />;
-      default:         return <OverviewTab />;
+      case 'terms': return <TermsTabLocal />;
+      case 'privacy': return <PrivacyTab />;
+      case 'cookies': return <CookiesTab />;
+      case 'conduct': return <ConductTab />;
+      case 'about': return <AboutTab />;
+      default: return <OverviewTab />;
     }
   };
 
@@ -471,11 +471,10 @@ export default function SecurityView() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === id
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${activeTab === id
                   ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
+                }`}
             >
               <Icon size={13} />
               <span>{label}</span>

@@ -17,7 +17,6 @@ import {
     CreditCard,
     Download,
     BarChart2,
-    MessageCircle,
     Medal,
     Shield,
     Home,
@@ -27,16 +26,16 @@ import SidebarMenuSection, { Divider, SectionLabel, MenuItem } from './SidebarMe
 
 // ─── Seções do menu ───────────────────────────────────────────────────────────
 const COMMUNITY_ITEMS = [
-    { id: 'utility',     label: 'Utilidade Pública', icon: Zap,        desc: 'Serviços e emergências' },
-    { id: 'polls',       label: 'Enquetes',           icon: BarChart2,  desc: 'Vote e opine no bairro' },
-    { id: 'suggestions', label: 'Sugestões',          icon: Lightbulb,  desc: 'Dê sua opinião' },
-    { id: 'history',     label: 'História do Bairro', icon: History,    desc: 'Conheça Interlagos' },
+    { id: 'utility', label: 'Utilidade Pública', icon: Zap, desc: 'Serviços e emergências' },
+    { id: 'polls', label: 'Enquetes', icon: BarChart2, desc: 'Vote e opine no bairro' },
+    { id: 'suggestions', label: 'Sugestões', icon: Lightbulb, desc: 'Dê sua opinião' },
+    { id: 'history', label: 'História do Bairro', icon: History, desc: 'Conheça Interlagos' },
 ];
 
 // A seção de negócios (Business/Resident) será gerada dinamicamente dentro do componente
 const MEMBERS_ITEMS = [
-    { id: 'members-landing', label: 'Seja Membro',         icon: Heart,  desc: 'Apoie o bairro' },
-    { id: 'member-panel',    label: 'Meu Plano de Membro', icon: Medal,  desc: 'Benefícios e badge', requireAuth: true },
+    { id: 'members-landing', label: 'Seja Membro', icon: Heart, desc: 'Apoie o bairro' },
+    { id: 'member-panel', label: 'Meu Plano de Membro', icon: Medal, desc: 'Benefícios e badge', requireAuth: true },
 ];
 
 const SYSTEM_ITEMS = [
@@ -79,7 +78,6 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
             const residentItems = [
                 { id: 'resident-panel', label: 'Meu Painel', icon: Home, desc: 'Seus classificados e histórico', requireAuth: true },
                 { id: 'merchant-landing', label: 'Venda no Bairro', icon: Store, desc: 'Evolua para Comerciante e Anuncie' },
-                { id: 'support', label: 'Suporte', icon: MessageCircle, desc: 'Tire suas dúvidas' }
             ];
             return <SidebarMenuSection title="Minha Conta" items={residentItems} onNavigate={handleNav} />;
         }
@@ -88,7 +86,6 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
         const merchantItems = [
             { id: 'merchant-panel', label: 'Painel do Proprietário', icon: LayoutDashboard, desc: 'Gerencie sua loja e anúncios', requireAuth: true },
             { id: 'plans', label: 'Planos e Upgrades', icon: CreditCard, desc: 'Básico · Pro · Premium' },
-            { id: 'support', label: 'Suporte', icon: MessageCircle, desc: 'Atendimento exclusivo' }
         ];
         return <SidebarMenuSection title="Meu Negócio" items={merchantItems} onNavigate={handleNav} />;
     };
@@ -186,7 +183,7 @@ export default function SidebarMenu({ isOpen, onClose, onNavigate, onLoginOpen }
                         </button>
                     ) : (
                         <p className="text-center text-xs text-gray-400">
-                            Tem No Bairro © 2025
+                            Tem No Bairro © 2026. Todos os direitos reservados.
                         </p>
                     )}
                 </div>

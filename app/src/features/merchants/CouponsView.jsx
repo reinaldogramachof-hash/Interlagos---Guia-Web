@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { formatDate } from '../../utils/dateUtils';
-import { ArrowLeft, Ticket, Tag, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Ticket, Tag, ChevronRight, Search, X } from 'lucide-react';
 import { fetchActiveCoupons } from '../../services/communityService';
 
 export default function CouponsView({ onMerchantClick, onBack }) {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchActiveCoupons()
@@ -13,15 +14,38 @@ export default function CouponsView({ onMerchantClick, onBack }) {
       .finally(() => setLoading(false));
   }, []);
 
+  const filteredCoupons = coupons.filter(coupon => {
+      const matchesSearch = coupon.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            coupon.merchants?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesSearch;
+  });
+
   return (
     <div className="pb-4">
-      <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100">
-        <button onClick={onBack} className="p-1.5 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h2 className="font-black text-gray-900">Cupons &amp; Ofertas</h2>
-          <p className="text-xs text-gray-400">{coupons.length} oferta{coupons.length !== 1 ? 's' : ''} ativa{coupons.length !== 1 ? 's' : ''}</p>
+      <div className="px-4 pt-4 pb-3 border-b border-gray-100 bg-white sticky top-0 z-10 space-y-3">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1.5 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h2 className="font-black text-gray-900">Cupons &amp; Ofertas</h2>
+            <p className="text-xs text-gray-400">{filteredCoupons.length} oferta{filteredCoupons.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+        <div className="relative">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Buscar cupons ou lojas..."
+            className="w-full pl-9 pr-9 py-2.5 bg-white border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -31,15 +55,15 @@ export default function CouponsView({ onMerchantClick, onBack }) {
             <div key={i} className="h-44 bg-gray-100 rounded-card animate-pulse" />
           ))}
         </div>
-      ) : coupons.length === 0 ? (
+      ) : filteredCoupons.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center px-6">
           <Ticket size={40} className="text-gray-200 mb-3" />
-          <p className="font-bold text-gray-500">Nenhum cupom disponível</p>
-          <p className="text-sm text-gray-400 mt-1">Volte em breve para novas promoções!</p>
+          <p className="font-bold text-gray-500">Nenhum cupom encontrado</p>
+          <p className="text-sm text-gray-400 mt-1">Tente buscar por outros termos.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 px-4 pt-4">
-          {coupons.map(coupon => {
+          {filteredCoupons.map(coupon => {
             const merchant = coupon.merchants ?? {};
             return (
               <div

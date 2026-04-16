@@ -90,7 +90,11 @@ export default function ApprovalsTab({ onEscalate, onCountChange }) {
     }
   };
 
-  useEffect(() => { fetchPending(); }, []);
+  useEffect(() => {
+    fetchPending();
+    const interval = setInterval(fetchPending, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleApprove = async (table, id) => {
     try {

@@ -63,9 +63,12 @@ function ResidentEmailForm({ email, setEmail, loading, termsAccepted, onSubmit }
 }
 
 // ── Sub-componente: login parceiro (email + senha) ────────────────────────────
-function PartnerForm({ email, setEmail, password, setPassword, showPassword, setShowPassword, loading, termsAccepted, onSubmit }) {
+function PartnerForm({ email, setEmail, password, setPassword, showPassword, setShowPassword, loading, termsAccepted, setTermsAccepted, onSubmit }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      <div className="mb-2">
+        <TermsCheckbox termsAccepted={termsAccepted} setTermsAccepted={setTermsAccepted} />
+      </div>
       <div>
         <label className="text-xs font-bold text-slate-500 ml-1 mb-1 block">E-mail Corporativo</label>
         <div className="relative">
@@ -168,7 +171,7 @@ export default function LoginModal({ onClose, onSuccess }) {
   const { signInWithGoogle, signInWithMagicLink, signInWithPassword, verifyOtp } = useAuthStore();
 
   const handleTabSwitch = (tab) => {
-    setLoginType(tab); setError(''); setMagicSent(false); setOtpCode(''); setTermsAccepted(false);
+    setLoginType(tab); setError(''); setMagicSent(false); setOtpCode('');
   };
   const handleClose = () => { setMagicSent(false); setOtpCode(''); setTermsAccepted(false); onClose(); };
 
@@ -245,7 +248,7 @@ export default function LoginModal({ onClose, onSuccess }) {
           {loginType === 'partner' && (
             <PartnerForm email={email} setEmail={setEmail} password={password} setPassword={setPassword}
               showPassword={showPassword} setShowPassword={setShowPassword}
-              loading={loading} termsAccepted={termsAccepted} onSubmit={handlePasswordLogin} />
+              loading={loading} termsAccepted={termsAccepted} setTermsAccepted={setTermsAccepted} onSubmit={handlePasswordLogin} />
           )}
           <p className="mt-5 text-center text-[10px] text-slate-300 font-bold uppercase tracking-widest">Versão Beta 2.0</p>
         </div>

@@ -28,7 +28,11 @@ export default function MerchantsTab() {
     setMerchants(data);
   };
 
-  useEffect(() => { fetchMerchants(); }, []);
+  useEffect(() => {
+    fetchMerchants();
+    const interval = setInterval(fetchMerchants, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSave = async (e) => {
     e.preventDefault();

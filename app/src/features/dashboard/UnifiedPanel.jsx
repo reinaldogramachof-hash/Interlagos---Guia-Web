@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, User, Store, ShieldCheck } from 'lucide-react';
+import { X, TrendingUp, User, Store } from 'lucide-react';
 import { getMerchantByOwner } from '../../services/merchantService';
-import { fetchAdsByUser, deleteAd } from '../../services/adsService';
 import { useAuth } from '../auth/AuthContext';
-import CreateAdWizard from '../ads/CreateAdWizard';
 import { useToast } from '../../components/Toast';
 import UpgradeModal from '../merchants/UpgradeModal';
 import { PLANS_CONFIG } from '../../constants/plans';
@@ -21,10 +19,6 @@ export default function UnifiedPanel({ onClose }) {
     const [activeTab, setActiveTab] = useState(uiMode === 'merchant' ? 'business' : 'personal');
     
     const [merchant, setMerchant] = useState(null);
-    const [myAds, setMyAds] = useState([]);
-    const [loadingAds, setLoadingAds] = useState(false);
-    const [showCreateAd, setShowCreateAd] = useState(false);
-    const [adToEdit, setAdToEdit] = useState(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     
     const showToast = useToast();
@@ -42,37 +36,7 @@ export default function UnifiedPanel({ onClose }) {
         getMerchantByOwner(currentUser.id || currentUser.uid)
             .then(data => setMerchant(data || { id: 'temp_dev', name: currentUser.displayName, plan: 'basic', views: 0, clicks: 0 }))
             .catch(() => showToast('Erro ao carregar dados comerciais.', 'error'));
-        fetchMyAds();
     }, [currentUser?.id, uiMode]);
-
-    const fetchMyAds = async () => {
-        setLoadingAds(true);
-        try {
-            const data = await fetchAdsByUser(currentUser.id || currentUser.uid);
-            setMyAds(data);
-        } catch (error) { console.error("Error fetching ads:", error); }
-        finally { setLoadingAds(false); }
-    };
-
-    const handleDeleteAd = async (adId) => {
-        try {
-            await deleteAd(adId);
-            setMyAds(prev => prev.filter(ad => ad.id !== adId));
-            showToast('Anúncio excluído.', 'success');
-        } catch (error) { showToast('Erro ao excluir anúncio.', 'error'); }
-    };
-
-    const handleCreateAdClick = () => {
-        const planConfig = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
-        if (myAds.length >= planConfig.adLimit) setShowUpgradeModal(true);
-        else { setAdToEdit(null); setShowCreateAd(true); }
-    };
-
-    const handleWizardClose = () => {
-        setShowCreateAd(false);
-        setAdToEdit(null);
-        if (uiMode === 'merchant') fetchMyAds();
-    };
 
     const theme = uiMode === 'merchant' 
         ? { bg: 'bg-indigo-600', icon: 'text-indigo-200', text: 'text-indigo-100', title: 'Painel do Comerciante' }
@@ -143,16 +107,7 @@ export default function UnifiedPanel({ onClose }) {
                             <Store size={13} /> Cadastrar Loja
                         </button>
                     )}
-                    <button
-                        onClick={() => setActiveTab('terms')}
-                        className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-colors ${
-                            activeTab === 'terms'
-                                ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm'
-                                : 'text-slate-500'
-                        }`}
-                    >
-                        <ShieldCheck size={13} /> Termos
-                    </button>
+
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
@@ -167,12 +122,7 @@ export default function UnifiedPanel({ onClose }) {
                             <MerchantTabs
                                 merchant={merchant}
                                 currentUser={currentUser}
-                                myAds={myAds}
-                                loadingAds={loadingAds}
                                 onUpgrade={() => setShowUpgradeModal(true)}
-                                onCreateAdClick={handleCreateAdClick}
-                                onDeleteAd={handleDeleteAd}
-                                onEditAd={(ad) => { setAdToEdit(ad); setShowCreateAd(true); }}
                                 onMerchantUpdate={setMerchant}
                             />
                         )}
@@ -198,7 +148,6 @@ export default function UnifiedPanel({ onClose }) {
             {uiMode === 'merchant' && (
                 <>
                     <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} currentPlan={merchant?.plan || 'basic'} merchantId={merchant?.id} onUpgrade={(newPlan) => setMerchant(prev => ({ ...prev, plan: newPlan }))} />
-                    <CreateAdWizard isOpen={showCreateAd} onClose={handleWizardClose} user={currentUser} initialAd={adToEdit} />
                 </>
             )}
         </div>

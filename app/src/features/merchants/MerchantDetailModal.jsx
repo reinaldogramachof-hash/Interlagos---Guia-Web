@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Clock, Star, Heart, Share2, Store } from 'lucide-react';
+import { X, Clock, Star, Heart, Share2, Store, ShieldCheck } from 'lucide-react';
+import { PLANS_CONFIG } from '../../constants/plans';
 import { MerchantAddress, MerchantContactButtons, MerchantSocialLinks } from './MerchantContactInfo';
 import { incrementMerchantView, incrementMerchantContactClick } from '../../services/statsService';
 import { toggleFavorite, checkIsFavorite } from '../../services/favoritesService';
@@ -7,10 +8,12 @@ import { useAuth } from '../auth/AuthContext';
 import useAuthStore from '../../stores/authStore';
 import { useToast } from '../../components/Toast';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { getMerchantPosts } from '../../services/merchantPostsService';
 
 export default function MerchantDetailModal({ merchant, onClose, onLoginRequired }) {
     const { currentUser } = useAuth();
     const [isFavorite, setIsFavorite] = useState(false);
+    const [posts, setPosts] = useState([]);
     const showToast = useToast();
     const onCloseRef = useRef(onClose);
 
@@ -36,6 +39,11 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
             setIsFavorite(false);
         }
     }, [merchant?.id, currentUser?.id]);
+
+    useEffect(() => {
+        if (merchant?.id) getMerchantPosts(merchant.id).then(setPosts);
+        else setPosts([]);
+    }, [merchant?.id]);
 
     const handleWhatsApp = () => {
         if (merchant?.id) incrementMerchantContactClick(merchant.id);
@@ -93,7 +101,12 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                 <span className="inline-block px-3 py-1 bg-brand-600 text-white text-xs font-bold rounded-full mb-3 shadow-lg">
                                     {merchant.category}
                                 </span>
-                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{merchant.name}</h2>
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1 flex items-center gap-2">
+                                    {merchant.name}
+                                    {PLANS_CONFIG[merchant.plan]?.hasVerifiedBadge && (
+                                        <ShieldCheck size={22} className="text-amber-400 shrink-0" title="Verificado Oficial" />
+                                    )}
+                                </h2>
                                 <MerchantAddress address={merchant.address} />
                             </div>
                             <div className="flex gap-2">
@@ -133,8 +146,8 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                 </p>
                             )}
 
-                            {/* Photo Gallery (Professional & Premium) */}
-                            {['professional', 'premium'].includes(merchant.plan) && merchant.gallery && merchant.gallery.length > 0 && (
+                            {/* Photo Gallery (Pro & Premium) */}
+                            {['pro', 'premium'].includes(merchant.plan) && merchant.gallery && merchant.gallery.length > 0 && (
                                 <div className="mt-8 pt-6 border-t border-gray-100">
                                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                         <div className="w-1 h-5 bg-brand-600 rounded-full"></div> Galeria de Fotos
@@ -149,21 +162,40 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                 </div>
                             )}
 
-                            {/* Reviews - PREMIUM ONLY */}
-                            {merchant.plan === 'premium' && (
+                            {posts.length > 0 && (
                                 <div className="mt-8 pt-6 border-t border-gray-100">
                                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                        <Star size={18} className="text-amber-400 fill-amber-400" /> Avaliações
+                                        <div className="w-1 h-5 bg-brand-600 rounded-full" /> Da Vitrine
                                     </h3>
-                                    {/* Mock Reviews for Premium */}
-                                    <div className="space-y-4">
-                                        <div className="bg-gray-50 p-4 rounded-xl">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="font-bold text-sm text-gray-800">Maria Silva</span>
-                                                <div className="flex text-amber-400"><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /><Star size={12} fill="currentColor" /></div>
-                                            </div>
-                                            <p className="text-xs text-gray-600">Adorei o atendimento! Recomendo muito.</p>
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {posts.slice(0, 4).map(post => {
+                                            const TYPE_COLORS = {
+                                                product: 'bg-blue-100 text-blue-700',
+                                                service: 'bg-amber-100 text-amber-700',
+                                                news: 'bg-emerald-100 text-emerald-700',
+                                                promo: 'bg-indigo-100 text-indigo-700',
+                                            };
+                                            const TYPE_LABELS = { product: 'Produto', service: 'Serviço', news: 'Novidade', promo: 'Promoção' };
+                                            return (
+                                                <div key={post.id} className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex flex-col">
+                                                    <div className="relative aspect-square bg-gray-100 shrink-0">
+                                                        {post.image_url
+                                                            ? <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
+                                                            : <div className="w-full h-full flex items-center justify-center text-gray-300"><Store size={24} /></div>
+                                                        }
+                                                        <span className={`absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${TYPE_COLORS[post.type] ?? TYPE_COLORS.product}`}>
+                                                            {TYPE_LABELS[post.type] ?? post.type}
+                                                        </span>
+                                                    </div>
+                                                    <div className="p-2 flex-1 flex flex-col justify-between">
+                                                        <p className="text-xs font-bold text-gray-900 line-clamp-2 leading-tight">{post.title}</p>
+                                                        {post.price != null && (
+                                                            <p className="text-xs font-bold text-emerald-600 mt-0.5 whitespace-nowrap">R$ {Number(post.price).toLocaleString('pt-BR')}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -183,7 +215,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                 </div>
                             ) : null}
 
-                            {['professional', 'premium'].includes(merchant.plan) && (
+                            {['pro', 'premium'].includes(merchant.plan) && (
                                 <div className="bg-brand-50 p-5 rounded-2xl border border-brand-100">
                                     <div className="flex items-center gap-2 mb-2 text-brand-600 font-bold">
                                         <Star size={18} className="text-amber-400 fill-amber-400" /> 4.8

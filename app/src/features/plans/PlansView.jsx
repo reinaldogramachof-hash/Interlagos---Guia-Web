@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, Star, Zap, Crown, ArrowRight, Shield, Zap as ZapIcon } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -49,11 +48,11 @@ export default function PlansView({ onRegisterFree, onNavigate }) {
       Icon: Star,
       color: 'blue',
       features: [
-        'Perfil comercial completo',
+        'Perfil do negócio no bairro',
         'Presença em 1 categoria',
-        'Link para WhatsApp',
-        'Até 3 anúncios ativos',
-        'Suporte por email',
+        'Link direto para WhatsApp',
+        'Até 3 anúncios com 1 foto cada',
+        'Suporte por e-mail',
       ],
       cta: 'Começar Agora',
       popular: false,
@@ -73,7 +72,7 @@ export default function PlansView({ onRegisterFree, onNavigate }) {
         'Links para redes sociais',
         'Destaque rotativo na categoria',
         'Anúncios ilimitados',
-        'Estatísticas e relatórios de visitas',
+        'Estatísticas de visitas, cliques e conversão',
       ],
       cta: 'Assinar Pro',
       popular: true,
@@ -90,7 +89,7 @@ export default function PlansView({ onRegisterFree, onNavigate }) {
         'Tudo do plano Pro',
         'Categorias ilimitadas',
         'Topo nas buscas sempre',
-        'Banner de destaque na Home',
+        'Carrossel exclusivo na Home',
         'Selo Verificado Oficial',
         'Suporte prioritário WhatsApp',
         'Relatórios detalhados mensais',

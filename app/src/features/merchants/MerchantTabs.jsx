@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Tag, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck, LifeBuoy, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Store, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck, LifeBuoy, MessageSquare } from 'lucide-react';
 import { PLANS_CONFIG, hasPlanAccess } from '../../constants/plans';
 import DashboardTab from './merchant-panel/tabs/DashboardTab';
-import AdsTab from './merchant-panel/tabs/AdsTab';
+import VitrineTab from './merchant-panel/tabs/VitrineTab';
 import CampaignTab from './merchant-panel/tabs/CampaignTab';
 import ReportsTab from './merchant-panel/tabs/ReportsTab';
 import MerchantSettingsTab from './merchant-panel/tabs/SettingsTab';
@@ -10,7 +10,7 @@ import TermsTab from '../terms/TermsTab';
 
 const TABS = [
   { id: 'dashboard', label: 'Visão Geral',  icon: LayoutDashboard, minPlan: 'free' },
-  { id: 'ads',       label: 'Anúncios',     icon: Tag,             minPlan: 'basic' },
+  { id: 'vitrine',   label: 'Vitrine',      icon: Store,           minPlan: 'basic' },
   { id: 'campaigns', label: 'Campanhas',    icon: Megaphone,       minPlan: 'premium' },
   { id: 'reports',   label: 'Relatórios',   icon: BarChart3,       minPlan: 'pro' },
   { id: 'settings',  label: 'Configurações',icon: Settings,        minPlan: 'free' },
@@ -35,11 +35,10 @@ const UpgradeAccess = ({ title, desc, onUpgrade }) => (
 );
 
 export default function MerchantTabs({ 
-  merchant, currentUser, myAds, loadingAds, onUpgrade, onCreateAdClick, onDeleteAd, onEditAd, onMerchantUpdate 
+  merchant, currentUser, onUpgrade, onMerchantUpdate 
 }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const plan = merchant?.plan || 'free';
-  const photoLimit = PLANS_CONFIG[plan]?.photoLimit ?? 1;
 
   const hasAccess = (tabId) => {
     const tab = TABS.find(t => t.id === tabId);
@@ -74,19 +73,21 @@ export default function MerchantTabs({
       {activeTab === 'dashboard' && (
         <DashboardTab 
           merchant={merchant} 
-          myAds={myAds} 
           onUpgrade={onUpgrade} 
           currentUser={currentUser}
           onNavigate={setActiveTab}
         />
       )}
       
-      {activeTab === 'ads' && (
-        hasAccess('ads') 
-          ? <AdsTab myAds={myAds} loading={loadingAds} onCreateClick={onCreateAdClick} onDeleteClick={onDeleteAd} onEditClick={onEditAd} photoLimit={photoLimit} />
+      {activeTab === 'vitrine' && (
+        hasAccess('vitrine') 
+          ? <VitrineTab 
+              merchant={merchant} 
+              onUpgrade={onUpgrade}
+            />
           : <UpgradeAccess 
-              title="Classificados PRO" 
-              desc="Aumente seu alcance! Publique anúncios detalhados de seus produtos no guia do bairro." 
+              title="Vitrine Comercial" 
+              desc="Divulgue seus produtos e serviços para os moradores do bairro." 
               onUpgrade={onUpgrade} 
             />
       )}
@@ -118,13 +119,50 @@ export default function MerchantTabs({
           <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <MessageSquare size={32} />
           </div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Suporte via Plataforma</h3>
-          <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
-            Comerciantes possuem atendimento prioritário via chat interno. Em breve você poderá abrir tickets diretamente por aqui.
-          </p>
-          <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs text-slate-400 inline-block">
-            Módulo em desenvolvimento
-          </div>
+          
+          {plan === 'premium' ? (
+            <>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Suporte Prioritário WhatsApp</h3>
+              <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
+                Como cliente Premium, você tem acesso direto ao nosso suporte especializado via WhatsApp.
+              </p>
+              <a 
+                href={`https://wa.me/${import.meta.env.VITE_SUPPORT_WHATSAPP || '5511999999999'}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg"
+              >
+                Chamar no WhatsApp
+              </a>
+            </>
+          ) : plan === 'pro' || plan === 'basic' ? (
+            <>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Suporte via E-mail</h3>
+              <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
+                Envie sua dúvida para nossa equipe técnica e responderemos em até 24h úteis.
+              </p>
+              <a 
+                href={`mailto:${import.meta.env.VITE_SUPPORT_EMAIL || 'suporte@temnobairro.online'}`}
+                className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all"
+              >
+                Enviar E-mail
+              </a>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Suporte da Plataforma</h3>
+              <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
+                O suporte direto está disponível para comerciantes a partir do plano Básico.
+              </p>
+              <button 
+                onClick={onUpgrade}
+                className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all"
+              >
+                Fazer Upgrade Agora
+              </button>
+            </>
+          )}
+
         </div>
       )}
     </div>

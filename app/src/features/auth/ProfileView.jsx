@@ -1,4 +1,5 @@
 import { useAuth } from './AuthContext';
+import { ShieldCheck } from 'lucide-react';
 import useMerchantPlan from '../../hooks/useMerchantPlan';
 import { uploadImage } from '../../services/storageService';
 import { updateUserProfile } from '../../services/authService';
@@ -23,6 +24,7 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
   const { currentUser, isMerchant, isAdmin, isMaster, logout } = useAuth();
   const { planId, plan } = useMerchantPlan();
   const showToast = useToast();
+  const profile = useAuthStore(s => s.profile);
 
   const handleAvatarChange = async (file) => {
     try {
@@ -107,6 +109,13 @@ export default function ProfileView({ onLoginOpen, onNavigate }) {
           <span className={`inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full ${rmeta.color}`}>
             {rmeta.emoji} {rmeta.label}
           </span>
+          {profile?.is_verified && (
+            <div className="flex justify-center">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 mt-2">
+                <ShieldCheck size={11} /> Perfil Verificado
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Card do Morador */}

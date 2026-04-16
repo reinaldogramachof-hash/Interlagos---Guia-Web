@@ -4,9 +4,9 @@
 
 /* ── Responsividade global ─────────────────────────────────────────────────── */
 
-/* Previne overflow horizontal em qualquer viewport */
+/* Previne overflow horizontal em qualquer viewport sem quebrar o sticky */
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100vw;
 }
 

@@ -58,7 +58,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 font-sans">
       <SidebarMenu
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
@@ -79,15 +79,7 @@ function AppContent() {
           </div>
         </main>
 
-        {currentView === 'ads' && (
-          <button
-            onClick={() => requireAuth(() => setShowCreateAd(true))}
-            className="fixed bottom-24 right-4 z-30 bg-brand-600 text-white flex items-center gap-2 px-5 py-3.5 rounded-pill shadow-fab hover:bg-brand-700 hover:scale-105 transition-all font-bold text-sm"
-          >
-            <PlusCircle size={20} />
-            Anunciar Grátis
-          </button>
-        )}
+
 
         <BottomNav
           currentView={currentView}

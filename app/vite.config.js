@@ -74,6 +74,7 @@ export default defineConfig(({ mode }) => {
           theme_color: '#4338ca',
           background_color: '#ffffff',
           display: 'standalone',
+          prefer_related_applications: false,
           start_url: basePath,
           scope: basePath,
           icons: [

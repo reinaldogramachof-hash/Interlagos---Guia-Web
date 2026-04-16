@@ -20,7 +20,7 @@ export function subscribeAds(callback) {
       schema: 'public',
       table: 'ads',
       filter: `neighborhood=eq.${import.meta.env.VITE_NEIGHBORHOOD}`
-    }, callback)
+    }, () => fetchAds().then(callback))
     .subscribe();
   return () => supabase.removeChannel(channel);
 }

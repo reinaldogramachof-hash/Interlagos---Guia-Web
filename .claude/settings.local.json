@@ -28,7 +28,11 @@
       "Bash(bash atlas.sh \"Olá ATLAS! Sou o Claude Code, arquiteto do projeto Tem No Bairro. Confirme que você está online e me diga o que sabe sobre o projeto.\" low)",
       "Bash(bash atlas.sh \"Olá ATLAS! Sou o Claude Code, arquiteto do projeto Tem No Bairro. Confirme que você está online e me diga brevemente o que sabe sobre o projeto.\" low)",
       "Bash(grep -i -E \"\\\\.\\(png|jpg|jpeg|webp\\)$\")",
-      "Bash(powershell -Command \":*)"
+      "Bash(powershell -Command \":*)",
+      "Bash(powershell -Command \"Compress-Archive -Path 'dist/*' -DestinationPath '../deploy.zip' -Force\")",
+      "Read(//c/Users/reina/OneDrive/Desktop/Projetos/**)",
+      "Bash(node scripts/create_test_merchants.mjs)",
+      "Bash(powershell -Command \"Compress-Archive -Path 'app/dist/*' -DestinationPath 'deploy.zip' -Force\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\reina\\OneDrive\\Desktop\\Projetos\\Guia Digital Interlagos\\.claude"

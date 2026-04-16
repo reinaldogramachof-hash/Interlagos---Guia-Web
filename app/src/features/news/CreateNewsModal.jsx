@@ -25,7 +25,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
 
   const isTitleValid = title.trim().length >= 5;
   const isContentValid = content.trim().length >= 20;
-  const canSubmit = isTitleValid && isContentValid && !saving;
+  const canSubmit = isTitleValid && isContentValid && !saving && !!userId;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -42,6 +42,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
     if (!isTitleValid || !isContentValid || !userId) {
       if (!isTitleValid) showToast('Título curto demais.', 'error');
       else if (!isContentValid) showToast('Conteúdo curto demais.', 'error');
+      else if (!userId) showToast('Faça login para publicar.', 'error');
       return;
     }
 
@@ -94,7 +95,7 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
 
         {/* Body - Rolável (flex-1 para ocupar o espaço entre header/footer) */}
         <div className="flex-1 overflow-y-auto px-5 py-5 bg-slate-50/30">
-          <form id="create-news-form" onSubmit={handleSubmit} className="space-y-5">
+          <form className="space-y-5">
             <div>
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Título da Notícia</label>
               <input
@@ -167,14 +168,14 @@ export default function CreateNewsModal({ isOpen, userId, onClose, onCreated }) 
             Sair
           </button>
           <button
-            form="create-news-form"
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             disabled={saving}
-            className={`flex-1 py-3 rounded-xl font-black text-[11px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg ${
+            className={`flex-1 py-3 rounded-xl font-black text-[11px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg active:scale-95 cursor-pointer ${
               saving 
-                ? 'bg-slate-100 text-slate-400' 
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
                 : canSubmit 
-                  ? 'bg-brand-600 text-white shadow-brand-600/20 active:scale-95' 
+                  ? 'bg-brand-600 text-white shadow-brand-600/20' 
                   : 'bg-slate-200 text-slate-400'
             }`}
           >

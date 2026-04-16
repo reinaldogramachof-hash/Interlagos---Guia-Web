@@ -7,7 +7,7 @@ import { useToast } from '../../../../components/Toast';
 import { useAuth } from '../../../auth/AuthContext';
 import ImageGrid from '../../../ads/ImageGrid';
 
-export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick, photoLimit = 1 }) {
+export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick, photoLimit = 1, adLimit = 1, onUpgrade }) {
   const { currentUser } = useAuth();
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
@@ -82,14 +82,27 @@ export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick, p
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start flex-wrap gap-4">
         <h3 className="text-xl font-bold text-slate-900 dark:text-white">Gerenciar Anúncios</h3>
-        <button
-          onClick={onCreateClick}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-colors"
-        >
-          <PlusCircle size={18} /> Novo Anúncio
-        </button>
+        
+        <div className="flex flex-col items-end gap-2">
+          <button
+            onClick={myAds.length >= adLimit && adLimit < 999 ? onUpgrade : onCreateClick}
+            className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-all ${
+              myAds.length >= adLimit && adLimit < 999
+                ? 'bg-slate-200 text-slate-500 cursor-not-allowed opacity-70'
+                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+            }`}
+          >
+            <PlusCircle size={18} /> Novo Anúncio
+          </button>
+          
+          {myAds.length >= adLimit && adLimit < 999 && (
+            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-100 animate-pulse">
+              Limite de {adLimit} anúncio(s) atingido · <button onClick={onUpgrade} className="underline">Fazer upgrade</button>
+            </span>
+          )}
+        </div>
       </div>
 
       {loading ? (

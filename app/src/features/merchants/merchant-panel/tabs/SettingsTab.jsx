@@ -16,6 +16,7 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
   const [imagePreview, setImagePreview] = useState(merchant?.image_url || '');
   const planConfig = PLANS_CONFIG[merchant?.plan] ?? PLANS_CONFIG['free'];
   const categoryLimit = planConfig.categoryLimit;
+  const hasSocialLinks = planConfig.hasSocialLinks ?? false;
 
   const [formData, setFormData] = useState({
     name: merchant?.name || '',
@@ -129,7 +130,11 @@ export default function SettingsTab({ merchant, currentUser, onUpdate }) {
         </div>
 
         {/* R7: maxLength={100} em instagram (dentro de MerchantContactFields via formData) */}
-        <MerchantContactFields formData={formData} onChange={handleChange} />
+        <MerchantContactFields 
+          formData={formData} 
+          onChange={handleChange} 
+          hasSocialLinks={hasSocialLinks} 
+        />
 
         <div className="pt-4 flex justify-end">
           <button type="submit" disabled={loading} className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20">
