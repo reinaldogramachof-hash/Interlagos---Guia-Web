@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Store, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck, LifeBuoy, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Store, Megaphone, BarChart3, Settings, Lock, Star, ShieldCheck, LifeBuoy, MessageSquare, Palette } from 'lucide-react';
 import { PLANS_CONFIG, hasPlanAccess } from '../../constants/plans';
 import DashboardTab from './merchant-panel/tabs/DashboardTab';
 import VitrineTab from './merchant-panel/tabs/VitrineTab';
@@ -7,10 +7,12 @@ import CampaignTab from './merchant-panel/tabs/CampaignTab';
 import ReportsTab from './merchant-panel/tabs/ReportsTab';
 import MerchantSettingsTab from './merchant-panel/tabs/SettingsTab';
 import TermsTab from '../terms/TermsTab';
+import CustomizeTab from './merchant-panel/tabs/CustomizeTab';
 
 const TABS = [
   { id: 'dashboard', label: 'Visão Geral',  icon: LayoutDashboard, minPlan: 'free' },
   { id: 'vitrine',   label: 'Vitrine',      icon: Store,           minPlan: 'basic' },
+  { id: 'customize', label: 'Personalizar', icon: Palette,         minPlan: 'pro' },
   { id: 'campaigns', label: 'Campanhas',    icon: Megaphone,       minPlan: 'premium' },
   { id: 'reports',   label: 'Relatórios',   icon: BarChart3,       minPlan: 'pro' },
   { id: 'settings',  label: 'Configurações',icon: Settings,        minPlan: 'free' },
@@ -89,6 +91,16 @@ export default function MerchantTabs({
               title="Vitrine Comercial" 
               desc="Divulgue seus produtos e serviços para os moradores do bairro." 
               onUpgrade={onUpgrade} 
+            />
+      )}
+
+      {activeTab === 'customize' && (
+        hasAccess('customize')
+          ? <CustomizeTab merchant={merchant} onUpdate={onMerchantUpdate} />
+          : <UpgradeAccess
+              title="Personalize sua Loja"
+              desc="Dê identidade única à sua vitrine com cores, capa e tagline exclusivas."
+              onUpgrade={onUpgrade}
             />
       )}
 

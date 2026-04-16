@@ -189,3 +189,30 @@ export const toggleMerchantActive = async (id, isActive) => {
   if (error) throw error;
   return data;
 };
+
+export const getMerchantById = async (id) => {
+  const { data, error } = await supabase
+    .from('merchants')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) { console.error('getMerchantById:', error); return null; }
+  return data;
+};
+
+export const updateMerchantStore = async (merchantId, data) => {
+  const { error } = await supabase
+    .from('merchants')
+    .update({
+      store_color: data.store_color,
+      store_cover_url: data.store_cover_url,
+      store_tagline: data.store_tagline,
+      store_description: data.store_description,
+      store_badge_text: data.store_badge_text,
+      store_theme: data.store_theme,
+      store_url: data.store_url,
+    })
+    .eq('id', merchantId);
+  if (error) { console.error('updateMerchantStore:', error); return false; }
+  return true;
+};

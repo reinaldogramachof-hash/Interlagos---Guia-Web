@@ -23,7 +23,7 @@ export const getNeighborhoodPosts = async (neighborhood, limit = 20) => {
     .from('merchant_posts')
     .select(`
       *,
-      merchants!inner(name, plan, image_url, category)
+      merchants!inner(name, plan, image_url, category, whatsapp, store_color, store_cover_url, store_tagline)
     `)
     .eq('neighborhood', neighborhood)
     .eq('is_active', true)

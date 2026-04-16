@@ -1,14 +1,16 @@
 import { create } from 'zustand';
 
 const useUiStore = create((set) => ({
-  currentView: 'merchants',
+  currentView: 'news',
   isLoginOpen: false,
   isSidebarOpen: false,
   showCreateAd: false,
   selectedMerchant: null,
   selectedService: null,
+  selectedStore: null,
 
   setCurrentView: (view) => set({ currentView: view, selectedMerchant: null, selectedService: null }),
+  setSelectedStore: (merchant) => set({ selectedStore: merchant }),
   setIsLoginOpen: (isOpen) => set({ isLoginOpen: isOpen }),
   setIsSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
   setShowCreateAd: (show) => set({ showCreateAd: show }),
@@ -22,5 +24,6 @@ export const selectIsSidebarOpen = (state) => state.isSidebarOpen;
 export const selectShowCreateAd = (state) => state.showCreateAd;
 export const selectSelectedMerchant = (state) => state.selectedMerchant;
 export const selectSelectedService = (state) => state.selectedService;
+export const selectSelectedStore = (state) => state.selectedStore;
 
 export default useUiStore;

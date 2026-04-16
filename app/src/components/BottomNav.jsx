@@ -1,9 +1,10 @@
-import { Home, Newspaper, Tag, Heart } from 'lucide-react';
+import { Newspaper, Store, Building2, Tag, Heart } from 'lucide-react';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const NAV_ITEMS = [
-  { id: 'merchants', label: 'Home', icon: Home },
   { id: 'news', label: 'Jornal', icon: Newspaper },
+  { id: 'vitrine', label: 'Vitrine', icon: Store },
+  { id: 'merchants', label: 'Comércios', icon: Building2 },
   { id: 'ads', label: 'Classificados', icon: Tag },
   { id: 'donations', label: 'Campanhas', icon: Heart },
 ];
