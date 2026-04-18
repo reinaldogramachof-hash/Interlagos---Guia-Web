@@ -9,7 +9,7 @@ export default function HistoryView() {
             <div className="relative h-64 rounded-3xl overflow-hidden shadow-lg group">
                 <div className="absolute inset-0 bg-indigo-900/40 z-10" />
                 <img
-                    src={`${import.meta.env.BASE_URL}historia.png`}
+                    src={`${import.meta.env.BASE_URL}historia.webp`}
                     alt="História do Parque Interlagos"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"

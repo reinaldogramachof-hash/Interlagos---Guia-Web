@@ -3,7 +3,50 @@ RewriteEngine On
 RewriteBase /interlagos/
 
 # Arquivos estáticos — servir diretamente pela extensão
-RewriteRule \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|json|webmanifest|map|txt|xml|wasm)$ - [L]
+RewriteRule \.(js|css|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|json|webmanifest|map|txt|xml|wasm)$ - [L]
 
 # Tudo o mais vai para o index.html (SPA fallback)
 RewriteRule ^ index.html [L]
+
+# ==========================================================================
+# Compressão (Brotli quando disponível, fallback para Gzip/Deflate)
+# ==========================================================================
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/javascript \
+    application/javascript application/json application/xml application/manifest+json \
+    image/svg+xml font/ttf font/otf
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript \
+    application/javascript application/json application/xml application/manifest+json \
+    image/svg+xml font/ttf font/otf
+</IfModule>
+
+# ==========================================================================
+# Cache-Control
+# ==========================================================================
+<IfModule mod_headers.c>
+  # Assets com hash (immutable) — 1 ano
+  <FilesMatch "\.(js|css|woff|woff2|ttf|eot|otf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Imagens e ícones — 30 dias (pode ser trocado sem rebuild)
+  <FilesMatch "\.(png|jpg|jpeg|gif|ico|svg|webp)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+
+  # Shell do app — nunca cachear (garante update imediato)
+  <FilesMatch "^(index\.html|sw\.js|manifest\.webmanifest|workbox-.*\.js)$">
+    Header set Cache-Control "public, max-age=0, no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# ==========================================================================
+# MIME types (garante servir .webp correto)
+# ==========================================================================
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType application/manifest+json .webmanifest
+</IfModule>

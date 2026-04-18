@@ -6,7 +6,7 @@ export default function MerchantLandingView({ onRegisterClick, onRegisterFree })
         <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
             {/* Hero Section */}
             <div className="relative rounded-3xl overflow-hidden bg-indigo-900 text-white mb-12">
-                <div className="absolute inset-0 bg-[url('/hero.png')] bg-cover bg-center opacity-20" />
+                <div className="absolute inset-0 bg-[url('/hero.webp')] bg-cover bg-center opacity-20" />
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-indigo-900/90 to-transparent" />
 
                 <div className="relative z-10 p-8 md:p-12 max-w-2xl">
