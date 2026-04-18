@@ -66,6 +66,8 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
                 src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=800"
                 alt="Comércios Locais"
                 className="w-full h-full object-cover"
+                loading="eager"
+                fetchpriority="high"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/90 via-indigo-900/60 to-transparent flex items-center justify-between px-5">
                 <div className="flex items-center gap-3">

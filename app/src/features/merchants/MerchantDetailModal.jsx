@@ -155,7 +155,7 @@ export default function MerchantDetailModal({ merchant, onClose, onLoginRequired
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {merchant.gallery.map((url, index) => (
                                             <div key={index} className="aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-sm group cursor-pointer hover:shadow-md transition-all">
-                                                <img src={url} alt={`Foto ${index + 1} de ${merchant.name}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                <img src={url} alt={`Foto ${index + 1} de ${merchant.name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                             </div>
                                         ))}
                                     </div>

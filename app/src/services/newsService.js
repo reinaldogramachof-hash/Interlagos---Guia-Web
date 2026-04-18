@@ -31,21 +31,24 @@ export async function fetchNews() {
 }
 
 export function subscribeNews(callback) {
-  // Chamada inicial
-  callback(); 
-  
+  // Fetch inicial + realtime (sem duplicar: única chamada ao montar)
+  fetchNews().then(callback).catch((err) => {
+    console.error('subscribeNews initial fetch:', err);
+    callback([]);
+  });
+
   const channel = supabase.channel('news-realtime')
-    .on('postgres_changes', 
-      { 
-        event: '*', 
-        schema: 'public', 
-        table: 'news', 
-        filter: `neighborhood=eq.${NEIGHBORHOOD}` 
-      }, 
-      () => callback() // Wrap to ensure any async callback is handled
+    .on('postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'news',
+        filter: `neighborhood=eq.${NEIGHBORHOOD}`
+      },
+      () => fetchNews().then(callback).catch(() => {})
     )
     .subscribe();
-    
+
   return () => {
     supabase.removeChannel(channel);
   };

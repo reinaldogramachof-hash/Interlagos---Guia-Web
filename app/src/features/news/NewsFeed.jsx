@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Newspaper, PlusCircle, Search, X } from 'lucide-react';
-import { fetchNews, subscribeNews, fetchCommentCounts } from '../../services/newsService';
 import { hasConsent } from '../../services/consentService';
 import NewsDetailModal from './NewsDetailModal';
 import NewsResponsibilityModal from './NewsResponsibilityModal';
@@ -8,55 +7,26 @@ import CreateNewsModal from './CreateNewsModal';
 import EmptyState from '../../components/EmptyState';
 import { SkeletonNewsCard } from '../../components/SkeletonCard';
 import useAuthStore from '../../stores/authStore';
+import useNewsStore, { selectNews, selectNewsLoading, selectCommentCounts } from '../../stores/newsStore';
 
 const CATEGORIES = ['Todos', 'Urgente', 'Eventos', 'Geral', 'Trânsito', 'Esportes', 'Cultura', 'Obras', 'Saúde'];
 
 import NewsCard from './NewsCard';
 
 export default function NewsFeed() {
-    const [news, setNews] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [showResponsibility, setShowResponsibility] = useState(false);
     const [showCreateNews, setShowCreateNews] = useState(false);
-    const [commentCounts, setCommentCounts] = useState({});
+
+    const news = useNewsStore(selectNews);
+    const loading = useNewsStore(selectNewsLoading);
+    const commentCounts = useNewsStore(selectCommentCounts);
 
     const session = useAuthStore(s => s.session);
     const userId = session?.user?.id;
     const currentUser = session?.user ?? null;
-
-    useEffect(() => {
-        let cancelled = false;
-        
-        const loadNews = async () => {
-            try {
-                const data = await fetchNews();
-                if (cancelled) return;
-                setNews(data ?? []);
-
-                // Buscar contagem de comentários em batch
-                if (data?.length > 0) {
-                    const counts = await fetchCommentCounts(data.map(n => n.id));
-                    if (!cancelled) setCommentCounts(counts);
-                }
-            } catch (err) {
-                console.error('NewsFeed load error:', err);
-                if (!cancelled) setNews([]);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
-
-        // O subscribeNews já faz a chamada inicial de loadNews internamente via callback
-        const unsubscribe = subscribeNews(loadNews);
-        
-        return () => {
-            cancelled = true;
-            unsubscribe();
-        };
-    }, []);
 
     const filteredNews = news.filter(item => {
         const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;

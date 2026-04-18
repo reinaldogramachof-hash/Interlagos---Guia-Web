@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tag, PlusCircle, Search, X } from 'lucide-react';
 import AdCard from './AdCard';
-import { subscribeAds } from '../../services/adsService';
 import AdDetailModal from './AdDetailModal';
 import CreateAdWizard from './CreateAdWizard';
 import EmptyState from '../../components/EmptyState';
 import { incrementAdClick } from '../../services/statsService';
 import { useAuth } from '../auth/AuthContext';
+import useAdsStore, { selectAds, selectAdsLoading } from '../../stores/adsStore';
 
 const categories = ['Todos', 'Vendas', 'Empregos', 'Imóveis', 'Serviços', 'Veículos', 'Eletrônicos', 'Doações'];
 
@@ -18,25 +18,8 @@ export default function AdsView({ onRequireAuth }) {
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
-    const [ads, setAds] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        let cancelled = false;
-        setLoading(true);
-
-        const unsubscribe = subscribeAds((data) => {
-            if (!cancelled) {
-                setAds(data);
-                setLoading(false);
-            }
-        });
-
-        return () => {
-            cancelled = true;
-            unsubscribe();
-        };
-    }, []);
+    const ads = useAdsStore(selectAds);
+    const loading = useAdsStore(selectAdsLoading);
 
     const filteredAds = ads.filter(ad => {
         const matchesCategory = selectedCategory === 'Todos' || ad.category === selectedCategory;

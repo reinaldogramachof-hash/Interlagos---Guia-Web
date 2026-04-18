@@ -132,7 +132,7 @@ export default function VitrineTab({ merchant, onUpgrade }) {
               <div key={post.id} className={`bg-white dark:bg-slate-800 rounded-xl border ${post.is_active ? 'border-slate-200 dark:border-slate-700' : 'border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50'} shadow-sm overflow-hidden transition-all flex flex-col sm:flex-row group`}>
                 <div className="w-full sm:w-32 h-32 bg-slate-100 dark:bg-slate-800 shrink-0 relative">
                   {post.image_url ? (
-                    <img src={post.image_url} alt={post.title} className={`w-full h-full object-cover ${!post.is_active && 'grayscale opacity-50'}`} />
+                    <img src={post.image_url} alt={post.title} loading="lazy" className={`w-full h-full object-cover ${!post.is_active && 'grayscale opacity-50'}`} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600"><ImageIcon size={32} /></div>
                   )}

@@ -91,7 +91,7 @@ export default function UsersTab() {
                 <tr key={user.id} className="hover:bg-slate-50">
                   <td className="p-4 flex items-center gap-3">
                     {user.photo_url
-                      ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                      ? <img src={user.photo_url} loading="lazy" className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
                       : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
                     }
                     <div><div className="font-bold text-slate-900">{user.display_name || 'Sem Nome'}</div><div className="text-xs text-slate-400">{String(user.id).slice(0, 8)}…</div></div>

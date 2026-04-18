@@ -22,7 +22,7 @@ export default function CampaignCard({ item, cat, onWhatsApp, onClick }) {
 
             {item.image_url && (
                 <div className="mb-4 h-40 rounded-xl overflow-hidden bg-slate-100">
-                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                    <img src={item.image_url} alt={item.title} loading="lazy" className="w-full h-full object-cover" />
                 </div>
             )}
 

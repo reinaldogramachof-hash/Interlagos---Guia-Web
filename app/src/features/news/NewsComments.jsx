@@ -8,7 +8,7 @@ import { useToast } from '../../components/Toast';
 const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 
 function CommentAvatar({ name, photoUrl }) {
-  if (photoUrl) return <img src={photoUrl} className="w-8 h-8 rounded-full object-cover flex-shrink-0" alt={name} />;
+  if (photoUrl) return <img src={photoUrl} loading="lazy" className="w-8 h-8 rounded-full object-cover flex-shrink-0" alt={name} />;
   const colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-rose-100 text-rose-700', 'bg-amber-100 text-amber-700'];
   const idx = (name?.charCodeAt(0) ?? 0) % colors.length;
   return (

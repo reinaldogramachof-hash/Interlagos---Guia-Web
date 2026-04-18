@@ -120,11 +120,11 @@ export default function VitrineView({ onMerchantClick, onStoreClick, onViewCoupo
                 <div className="h-20 relative"
                   style={{ background: m.store_cover_url ? undefined : (m.store_color || '#4f46e5') }}>
                   {m.store_cover_url && (
-                    <img src={m.store_cover_url} alt={m.name} className="w-full h-full object-cover" />
+                    <img src={m.store_cover_url} alt={m.name} loading="lazy" className="w-full h-full object-cover" />
                   )}
                   <div className="absolute bottom-0 left-3 translate-y-1/2 w-10 h-10 rounded-full border-2 border-white shadow bg-gray-100 overflow-hidden">
                     {m.image_url
-                      ? <img src={m.image_url} alt={m.name} className="w-full h-full object-cover" />
+                      ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center"><Store size={12} className="text-gray-400" /></div>}
                   </div>
                 </div>

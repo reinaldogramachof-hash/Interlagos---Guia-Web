@@ -93,7 +93,7 @@ export default function FavoritesTab({ currentUser }) {
                         <div key={fav.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
                             <div className="w-full h-32 bg-slate-100 dark:bg-slate-700 relative">
                                 {fav.image ? (
-                                    <img src={fav.image} alt={fav.name} className="w-full h-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                                    <img src={fav.image} alt={fav.name} loading="lazy" className="w-full h-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-4xl">
                                         {getEmoji(fav.entity_type)}

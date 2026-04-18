@@ -31,7 +31,7 @@ export default function AdsTab({ loading, myActivities, currentUser }) {
                         <div key={ad.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center shadow-sm">
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 bg-slate-200 rounded-lg overflow-hidden">
-                                    {ad.image && <img src={ad.image} className="w-full h-full object-cover" />}
+                                    {ad.image && <img src={ad.image} loading="lazy" className="w-full h-full object-cover" />}
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-slate-900 dark:text-white">{ad.title}</h4>

@@ -6,6 +6,8 @@ import AppHeader from './components/AppHeader';
 
 import useUiStore, { selectCurrentView, selectIsSidebarOpen, selectIsLoginOpen, selectShowCreateAd, selectSelectedMerchant, selectSelectedService } from './stores/uiStore';
 import useMerchantStore from './stores/merchantStore';
+import useNewsStore from './stores/newsStore';
+import useAdsStore from './stores/adsStore';
 import useRequireAuth from './hooks/useRequireAuth';
 import AppRouter from './app/Router';
 
@@ -23,6 +25,8 @@ import { PlusCircle } from 'lucide-react';
 function AppContent() {
   const { currentUser } = useAuth();
   const initMerchants = useMerchantStore(state => state.init);
+  const initNews = useNewsStore(state => state.init);
+  const initAds = useAdsStore(state => state.init);
   const session = useAuthStore(state => state.session);
   const profile = useAuthStore(state => state.profile);
   const refreshProfile = useAuthStore(state => state.refreshProfile);
@@ -49,9 +53,11 @@ function AppContent() {
   const handleCloseLogin    = useCallback(() => setIsLoginOpen(false),      [setIsLoginOpen]);
 
   useEffect(() => {
-    const unsub = initMerchants();
-    return () => unsub();
-  }, [initMerchants]);
+    const unsubMerchants = initMerchants();
+    const unsubNews = initNews();
+    const unsubAds = initAds();
+    return () => { unsubMerchants(); unsubNews(); unsubAds(); };
+  }, [initMerchants, initNews, initAds]);
 
   if (showCreateAd) {
     return <CreateAdWizard onClose={() => setShowCreateAd(false)} user={currentUser} isOpen />;

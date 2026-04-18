@@ -13,7 +13,7 @@ export default function UserProfile({ user, isAdmin, onLogout }) {
   return (
     <div className="flex items-center gap-3 bg-indigo-800/50 p-1.5 pr-4 rounded-full border border-indigo-500/30 backdrop-blur-sm">
       {user.photoURL ? (
-        <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full border-2 border-indigo-400" />
+        <img src={user.photoURL} alt={user.displayName} loading="lazy" className="w-8 h-8 rounded-full border-2 border-indigo-400" />
       ) : (
         <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
           <User size={16} />

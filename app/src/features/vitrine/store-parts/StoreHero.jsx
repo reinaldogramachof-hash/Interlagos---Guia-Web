@@ -57,7 +57,7 @@ export default function StoreHero({ merchant, theme, storeColor, onBack, onShare
             style={{ background: storeColor }}
           >
             {merchant.image_url ? (
-              <img src={merchant.image_url} alt={merchant.name} className="w-full h-full object-cover" />
+              <img src={merchant.image_url} alt={merchant.name} loading="lazy" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <ImageIcon size={22} className="text-white/60" />

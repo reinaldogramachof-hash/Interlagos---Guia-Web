@@ -122,7 +122,7 @@ export default function AdsTab({ myAds, loading, onCreateClick, onDeleteClick, p
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden shrink-0 border border-slate-100">
                       {ad.image_url ? (
-                        <img src={ad.image_url} alt={ad.title} className="w-full h-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                        <img src={ad.image_url} alt={ad.title} loading="lazy" className="w-full h-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400">🏷️</div>
                       )}

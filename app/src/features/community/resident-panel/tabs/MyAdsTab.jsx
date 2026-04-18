@@ -130,7 +130,7 @@ export default function MyAdsTab({ currentUser }) {
                 <div className="p-4 flex justify-between items-start gap-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     {ad.image_url && (
-                      <img src={ad.image_url} alt={ad.title} className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-100" />
+                      <img src={ad.image_url} alt={ad.title} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-100" />
                     )}
                     <div className="min-w-0">
                       <h4 className="font-bold text-slate-900 dark:text-white truncate">{ad.title}</h4>
