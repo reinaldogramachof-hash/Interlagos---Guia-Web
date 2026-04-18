@@ -35,3 +35,4 @@ Leia o arquivo mais recente em @.agent/reports/
 | 2026-04-16 | Deep Think | Auditoria Planos (Conformidade / Valores Reais) | ✅ Concluída | [2026-04-16_auditoria-planos-valor.md](2026-04-16_auditoria-planos-valor.md) |
 | 2026-04-16 | Deep Think | Padronização global de Hero Sections e Navegação + Ticket de Cupons | ✅ Concluída | [2026-04-16_16-00_padronizacao-buscas-ui.md](2026-04-16_16-00_padronizacao-buscas-ui.md) |
 | 2026-04-16 | Claude Sonnet 4.6 | Sprint Vitrine Store — 6 temas visuais, store_url, lapidação hero/cards, upload capa | ✅ Concluída | [2026-04-16_20-00_sprint-vitrine-store-temas-lapidacao.md](2026-04-16_20-00_sprint-vitrine-store-temas-lapidacao.md) |
+| 2026-04-18 | Claude Sonnet 4.6 + Fast Mode | Auditoria de cache e performance — itens 1-10 (Cache-Control, WebP, code splitting, stores, TTL, lazy imgs) | ✅ Concluída | [2026-04-18_auditoria-cache-otimizacoes-completas.md](2026-04-18_auditoria-cache-otimizacoes-completas.md) |
