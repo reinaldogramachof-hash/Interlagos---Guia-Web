@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Newspaper, PlusCircle } from 'lucide-react';
 import { fetchNews, subscribeNews, fetchCommentCounts } from '../../services/newsService';
 import { hasConsent } from '../../services/consentService';
@@ -22,6 +22,7 @@ export default function NewsFeed() {
     const [showResponsibility, setShowResponsibility] = useState(false);
     const [showCreateNews, setShowCreateNews] = useState(false);
     const [commentCounts, setCommentCounts] = useState({});
+    const isClosingRef = useRef(false);
 
     const session = useAuthStore(s => s.session);
     const userId = session?.user?.id;
@@ -29,7 +30,7 @@ export default function NewsFeed() {
 
     useEffect(() => {
         let cancelled = false;
-        
+
         const loadNews = async () => {
             try {
                 const data = await fetchNews();
@@ -49,17 +50,31 @@ export default function NewsFeed() {
         };
 
         const unsubscribe = subscribeNews(loadNews);
-        
+
         return () => {
             cancelled = true;
             unsubscribe();
         };
     }, []);
 
+    const handleCloseDetail = () => {
+        if (isClosingRef.current) return;
+        isClosingRef.current = true;
+        setSelectedNews(null);
+        setTimeout(() => {
+            isClosingRef.current = false;
+        }, 300);
+    };
+
+    const handleSelectNews = (item) => {
+        if (isClosingRef.current) return;
+        setSelectedNews(item);
+    };
+
     const filteredNews = news.filter(item => {
         const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
         const normalizedSearch = searchTerm.toLowerCase();
-        const matchesSearch = item.title?.toLowerCase().includes(normalizedSearch) || 
+        const matchesSearch = item.title?.toLowerCase().includes(normalizedSearch) ||
                               item.content?.toLowerCase().includes(normalizedSearch) ||
                               item.summary?.toLowerCase().includes(normalizedSearch);
         return matchesCategory && matchesSearch;
@@ -67,7 +82,7 @@ export default function NewsFeed() {
 
     const handlePublishClick = async () => {
         if (!userId) return;
-        
+
         try {
             const alreadyAccepted = await hasConsent(userId, 'news_responsibility');
             if (alreadyAccepted) {
@@ -83,7 +98,6 @@ export default function NewsFeed() {
 
     return (
         <div className="mobile-page animate-in fade-in duration-300">
-
             <div className="sticky top-14 z-20 mobile-sticky-panel pb-2 shadow-sm">
                 <PageHero
                     section="news"
@@ -138,7 +152,7 @@ export default function NewsFeed() {
                         <NewsCard
                             key={item.id}
                             item={item}
-                            onClick={() => setSelectedNews(item)}
+                            onClick={() => handleSelectNews(item)}
                             commentCount={commentCounts[item.id] || 0}
                         />
                     ))}
@@ -147,7 +161,7 @@ export default function NewsFeed() {
 
             <NewsDetailModal
                 isOpen={!!selectedNews}
-                onClose={() => setSelectedNews(null)}
+                onClose={handleCloseDetail}
                 news={selectedNews}
                 currentUser={currentUser}
             />

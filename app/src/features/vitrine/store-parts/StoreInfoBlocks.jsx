@@ -1,4 +1,4 @@
-import { Clock, MapPin, Info, ExternalLink } from 'lucide-react';
+import { Clock, MapPin, Info, ExternalLink, Globe, Smartphone, Linkedin, Youtube, Instagram, Facebook } from 'lucide-react';
 import { PLANS_CONFIG } from '../../../constants/plans';
 
 function Block({ icon, title, children, accent }) {
@@ -65,6 +65,57 @@ export function StoreExternalUrl({ merchant, storeColor }) {
       >
         <ExternalLink size={16} /> Ver Loja Completa
       </button>
+    </div>
+  );
+}
+
+export function StoreSocialLinks({ merchant, storeColor }) {
+  const links = merchant.social_links || {};
+  const hasLinks = Object.values(links).some(v => !!v) || !!merchant.instagram;
+  
+  if (!hasLinks) return null;
+
+  const networks = [
+    { id: 'instagram', icon: Instagram, url: links.instagram || merchant.instagram, prefix: 'https://instagram.com/' },
+    { id: 'facebook', icon: Facebook, url: links.facebook, prefix: 'https://facebook.com/' },
+    { id: 'tiktok', icon: Smartphone, url: links.tiktok, prefix: 'https://tiktok.com/@' },
+    { id: 'linkedin', icon: Linkedin, url: links.linkedin, prefix: 'https://linkedin.com/in/' },
+    { id: 'youtube', icon: Youtube, url: links.youtube, prefix: 'https://youtube.com/' },
+    { id: 'website', icon: Globe, url: links.website, prefix: 'https://' }
+  ];
+
+  const getFullUrl = (net) => {
+    let val = net.url;
+    if (!val) return null;
+    val = val.trim();
+    if (val.startsWith('http://') || val.startsWith('https://')) return val;
+    if (net.id === 'youtube' && val.startsWith('@')) return `https://youtube.com/${val}`;
+    if (net.id === 'website') return `https://${val}`;
+    return `${net.prefix}${val.replace(/^@/, '')}`;
+  };
+
+  const validNetworks = networks.filter(net => !!net.url).map(net => ({
+    ...net,
+    fullUrl: getFullUrl(net)
+  }));
+
+  if (validNetworks.length === 0) return null;
+
+  return (
+    <div className="mx-4 mb-4 flex items-center gap-3 justify-center">
+      {validNetworks.map((net) => {
+        const Icon = net.icon;
+        return (
+          <button
+            key={net.id}
+            onClick={() => window.open(net.fullUrl, '_blank', 'noopener,noreferrer')}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 cursor-pointer"
+            style={{ background: `${storeColor}15`, color: storeColor }}
+          >
+            <Icon size={18} />
+          </button>
+        );
+      })}
     </div>
   );
 }

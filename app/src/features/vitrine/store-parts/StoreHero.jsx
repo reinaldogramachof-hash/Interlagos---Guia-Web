@@ -1,10 +1,11 @@
-import { ArrowLeft, Share2, ImageIcon, Crown, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Share2, ImageIcon, Crown, ShieldCheck, Store } from 'lucide-react';
 import { PLANS_CONFIG } from '../../../constants/plans';
 
 export default function StoreHero({ merchant, theme, storeColor, onBack, onShare }) {
   const planConfig = PLANS_CONFIG[merchant?.plan || 'free'] || PLANS_CONFIG.free;
   const showPremiumBadge = planConfig.hasVitrineBadge;
   const showVerified = planConfig.hasVerifiedBadge;
+  const showProBadge = merchant?.plan === 'pro';
 
   return (
     <>
@@ -37,7 +38,18 @@ export default function StoreHero({ merchant, theme, storeColor, onBack, onShare
           <Share2 size={18} />
         </button>
 
-        <div className="absolute bottom-4 left-4 right-16">
+        <div className="absolute bottom-4 left-4 w-14 h-14 rounded-xl border-[3px] border-white shadow-lg overflow-hidden flex-shrink-0"
+             style={{ background: storeColor }}>
+          {merchant.image_url ? (
+            <img src={merchant.image_url} alt={merchant.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon size={18} className="text-white/60" />
+            </div>
+          )}
+        </div>
+
+        <div className="absolute bottom-4 left-20 right-14">
           <h1 className="text-white font-black text-2xl leading-tight drop-shadow line-clamp-1 flex items-center gap-2">
             {merchant.name}
             {showVerified && (
@@ -50,32 +62,19 @@ export default function StoreHero({ merchant, theme, storeColor, onBack, onShare
         </div>
       </div>
 
-      <div className="-mt-8 px-4 flex items-end justify-between mb-3">
-        <div className="flex items-end gap-3">
-          <div
-            className="w-16 h-16 rounded-2xl border-2 border-white shadow-lg overflow-hidden flex-shrink-0"
-            style={{ background: storeColor }}
-          >
-            {merchant.image_url ? (
-              <img src={merchant.image_url} alt={merchant.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ImageIcon size={22} className="text-white/60" />
-              </div>
-            )}
-          </div>
-          <div className="pb-1">
-            <span className="text-[10px] font-bold text-indigo-600 bg-white border border-indigo-100 px-2 py-0.5 rounded-full shadow-sm">
-              {merchant.category}
-            </span>
-          </div>
-        </div>
+      <div className="px-4 py-3 flex items-center justify-between bg-white border-b border-gray-100 mb-3">
+        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full shadow-sm">
+          {merchant.category}
+        </span>
         {showPremiumBadge && (
-          <div className="pb-1">
-            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-              <Crown size={11} /> Premium
-            </span>
-          </div>
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+            <Crown size={11} /> Premium
+          </span>
+        )}
+        {!showPremiumBadge && showProBadge && (
+          <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+            <Store size={11} /> Pro
+          </span>
         )}
       </div>
 

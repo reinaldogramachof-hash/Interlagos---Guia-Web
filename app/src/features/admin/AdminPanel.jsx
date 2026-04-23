@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { escalateItem } from '../../services/adminService';
 import { useAuth } from '../auth/AuthContext';
-import { Shield, Database, CheckCircle, Trophy, Bell, Heart, User, FileText, ClipboardList, X, Lock, Lightbulb, BarChart2, Phone } from 'lucide-react';
+import { Shield, Database, CheckCircle, Trophy, Bell, Heart, User, FileText, ClipboardList, X, Lock, Lightbulb, BarChart2, Phone, MessageSquare } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 
 import ApprovalsTab  from './tabs/ApprovalsTab';
@@ -16,15 +16,17 @@ import TicketsTab    from './tabs/TicketsTab';
 import AuditTab      from './tabs/AuditTab';
 import DatabaseTab   from './tabs/DatabaseTab';
 import EscalationDialog from './EscalationDialog';
+import ReviewsTab     from './tabs/ReviewsTab';
 
 const NAV_ITEMS = [
-  { id: 'approvals',   label: 'Aprovações',       icon: CheckCircle, masterOnly: false },
-  { id: 'merchants',   label: 'Comércios',         icon: Trophy,      masterOnly: false },
-  { id: 'news',        label: 'Notícias',          icon: Bell,        masterOnly: false },
-  { id: 'campaigns',   label: 'Campanhas',         icon: Heart,       masterOnly: false },
-  { id: 'suggestions', label: 'Sugestões',         icon: Lightbulb,   masterOnly: false },
-  { id: 'polls',       label: 'Enquetes',           icon: BarChart2,   masterOnly: false },
-  { id: 'utilities',   label: 'Utilidade Pública', icon: Phone,       masterOnly: false },
+  { id: 'approvals',   label: 'Aprovações',       icon: CheckCircle,   masterOnly: false },
+  { id: 'merchants',   label: 'Comércios',         icon: Trophy,        masterOnly: false },
+  { id: 'news',        label: 'Notícias',          icon: Bell,          masterOnly: false },
+  { id: 'campaigns',   label: 'Campanhas',         icon: Heart,         masterOnly: false },
+  { id: 'reviews',     label: 'Avaliações',        icon: MessageSquare, masterOnly: false },
+  { id: 'suggestions', label: 'Sugestões',         icon: Lightbulb,     masterOnly: false },
+  { id: 'polls',       label: 'Enquetes',           icon: BarChart2,     masterOnly: false },
+  { id: 'utilities',   label: 'Utilidade Pública', icon: Phone,         masterOnly: false },
 ];
 
 const MASTER_NAV_ITEMS = [
@@ -89,6 +91,7 @@ export default function AdminPanel({ onClose }) {
       case 'merchants': return <MerchantsTab />;
       case 'news':      return <NewsTab />;
       case 'campaigns': return <CampaignsTab />;
+      case 'reviews':   return <ReviewsTab />;
       case 'suggestions': return <SuggestionsTab />;
       case 'polls':       return <PollsTab />;
       case 'utilities':   return <UtilitiesTab />;

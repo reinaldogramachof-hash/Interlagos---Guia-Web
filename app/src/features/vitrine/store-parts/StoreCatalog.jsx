@@ -10,7 +10,7 @@ export default function StoreCatalog({
   planConfig,
   theme,
   storeColor,
-  onMerchantClick,
+  onPostClick,
 }) {
   const hasPosts = posts.length > 0;
   const counts = posts.reduce((acc, p) => {
@@ -69,7 +69,7 @@ export default function StoreCatalog({
               theme={theme}
               storeColor={storeColor}
               isFeatured={index === 0 && activeFilter === 'all'}
-              onMerchantClick={onMerchantClick}
+              onPostClick={onPostClick}
             />
           ))}
         </div>

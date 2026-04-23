@@ -1,4 +1,4 @@
-import { ImageIcon, ShoppingBag, Wrench, Megaphone, Tag } from 'lucide-react';
+import { ShoppingBag, Wrench, Megaphone, Tag, MessageCircle } from 'lucide-react';
 import { cleanWhatsapp } from '../../utils/whatsapp';
 
 const TYPE_BADGE = {
@@ -15,8 +15,7 @@ const TYPE_ICON = {
   promo:   Tag,
 };
 
-
-export default function StoreProductCard({ post, merchant, planConfig, theme, storeColor, isFeatured, onMerchantClick }) {
+export default function StoreProductCard({ post, merchant, planConfig, theme, storeColor, isFeatured, onPostClick }) {
   const badge = TYPE_BADGE[post.type] ?? TYPE_BADGE.product;
   const Icon = TYPE_ICON[post.type] ?? ShoppingBag;
   const waNumber = cleanWhatsapp(merchant.whatsapp || '');
@@ -28,7 +27,7 @@ export default function StoreProductCard({ post, merchant, planConfig, theme, st
   return (
     <div
       className={`flex flex-col cursor-pointer active:scale-[0.98] transition-transform duration-150 ${isFeatured ? 'col-span-2' : ''}`}
-      onClick={() => !planConfig.hasVitrineProductCTA && onMerchantClick(merchant)}
+      onClick={() => onPostClick(post)}
     >
       <div className="relative mb-2">
         {post.image_url ? (
@@ -39,7 +38,6 @@ export default function StoreProductCard({ post, merchant, planConfig, theme, st
             className={`w-full object-cover rounded-xl ${isFeatured ? 'aspect-video' : 'aspect-square'}`}
           />
         ) : (
-          /* Placeholder com identidade visual da loja */
           <div
             className={`w-full rounded-xl flex flex-col items-center justify-center gap-2 ${isFeatured ? 'aspect-video' : 'aspect-square'}`}
             style={{ background: `linear-gradient(135deg, ${color}20, ${color}08)`, borderWidth: 1, borderStyle: 'solid', borderColor: `${color}25` }}>
@@ -58,14 +56,24 @@ export default function StoreProductCard({ post, merchant, planConfig, theme, st
           {badge.label}
         </span>
 
+        {post.type === 'promo' && (
+          <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">
+            OFERTA
+          </span>
+        )}
+
         {planConfig.hasVitrineProductCTA && merchant.whatsapp && (
           <a
             href={`https://wa.me/${waNumber}?text=${waMsg}`}
             target="_blank" rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            className={`absolute bottom-2 right-2 text-white font-bold rounded-xl shadow-md min-h-[32px] flex items-center ${isFeatured ? 'text-sm px-4 py-1.5' : 'text-[10px] px-2.5 py-1'} ${ctaBg}`}
+            className={`absolute bottom-2 right-2 text-white font-bold rounded-xl shadow-md min-h-[32px] flex items-center justify-center gap-1 ${isFeatured ? 'text-sm px-4 py-1.5' : 'text-[10px] px-2.5 py-1'} ${ctaBg}`}
           >
-            WhatsApp
+            {isFeatured ? (
+              <><MessageCircle size={14} /> Pedir</>
+            ) : (
+              <MessageCircle size={12} />
+            )}
           </a>
         )}
       </div>

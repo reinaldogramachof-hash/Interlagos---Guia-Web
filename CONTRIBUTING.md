@@ -1,6 +1,6 @@
-# Contributing to Interlagos---Guia-Web
+# Contributing to Tem No Bairro
 
-Thank you for your interest in contributing to the Interlagos---Guia-Web! We appreciate your help in improving our project. Please follow the guidelines below for contributing.
+Thank you for your interest in contributing to the Tem No Bairro! We appreciate your help in improving our project. Please follow the guidelines below for contributing.
 
 ## How to Contribute
 

@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 import { createNotification, notifyAdmins } from './notificationService';
 import { PLAN_RANK } from '../constants/plans';
+import { getCached, setCached } from '../utils/sessionCache';
 
 const MERCHANT_LIST_COLUMNS = `
   id,
@@ -231,7 +232,7 @@ export const toggleMerchantActive = async (id, isActive) => {
 export const getMerchantById = async (id) => {
   const { data, error } = await supabase
     .from('merchants')
-    .select('*')
+    .select('id, owner_id, name, description, category, plan, image_url, phone, address, instagram, whatsapp, is_active, created_at, store_color, store_cover_url, store_tagline, store_theme, store_url, store_badge_text, store_description, hours_json, latitude, longitude, social_links, avg_rating, review_count')
     .eq('id', id)
     .single();
   if (error) { console.error('getMerchantById:', error); return null; }
@@ -239,18 +240,49 @@ export const getMerchantById = async (id) => {
 };
 
 export const updateMerchantStore = async (merchantId, data) => {
+  const updates = {
+    store_color: data.store_color,
+    store_cover_url: data.store_cover_url,
+    store_tagline: data.store_tagline,
+    store_description: data.store_description,
+    store_badge_text: data.store_badge_text,
+    store_theme: data.store_theme,
+    store_url: data.store_url,
+  };
+  if (data.social_links !== undefined) {
+    updates.social_links = data.social_links;
+  }
+  if (data.instagram !== undefined) {
+    updates.instagram = data.instagram;
+  }
+
   const { error } = await supabase
     .from('merchants')
-    .update({
-      store_color: data.store_color,
-      store_cover_url: data.store_cover_url,
-      store_tagline: data.store_tagline,
-      store_description: data.store_description,
-      store_badge_text: data.store_badge_text,
-      store_theme: data.store_theme,
-      store_url: data.store_url,
-    })
+    .update(updates)
     .eq('id', merchantId);
   if (error) { console.error('updateMerchantStore:', error); return false; }
   return true;
+};
+
+export const getVitrineStoreMerchants = async (neighborhood) => {
+  const cacheKey = `vitrine:${neighborhood}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const { data, error } = await supabase
+    .from('merchants')
+    .select('id, name, plan, image_url, category, whatsapp, store_color, store_cover_url, store_tagline, store_theme, avg_rating, review_count')
+    .eq('is_active', true)
+    .eq('neighborhood', neighborhood)
+    .in('plan', ['pro', 'premium'])
+    .order('plan', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('merchantService.getVitrineStoreMerchants:', error);
+    return [];
+  }
+  
+  setCached(cacheKey, data || []);
+  return data || [];
 };

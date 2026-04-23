@@ -3,6 +3,7 @@ import { Loader2, CheckCircle, Sparkles, UploadCloud, X } from 'lucide-react';
 import { updateMerchantStore } from '../../../../services/merchantService';
 import { uploadImage } from '../../../../services/storageService';
 import { PLANS_CONFIG, hasPlanAccess } from '../../../../constants/plans';
+import { SocialSection } from './SocialSection';
 
 const SWATCHES = [
   '#4f46e5', '#dc2626', '#16a34a', '#d97706',
@@ -233,6 +234,13 @@ export default function CustomizeTab({ merchant, onUpdate }) {
           </div>
         </>
       )}
+
+      <SocialSection 
+        merchant={merchant} 
+        onUpdate={onUpdate} 
+        isPro={hasPlanAccess(plan, 'pro')} 
+        isPremium={isPremium} 
+      />
 
       {/* CARD UPSELL */}
       <div className="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/50 p-4">

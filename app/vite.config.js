@@ -91,15 +91,32 @@ export default defineConfig(({ mode }) => {
           clientsClaim: true,
           // NetworkFirst para API Supabase: tenta rede, cai no cache se offline
           runtimeCaching: [
+            // Handler A — /auth/v1/ — NetworkFirst, timeout 5s
             {
-              urlPattern: ({ url }) => url.hostname.includes('supabase.co'),
+              urlPattern: ({ url }) => url.hostname.includes('supabase.co') && url.pathname.startsWith('/auth/v1/'),
               handler: 'NetworkFirst',
               options: {
+                cacheName: 'supabase-auth',
+                networkTimeoutSeconds: 5,
+                expiration: { maxAgeSeconds: 300 }, // 5 min apenas
+              },
+            },
+            // Handler B — /storage/v1/ — CacheFirst, 7 dias
+            {
+              urlPattern: ({ url }) => url.hostname.includes('supabase.co') && url.pathname.startsWith('/storage/v1/'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'supabase-storage',
+                expiration: { maxEntries: 300, maxAgeSeconds: 604800 }, // 7 dias
+              },
+            },
+            // Handler C — todo o resto da supabase.co — StaleWhileRevalidate
+            {
+              urlPattern: ({ url }) => url.hostname.includes('supabase.co') && !url.pathname.startsWith('/auth/v1/') && !url.pathname.startsWith('/storage/v1/'),
+              handler: 'StaleWhileRevalidate',
+              options: {
                 cacheName: 'supabase-api',
-                expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 }, // 24h
-                // [Bug#2] Timeout alinhado com _fetchProfile (8s) para evitar
-                // que respostas lentas caiam em cache stale durante o OAuth redirect.
-                networkTimeoutSeconds: 8,
+                expiration: { maxEntries: 200, maxAgeSeconds: 86400 }, // 24h
               },
             },
             // CacheFirst para imagens estáticas e Unsplash

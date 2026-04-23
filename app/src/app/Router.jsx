@@ -46,7 +46,6 @@ export default function AppRouter({ requireAuth }) {
   const selectedCategory = useMerchantStore(selectSelectedCategory);
   const searchTerm = useMerchantStore(selectSearchTerm);
 
-  // URL param: ?store=<id> abre a loja ao carregar o app
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const storeId = params.get('store');
@@ -55,53 +54,54 @@ export default function AppRouter({ requireAuth }) {
 
   const goToMerchantPanel = () => requireAuth(() => setCurrentView('merchant-panel'));
 
-  let route;
+  const renderContent = () => {
+    if (selectedStore) {
+      return (
+        <MerchantStorePage
+          merchant={selectedStore}
+          onBack={() => { setSelectedStore(null); setCurrentView('vitrine'); }}
+          onMerchantClick={setSelectedMerchant}
+        />
+      );
+    }
 
-  if (selectedStore) {
-    route = (
-      <MerchantStorePage
-        merchant={selectedStore}
-        onBack={() => { setSelectedStore(null); setCurrentView('vitrine'); }}
-        onMerchantClick={setSelectedMerchant}
-      />
-    );
-  } else {
     switch (currentView) {
-      case 'security': route = <SecurityView />; break;
-      case 'vitrine': route = (
+      case 'security': return <SecurityView />;
+      case 'vitrine': return (
         <VitrineView
           onMerchantClick={setSelectedMerchant}
           onStoreClick={(m) => setSelectedStore(m)}
           onViewCoupons={() => setCurrentView('coupons')}
         />
-      ); break;
-      case 'news': route = <NewsFeed />; break;
-      case 'ads': route = <AdsView onRequireAuth={requireAuth} />; break;
-      case 'donations': route = <DonationsView />; break;
-      case 'utility': route = <UtilityView onServiceClick={setSelectedService} />; break;
-      case 'history': route = <HistoryView />; break;
-      case 'suggestions': route = <SuggestionsView />; break;
-      case 'management': route = <ManagementView />; break;
-      case 'plans': route = <PlansView onRegisterFree={goToMerchantPanel} onNavigate={setCurrentView} />; break;
-      case 'merchant-landing': route = <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} onRegisterFree={goToMerchantPanel} />; break;
-      case 'profile': route = <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />; break;
-      case 'admin': route = <AdminPanel onClose={() => setCurrentView('news')} />; break;
+      );
+      case 'news': return <NewsFeed />;
+      case 'ads': return <AdsView onRequireAuth={requireAuth} />;
+      case 'donations': return <DonationsView />;
+      case 'utility': return <UtilityView onServiceClick={setSelectedService} />;
+      case 'history': return <HistoryView />;
+      case 'suggestions': return <SuggestionsView />;
+      case 'management': return <ManagementView />;
+      case 'plans': return <PlansView onRegisterFree={goToMerchantPanel} onNavigate={setCurrentView} />;
+      case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} onRegisterFree={goToMerchantPanel} />;
+      case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
+      case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
       case 'merchant-panel':
       case 'resident-panel':
-        route = <UnifiedPanel onClose={() => setCurrentView('profile')} />; break;
-      case 'polls': route = <PollsView onRequireAuth={requireAuth} />; break;
-      case 'support': route = <SupportView />; break;
-      case 'members-landing': route = <MembersLandingView onNavigate={setCurrentView} />; break;
-      case 'member-panel': route = requireAuth(() => <MemberPanelView onNavigate={setCurrentView} />) || null; break;
-      case 'coupons': route = (
-        <CouponsView
-          onMerchantClick={setSelectedMerchant}
-          onBack={() => setCurrentView('merchants')}
-        />
-      ); break;
+        return <UnifiedPanel onClose={() => setCurrentView('profile')} />;
+      case 'polls': return <PollsView onRequireAuth={requireAuth} />;
+      case 'support': return <SupportView />;
+      case 'members-landing': return <MembersLandingView onNavigate={setCurrentView} />;
+      case 'member-panel': return requireAuth(() => <MemberPanelView onNavigate={setCurrentView} />) || null;
+      case 'coupons':
+        return (
+          <CouponsView
+            onMerchantClick={setSelectedMerchant}
+            onBack={() => setCurrentView('merchants')}
+          />
+        );
       case 'merchants':
       default:
-        route = (
+        return (
           <MerchantsView
             merchants={merchants}
             loading={loading}
@@ -112,7 +112,7 @@ export default function AppRouter({ requireAuth }) {
           />
         );
     }
-  }
+  };
 
-  return <Suspense fallback={<RouteFallback />}>{route}</Suspense>;
+  return <Suspense fallback={<RouteFallback />}>{renderContent()}</Suspense>;
 }

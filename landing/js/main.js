@@ -101,5 +101,50 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     if (!target) return;
     e.preventDefault();
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+});
+});
+
+// --- Waitlist Modal ---
+window.openWaitlistModal = function(e) {
+  if (e) e.preventDefault();
+  const modal = document.getElementById('waitlist-modal');
+  if (modal) {
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+};
+
+window.closeWaitlistModal = function() {
+  const modal = document.getElementById('waitlist-modal');
+  if (modal) {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+};
+
+window.submitWaitlist = function(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  const ogText = btn.innerText;
+  btn.innerText = 'Enviando...';
+  btn.style.opacity = '0.7';
+  
+  // Simulate API call
+  setTimeout(() => {
+    btn.innerText = 'Inscrito com sucesso!';
+    btn.style.background = 'var(--color-success)';
+    btn.style.opacity = '1';
+    
+    setTimeout(() => {
+      closeWaitlistModal();
+      btn.innerText = ogText;
+      btn.style.background = 'var(--gradient-brand)';
+      e.target.reset();
+    }, 2000);
+  }, 1000);
+};
+
+// Fechar com Escape (Waitlist)
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeWaitlistModal();
 });

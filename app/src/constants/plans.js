@@ -41,6 +41,7 @@ export const PLANS_CONFIG = {
     hasVitrineProductCTA: false,
     hasStoreTheme: false,
     hasStoreUrl: false,
+    hasStoreReviews: false,
   },
   basic: {
     id: 'basic',
@@ -70,6 +71,7 @@ export const PLANS_CONFIG = {
     hasVitrineProductCTA: false,
     hasStoreTheme: false,
     hasStoreUrl: false,
+    hasStoreReviews: false,
   },
   pro: {
     id: 'pro',
@@ -96,9 +98,10 @@ export const PLANS_CONFIG = {
     hasVitrineTagline: true,
     hasVitrineFeaturedRow: false,
     hasVitrineBadge: false,
-    hasVitrineProductCTA: false,
+    hasVitrineProductCTA: true,
     hasStoreTheme: true,
     hasStoreUrl: true,
+    hasStoreReviews: false,
   },
   premium: {
     id: 'premium',
@@ -128,6 +131,7 @@ export const PLANS_CONFIG = {
     hasVitrineProductCTA: true,
     hasStoreTheme: true,
     hasStoreUrl: true,
+    hasStoreReviews: true,
   },
 };
 

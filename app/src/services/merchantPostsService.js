@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabaseClient';
 import { PLAN_RANK } from '../constants/plans';
 import { readCache, writeCache } from '../utils/localCache';
 
-const POSTS_CACHE_TTL_MS = 1000 * 60 * 10; // 10 min
+const POSTS_CACHE_TTL_MS = 1000 * 60 * 10;
 const postCacheKey = (scope, id) => `tnb:merchant-posts:${scope}:${id || 'default'}`;
 
 async function withPostsCache(key, request, { preferCache = true } = {}) {
@@ -19,7 +19,6 @@ async function withPostsCache(key, request, { preferCache = true } = {}) {
   return fresh;
 }
 
-// Retorna posts ativos de um merchant
 export const getMerchantPosts = async (merchantId, options = {}) => {
   return withPostsCache(postCacheKey('merchant', merchantId), async () => {
     const { data, error } = await supabase
@@ -33,11 +32,10 @@ export const getMerchantPosts = async (merchantId, options = {}) => {
       console.error('merchantPostsService.getMerchantPosts:', error);
       return [];
     }
-    return data;
+    return data || [];
   }, options);
 };
 
-// Retorna posts recentes do bairro para o feed da home
 export const getNeighborhoodPosts = async (neighborhood, limit = 20, options = {}) => {
   return withPostsCache(postCacheKey('neighborhood', `${neighborhood}:${limit}`), async () => {
     const { data, error } = await supabase
@@ -56,8 +54,7 @@ export const getNeighborhoodPosts = async (neighborhood, limit = 20, options = {
       return [];
     }
 
-    // Ordenados por: plano do merchant (premium→pro→basic) + created_at desc
-    return data.sort((a, b) => {
+    return (data || []).sort((a, b) => {
       const rankA = PLAN_RANK[a.merchants?.plan] ?? 0;
       const rankB = PLAN_RANK[b.merchants?.plan] ?? 0;
       if (rankA !== rankB) {
@@ -68,7 +65,6 @@ export const getNeighborhoodPosts = async (neighborhood, limit = 20, options = {
   }, options);
 };
 
-// CRUD do painel
 export const createMerchantPost = async (merchantId, neighborhood, data) => {
   const { data: result, error } = await supabase
     .from('merchant_posts')

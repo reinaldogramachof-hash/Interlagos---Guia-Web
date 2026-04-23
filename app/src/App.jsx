@@ -4,7 +4,7 @@ import useAuthStore from './stores/authStore';
 import BottomNav from './components/BottomNav';
 import AppHeader from './components/AppHeader';
 
-import useUiStore, { selectCurrentView, selectIsSidebarOpen, selectIsLoginOpen, selectShowCreateAd, selectSelectedMerchant, selectSelectedService } from './stores/uiStore';
+import useUiStore, { selectCurrentView, selectIsSidebarOpen, selectIsLoginOpen, selectShowCreateAd, selectSelectedMerchant, selectSelectedService, selectSelectedStore } from './stores/uiStore';
 import useMerchantStore from './stores/merchantStore';
 import useRequireAuth from './hooks/useRequireAuth';
 import AppRouter from './app/Router';
@@ -33,6 +33,7 @@ function AppContent() {
   const showCreateAd = useUiStore(selectShowCreateAd);
   const selectedMerchant = useUiStore(selectSelectedMerchant);
   const selectedService = useUiStore(selectSelectedService);
+  const selectedStore = useUiStore(selectSelectedStore);
 
   const setCurrentView = useUiStore(state => state.setCurrentView);
   const setIsSidebarOpen = useUiStore(state => state.setIsSidebarOpen);
@@ -67,25 +68,27 @@ function AppContent() {
       />
 
       <div className="w-full relative min-h-screen bg-gray-50 flex flex-col">
-        <AppHeader
-          currentView={currentView}
-          onLoginOpen={() => setIsLoginOpen(true)}
-          onSidebarOpen={() => setIsSidebarOpen(true)}
-        />
+        {!selectedStore && (
+          <AppHeader
+            currentView={currentView}
+            onLoginOpen={() => setIsLoginOpen(true)}
+            onSidebarOpen={() => setIsSidebarOpen(true)}
+          />
+        )}
 
-        <main className="flex-1 pt-14 pb-20">
+        <main className={`flex-1 ${!selectedStore ? 'pt-14 pb-20' : ''}`}>
           <div className="animate-in fade-in duration-300 h-full">
             <AppRouter requireAuth={requireAuth} />
           </div>
         </main>
 
-
-
-        <BottomNav
-          currentView={currentView}
-          onNavigate={setCurrentView}
-          onCreateAd={() => requireAuth(() => setShowCreateAd(true))}
-        />
+        {!selectedStore && (
+          <BottomNav
+            currentView={currentView}
+            onNavigate={setCurrentView}
+            onCreateAd={() => requireAuth(() => setShowCreateAd(true))}
+          />
+        )}
       </div>
 
       {selectedMerchant && (

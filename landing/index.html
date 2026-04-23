@@ -86,6 +86,10 @@
             Seu bairro,<br />
             agora <span class="highlight">conectado.</span>
           </h1>
+          <div class="hero__fake-search" aria-hidden="true" onclick="openWaitlistModal()">
+            <i data-lucide="search"></i>
+            <span>O que você procura no Parque Interlagos?</span>
+          </div>
           <p class="hero__desc">
             Comércios da esquina, classificados com vizinhos, notícias de perto e ações que fortalecem quem mora por
             aqui.
@@ -202,7 +206,7 @@
         <div class="bairros__grid">
 
           <!-- Interlagos — ATIVO -->
-          <a href="https://www.temnobairro.online/interlagos/"
+          <a href="javascript:void(0)" onclick="openWaitlistModal()"
             class="bairro-card bairro-card--active reveal reveal-delay-1" id="card-interlagos"
             aria-label="Acessar Interlagos, bairro ativo">
             <div class="bairro-card__bg" style="background-image: url('assets/hero.png');" aria-hidden="true"></div>
@@ -347,7 +351,7 @@
               <p class="free-banner__title">Todo negócio do bairro merece ser encontrado</p>
               <p class="free-banner__desc">Cadastro gratuito · Sem cartão · Sai quando quiser, sem enrolação</p>
             </div>
-            <a href="https://www.temnobairro.online/interlagos/" class="btn-free-cta" id="free-banner-cta">
+            <a href="javascript:void(0)" onclick="openWaitlistModal()" class="btn-free-cta" id="free-banner-cta">
               Cadastrar gratuitamente
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 aria-hidden="true">
@@ -371,7 +375,7 @@
                 <li><span class="check" aria-hidden="true">✔</span> Painel simples com métricas de cliques</li>
                 <li><span class="check" aria-hidden="true">✔</span> Visível para todos os moradores</li>
               </ul>
-              <a href="https://www.temnobairro.online/interlagos/" class="plan-card__cta plan-card__cta--free"
+              <a href="javascript:void(0)" onclick="openWaitlistModal()" class="plan-card__cta plan-card__cta--free"
                 id="merchant-cta-basic">
                 Começar no Básico →
               </a>
@@ -383,7 +387,7 @@
                 <i data-lucide="star"></i> Mais popular
               </div>
               <p class="plan-card__label">Plano Profissional</p>
-              <p class="plan-card__price">R$ 39,90 <span>/ mês</span></p>
+              <p class="plan-card__price">R$ 49,90 <span>/ mês</span></p>
               <p class="plan-card__desc">Pra ser o primeiro nome que o bairro pensa quando precisar do que você faz.</p>
               <ul class="plan-card__features">
                 <li><span class="check" aria-hidden="true">✔</span> Tudo do Básico, mais:</li>
@@ -407,11 +411,11 @@
             <!-- Plano Premium -->
             <div class="plan-card plan-card--top">
               <p class="plan-card__label">Plano Premium</p>
-              <p class="plan-card__price">R$ 79,90 <span>/ mês</span></p>
+              <p class="plan-card__price">R$ 99,90 <span>/ mês</span></p>
               <p class="plan-card__desc">Pra dominar a categoria e ser o nome que o bairro não esquece.</p>
               <ul class="plan-card__features">
                 <li><span class="check" aria-hidden="true">✔</span> Tudo do Profissional, mais:</li>
-                <li><span class="check" aria-hidden="true">✔</span> Topo absoluto nas buscas — sempre</li>
+                <li><span class="check" aria-hidden="true">✔</span> Posição de destaque prioritário nas buscas</li>
                 <li><span class="check" aria-hidden="true">✔</span> Banner de destaque na home do bairro</li>
                 <li><span class="check" aria-hidden="true">✔</span> Categorias ilimitadas</li>
                 <li><span class="check" aria-hidden="true">✔</span> Cupons de desconto ilimitados</li>
@@ -448,7 +452,8 @@
     <!-- ============================================================
          SEJA MEMBRO — Seção 6
     ============================================================ -->
-    <section class="members" id="membros" aria-labelledby="members-title">
+    <!-- SEÇÃO SEJA MEMBRO OCULTADA NA FASE 1 -->
+    <section class="members" id="membros" aria-labelledby="members-title" style="display: none;">
       <div class="container">
         <span class="section-tag reveal"><i data-lucide="heart"></i> Rede de Apoio</span>
         <h2 id="members-title" class="section-heading reveal reveal-delay-1">
@@ -609,7 +614,7 @@
           <p class="cta-final__desc">
             Entra e vê o que tem por perto — sem precisar criar conta pra dar uma olhada.
           </p>
-          <a href="https://www.temnobairro.online/interlagos/" class="btn-primary cta-final__btn"
+          <a href="javascript:void(0)" onclick="openWaitlistModal()" class="btn-primary cta-final__btn"
             id="cta-final-primary">
             Explorar Parque Interlagos
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -642,7 +647,7 @@
         <div class="footer__links">
           <h4>Bairros</h4>
           <ul>
-            <li><a href="https://www.temnobairro.online/interlagos/">Interlagos ↗</a></li>
+            <li><a href="javascript:void(0)" onclick="openWaitlistModal()">Interlagos ↗</a></li>
             <li><a href="#bairros">Ver todos</a></li>
           </ul>
         </div>
@@ -888,6 +893,33 @@
       if (e.key === 'Escape') closeLegalModal();
     });
   </script>
+
+  <!-- ============================================================
+       MODAL WAITLIST — Substitui links diretos para /interlagos/
+  ============================================================ -->
+  <div id="waitlist-modal" class="waitlist-modal" role="dialog" aria-modal="true" aria-label="Lista de Espera" hidden>
+    <div class="waitlist-modal__overlay" onclick="closeWaitlistModal()"></div>
+    <div class="waitlist-modal__box">
+      <button class="waitlist-modal__close" onclick="closeWaitlistModal()" aria-label="Fechar">&times;</button>
+      <h2 class="waitlist-modal__title">O Interlagos tá chegando!</h2>
+      <p class="waitlist-modal__desc">
+        A plataforma está em fase final de testes. Deixe seu WhatsApp para ser um dos primeiros a usar e concorrer a prêmios especiais no lançamento.
+      </p>
+      <form class="waitlist-form" onsubmit="submitWaitlist(event)">
+        <input type="text" placeholder="Seu nome" required />
+        <input type="tel" placeholder="Seu WhatsApp (com DDD)" required />
+        <button type="submit">Quero acesso antecipado</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Botão Flutuante WhatsApp (Suporte) -->
+  <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" class="floating-whatsapp" aria-label="Fale com a gente no WhatsApp">
+    <svg viewBox="0 0 24 24">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122.973 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+    <span>Dúvidas? Fale com a gente</span>
+  </a>
 </body>
 
 </html>
