@@ -5,7 +5,7 @@ import { readCache, writeCache } from '../utils/localCache';
 const POSTS_CACHE_TTL_MS = 1000 * 60 * 10; // 10 min
 const postCacheKey = (scope, id) => `tnb:merchant-posts:${scope}:${id || 'default'}`;
 
-async function withPostsCache(key, request, { preferCache = false } = {}) {
+async function withPostsCache(key, request, { preferCache = true } = {}) {
   if (preferCache) {
     const cached = readCache(key, POSTS_CACHE_TTL_MS);
     if (cached) {
