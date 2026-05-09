@@ -1,8 +1,8 @@
 # SESSION START — Tem No Bairro
 
 > Este documento é o ponto de entrada obrigatório de toda sessão de trabalho.
-> Todo agente (Claude, Deep Think, Fast Mode) deve ler este arquivo antes de qualquer ação.
-> Última atualização: 2026-04-11
+> Codex e Claude Code devem ler este arquivo antes de qualquer ação.
+> Última atualização: 2026-05-09
 
 ---
 
@@ -89,13 +89,11 @@ app/src/
 
 | Agente | Papel | Quando usar |
 |---|---|---|
-| **Claude Sonnet 4.6** | Arquiteto Principal | Decisões de arquitetura, briefing, validação final |
-| **Deep Think** | Executor Estratégico | Qualquer tarefa que toque >1 arquivo ou exija raciocínio |
-| **Fast Mode** | Executor Tático | Ajustes cirúrgicos em arquivo único, boilerplate |
-| **Subagente de Navegador** | Auditor Visual | Validação de UI, smoke test visual, screenshots |
-| **Deep Think (substituto)** | Arquiteto Substituto | Somente quando Claude está indisponível |
+| **Codex** | Arquiteto e Orquestrador | Auditoria, fases, priorização, prompts técnicos, governança |
+| **Claude Code** | Executor Técnico | Implementação de código, refactors, migrations, validação local |
+| **Reinaldo** | QA Funcional | Testes reais no localhost, aceite e feedback de fluxo |
 
-**Regra de escalação:** Fast Mode → Deep Think → Claude (last resort)
+**Regra de escalação:** Claude Code reporta bloqueio → Codex reprojeta a tarefa → Reinaldo revalida
 
 ---
 
@@ -129,12 +127,11 @@ app/src/
 - Estrutura multi-bairro (bairros/, .env.{slug}, build scripts)
 
 ### Próximos (backlog ativo)
-- [ ] Executar `docs/migrations/sprint1-lgpd.sql` no Supabase
-- [ ] Re-upload interlagos com OAuth fix + Sprint LGPD
-- [ ] Testar onboarding completo em produção
-- [ ] Conectar métricas reais ao DashboardTab (statsService)
-- [ ] Verificar link WhatsApp no AdDetailModal
-- [ ] Adicionar coluna `neighborhood` nas tabelas Supabase + atualizar RLS
+- [ ] Fase 1 — Segurança do painel administrativo
+- [ ] Fase 2 — Governança e rastreabilidade operacional
+- [ ] Fase 3 — Experiência operacional e confiabilidade de uso
+- [ ] Transformar o plano em tarefas delegáveis para Claude Code
+- [ ] Validar cada etapa no `localhost` antes de avançar
 
 ### Futuro
 - [ ] Ativar bairro Santa Júlia
@@ -149,10 +146,10 @@ app/src/
 Antes de começar qualquer tarefa, execute mentalmente este checklist:
 
 - [ ] **Li o relatório mais recente** em `.agent/reports/` para entender o estado da última sessão.
-- [ ] **Identifiquei o objetivo da sessão** com clareza.
-- [ ] **Sei qual agente** vai executar (Fast Mode, Deep Think ou Claude direto).
-- [ ] **Conheço os arquivos que serão tocados** — não vou alterar código sem ter lido o arquivo primeiro.
-- [ ] **Tenho o briefing completo** — Contexto + Diretiva + Restrições + Verificação.
+- [ ] **Identifiquei a fase atual** do plano em `docs/12-plano-admin-3-fases.md`.
+- [ ] **Sei se estou atuando como Codex ou Claude Code** nesta rodada.
+- [ ] **Conheço os arquivos que serão tocados** — não vou alterar nada sem ler antes.
+- [ ] **Tenho o prompt operacional completo** — Objetivo + Contexto + Diretiva + Restrições + Validação.
 
 ---
 
@@ -160,11 +157,10 @@ Antes de começar qualquer tarefa, execute mentalmente este checklist:
 
 Antes de encerrar qualquer sessão, execute:
 
-- [ ] **Build passou** — `npm run build:interlagos` com zero erros.
-- [ ] **Smoke test realizado** (se houve mudança de comportamento).
-- [ ] **Relatório de sessão gerado** em `.agent/reports/YYYY-MM-DD_HH-MM_descricao.md`.
-- [ ] **Índice de relatórios atualizado** em `.agent/reports/README.md`.
-- [ ] **Pendências documentadas** no relatório para a próxima sessão.
+- [ ] **Validação técnica local executada** conforme o escopo da tarefa.
+- [ ] **QA funcional realizado** no `localhost` quando a entrega afetar comportamento.
+- [ ] **Bloqueios ou pendências registrados** para o próximo prompt, se existirem.
+- [ ] **A fase atual foi atualizada** se a tarefa concluiu um marco relevante.
 
 ---
 

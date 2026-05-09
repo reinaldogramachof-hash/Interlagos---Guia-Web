@@ -13,12 +13,12 @@
   --color-border:     rgba(255,255,255,0.07);
   --color-text:       #e4e4e7;
   --color-muted:      #71717a;
-  --color-brand:      #6366f1;
-  --color-brand-2:    #8b5cf6;
+  --color-brand:      #4F46E5;
+  --color-brand-2:    #4338CA;
   --color-accent:     #f59e0b;
   --color-success:    #10b981;
-  --gradient-brand:   linear-gradient(135deg, var(--color-brand), var(--color-brand-2));
-  --gradient-glow:    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99,102,241,0.18), transparent);
+  --gradient-brand:   linear-gradient(135deg, #6366F1, var(--color-brand-2));
+  --gradient-glow:    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(79,70,229,0.18), transparent);
   --font-body:        'Inter', system-ui, sans-serif;
   --font-heading:     'Plus Jakarta Sans', system-ui, sans-serif;
   --radius-card:      1rem;
@@ -312,7 +312,7 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 1.25rem;
 }
 .pillar-card__icon--brand  { background: rgba(99,102,241,0.15); }
-.pillar-card__icon--violet { background: rgba(139,92,246,0.15); }
+.pillar-card__icon--violet { background: rgba(67,56,202,0.15); }
 .pillar-card__icon--amber  { background: rgba(245,158,11,0.15); }
 .pillar-card__icon--green  { background: rgba(16,185,129,0.15); }
 .pillar-card__icon svg {
@@ -485,7 +485,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--color-bg);
 }
 .merchants__inner {
-  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04));
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(67,56,202,0.04));
   border: 1px solid rgba(99,102,241,0.2);
   border-radius: 1.5rem;
   padding: 3.5rem 2rem;
@@ -1115,7 +1115,7 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
 }
 .cta-final__inner {
-  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.06));
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(67,56,202,0.06));
   border: 1px solid rgba(99,102,241,0.25);
   border-radius: 1.5rem;
   padding: 4rem 2rem;

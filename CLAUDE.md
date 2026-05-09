@@ -3,6 +3,29 @@
 > Este arquivo é lido automaticamente pelo Claude Code a cada sessão.
 > Ele define as regras imutáveis de arquitetura, stack e UX deste projeto.
 
+## MODO DE OPERAÇÃO DE AGENTES
+
+Este repositório opera com a seguinte divisão de responsabilidades:
+
+| Papel | Responsável | Responsabilidade |
+|---|---|---|
+| Arquiteto e Orquestrador | Codex | Planejamento, priorização, prompts de execução, governança e documentação |
+| Executor Técnico | Claude Code | Implementação de código, migrações, refactors, validações locais e aplicação de mudanças |
+| QA Funcional | Reinaldo | Testes reais via `localhost`, validação de fluxo e aceite |
+
+### Protocolo obrigatório do Claude Code
+
+1. Ler este `CLAUDE.md`, `.agent/SESSION_START.md` e `.agent/rules/`.
+2. Executar apenas a tarefa descrita no prompt técnico vigente.
+3. Preservar o escopo; não expandir a tarefa por iniciativa própria.
+4. Reportar **somente**:
+   - o que não foi possível aplicar;
+   - erros concretos;
+   - dependências ausentes;
+   - ambiguidades que mudem o comportamento esperado.
+5. Se a implementação for aplicada com sucesso, não devolver relatório narrativo longo.
+6. Considerar a tarefa concluída quando código, build local aplicável e artefatos pedidos estiverem consistentes.
+
 ---
 
 ## CONTEXTO DO PRODUTO
@@ -241,6 +264,7 @@ VITE_GENKIT_API_URL=
 - **Nomenclatura de branch:** `feat/`, `fix/`, `refactor/`, `chore/`
 - **Antes de qualquer PR:** rodar `npm run build:interlagos` e garantir zero erros
 - **Não commitar `.env.local` nem arquivos com credenciais reais**
+- **Ao executar tarefa delegada pelo Codex:** manter estritamente o escopo do prompt; se surgir desvio estrutural, parar e reportar
 
 ---
 

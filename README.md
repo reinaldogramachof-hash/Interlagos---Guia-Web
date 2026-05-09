@@ -135,7 +135,28 @@ Guia Digital Interlagos/
 | `docs/10-guia-de-execucao.md` | Guia de execução do projeto v2.1 |
 | `docs/11-deploy-hostgator.md` | Guia completo de deploy |
 | `docs/06-roadmap-tecnico.md` | Roadmap técnico v2.0 |
+| `docs/12-plano-admin-3-fases.md` | Plano operacional do painel administrativo + prompts para Claude Code |
 | `CLAUDE.md` | Regras de arquitetura e stack (lido pelo Claude Code) |
+
+---
+
+## 🤝 Modelo Operacional de Agentes
+
+Este projeto passa a operar com três papéis fixos:
+
+| Papel | Responsável | Responsabilidade |
+|---|---|---|
+| **Arquiteto e Orquestrador** | Codex | Audita, prioriza, quebra em fases, escreve prompts técnicos e atualiza a documentação de governança |
+| **Executor de Código** | Claude Code | Aplica mudanças no código a partir dos prompts aprovados e só reporta bloqueios ou itens não aplicados |
+| **QA Funcional** | Reinaldo | Valida os fluxos reais via `localhost`, confirma comportamento e aprova continuidade |
+
+### Regra de execução
+
+1. Codex define a fase, o escopo e o prompt operacional.
+2. Claude Code executa a tarefa no projeto.
+3. Se tudo for aplicado, considera-se a etapa concluída sem necessidade de relatório longo.
+4. Claude Code só deve retornar quando houver erro, bloqueio, ambiguidade material ou algo impossível de aplicar.
+5. A validação final do fluxo fica com o QA humano no ambiente local.
 
 ---
 

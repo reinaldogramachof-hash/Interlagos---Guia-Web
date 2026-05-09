@@ -1,27 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminFetchNews, createNews, adminDeleteNews, uploadNewsImage } from '../../../services/newsService';
 import { useAuth } from '../../auth/AuthContext';
-import { Bell, Trash2, Loader2, X } from 'lucide-react';
+import { Bell, Trash2, Loader2, X, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 export default function NewsTab() {
   const { currentUser } = useAuth();
   const [newsList, setNewsList] = useState([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [listError, setListError] = useState(null);
   const showToast = useToast();
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
+    setListLoading(true);
+    setListError(null);
     try {
       const data = await adminFetchNews();
       setNewsList(data);
     } catch (error) {
-      // silenced for production
+      setListError(error.message || 'Erro ao carregar notícias.');
+      showToast('Erro ao carregar notícias.', 'error');
+    } finally {
+      setListLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchNews(); }, []);
+  useEffect(() => { fetchNews(); }, [fetchNews]);
 
   const handlePublish = async (e) => {
     e.preventDefault();
@@ -121,19 +128,37 @@ export default function NewsTab() {
         </form>
       </div>
       <div className="space-y-4">
-        <h3 className="font-bold text-slate-800">Notícias Publicadas</h3>
-        {newsList.map(item => (
-          <div key={item.id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full mb-2 inline-block">{item.category}</span>
-              <h4 className="font-bold text-slate-900">{item.title}</h4>
-              <p className="text-sm text-slate-500 line-clamp-2">{item.summary || item.content}</p>
-              <div className="text-xs text-slate-400 mt-2">{new Date(item.created_at).toLocaleDateString('pt-BR')}</div>
-            </div>
-            <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg"><Trash2 size={18} /></button>
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-slate-800">Notícias Publicadas</h3>
+          <button onClick={fetchNews} disabled={listLoading} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-lg disabled:opacity-50" title="Atualizar lista">
+            <RefreshCw size={12} className={listLoading ? 'animate-spin' : ''} /> Atualizar
+          </button>
+        </div>
+
+        {listError && (
+          <div className="bg-red-50 border border-red-200 p-3 rounded-lg flex items-center gap-3 text-red-700 text-sm">
+            <AlertTriangle size={16} className="shrink-0" />
+            <span>{listError}</span>
           </div>
-        ))}
-        {newsList.length === 0 && <p className="text-slate-400 text-sm">Nenhuma notícia publicada.</p>}
+        )}
+
+        {listLoading ? (
+          <p className="text-center text-slate-400 py-6 text-sm">Carregando notícias...</p>
+        ) : !listError && newsList.length === 0 ? (
+          <p className="text-slate-400 text-sm py-4 text-center">Nenhuma notícia publicada ainda.</p>
+        ) : (
+          newsList.map(item => (
+            <div key={item.id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-start">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full mb-2 inline-block">{item.category}</span>
+                <h4 className="font-bold text-slate-900">{item.title}</h4>
+                <p className="text-sm text-slate-500 line-clamp-2">{item.summary || item.content}</p>
+                <div className="text-xs text-slate-400 mt-2">{new Date(item.created_at).toLocaleDateString('pt-BR')}</div>
+              </div>
+              <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg"><Trash2 size={18} /></button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

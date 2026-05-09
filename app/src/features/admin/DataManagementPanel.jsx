@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { backupDatabase, resetDatabase } from '../../services/adminService';
+import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../../components/Toast';
 import { Save, Trash2, ShieldAlert } from 'lucide-react';
 import DataManagementBackupModal from './DataManagementBackupModal';
@@ -7,29 +8,27 @@ import DataManagementResetModal from './DataManagementResetModal';
 
 export default function DataManagementPanel() {
     const showToast = useToast();
+    const { currentUser } = useAuth();
     const [loadingBackup, setLoadingBackup] = useState(false);
     const [loadingReset, setLoadingReset] = useState(false);
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
 
-    const MASTER_PIN = import.meta.env.VITE_MASTER_PIN;
     const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 
-    const handleBackup = async (pin) => {
-        if (pin !== MASTER_PIN) {
-            showToast('PIN incorreto', 'error');
-            return;
-        }
-        
+    const actor = { id: currentUser?.id, email: currentUser?.email };
+
+    const handleBackup = async () => {
         setLoadingBackup(true);
         try {
-            const data = await backupDatabase();
+            const data = await backupDatabase(actor);
             const exportData = {
                 exportedAt: new Date().toISOString(),
+                exportedBy: currentUser?.email || currentUser?.id,
                 neighborhood: NEIGHBORHOOD,
                 ...data
             };
-            
+
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -40,7 +39,7 @@ export default function DataManagementPanel() {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            
+
             showToast('Backup exportado com sucesso!', 'success');
             setShowBackupModal(false);
         } catch (error) {
@@ -51,19 +50,15 @@ export default function DataManagementPanel() {
         }
     };
 
-    const handleReset = async ({ word, pin }) => {
+    const handleReset = async ({ word }) => {
         if (word !== 'RESETAR') {
             showToast('Palavra de confirmação incorreta', 'error');
             return;
         }
-        if (pin !== MASTER_PIN) {
-            showToast('PIN incorreto', 'error');
-            return;
-        }
-        
+
         setLoadingReset(true);
         try {
-            await resetDatabase();
+            await resetDatabase(actor);
             showToast('Banco de dados resetado com sucesso!', 'success');
             setShowResetModal(false);
         } catch (error) {
@@ -86,7 +81,7 @@ export default function DataManagementPanel() {
                         <p className="text-slate-400 text-sm">Exportar todos os dados reais em formato JSON</p>
                     </div>
                 </div>
-                
+
                 <button
                     onClick={() => setShowBackupModal(true)}
                     className="w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
@@ -109,7 +104,7 @@ export default function DataManagementPanel() {
                         <p className="text-red-300/70 text-sm">Apagar permanentemente todos os dados de conteúdo</p>
                     </div>
                 </div>
-                
+
                 <button
                     onClick={() => setShowResetModal(true)}
                     className="w-full relative z-10 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all bg-red-600/80 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 border border-red-500/50"
@@ -131,6 +126,7 @@ export default function DataManagementPanel() {
                 loading={loadingReset}
                 onClose={() => setShowResetModal(false)}
                 onConfirm={handleReset}
+                userEmail={currentUser?.email}
             />
         </div>
     );

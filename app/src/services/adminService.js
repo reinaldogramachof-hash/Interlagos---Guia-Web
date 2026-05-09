@@ -3,51 +3,96 @@ import { createNotification } from './notificationService';
 
 const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 
-// fetchAuditLogs: a tabela audit_logs não existe no schema.
-// Usa click_events como proxy de auditoria de atividade — tabela real no schema.
+// ---------------------------------------------------------------------------
+// Trilha de auditoria — registra ações administrativas reais
+// Falha silenciosamente para não bloquear a ação principal em caso de erro
+// de permissão ou schema (o log é informativo, não transacional).
+// ---------------------------------------------------------------------------
+async function logAdminAction(actorId, actorEmail, action, targetTable, targetId, details = {}) {
+  try {
+    await supabase.from('admin_audit_logs').insert({
+      actor_id: actorId ?? null,
+      actor_email: actorEmail ?? null,
+      action,
+      target_table: targetTable ?? null,
+      target_id: targetId ? String(targetId) : null,
+      details,
+    });
+  } catch (_) {
+    // Log não deve bloquear a operação principal
+  }
+}
+
+export { logAdminAction };
+
+// ---------------------------------------------------------------------------
+// Auditoria
+// ---------------------------------------------------------------------------
 export async function fetchAuditLogs() {
   const { data, error } = await supabase
-    .from('click_events')
-    .select('*, profiles!user_id(display_name)')
+    .from('admin_audit_logs')
+    .select('*, actor:profiles!actor_id(display_name)')
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(200);
 
   if (error) throw error;
 
   return (data ?? []).map(row => ({
     id: row.id,
     created_at: row.created_at,
-    action: row.entity_type,
-    details: row.entity_id,
-    user_id: row.user_id,
-    user_name: row.profiles?.display_name || 'Usuário desconhecido',
-    profiles: row.profiles,
+    action: row.action,
+    target_table: row.target_table,
+    target_id: row.target_id,
+    details: row.details,
+    actor_id: row.actor_id,
+    actor_email: row.actor_email,
+    actor_name: row.actor?.display_name || row.actor_email || row.actor_id || 'Sistema',
   }));
 }
 
-export async function escalateItem(ticketData, targetCollection, targetId) {
-  // Monta payload compatível com o schema real da tabela tickets:
-  // tickets (author_id, subject, body, status, type, resolved_at, resolved_by)
-  const { error: ticketError } = await supabase
+// ---------------------------------------------------------------------------
+// Escalonamento — preserva referência ao item de origem
+// ---------------------------------------------------------------------------
+export async function escalateItem(ticketData, targetCollection, targetId, actor = {}) {
+  const { data: ticket, error: ticketError } = await supabase
     .from('tickets')
     .insert({
       subject: ticketData.subject,
       body: ticketData.body,
       status: 'open',
-      type: ticketData.type || ticketData.target_collection || 'moderation',
+      type: ticketData.type || 'escalation',
       author_id: ticketData.author_id ?? null,
-    });
+      ref_table: targetCollection,
+      ref_id: String(targetId),
+    })
+    .select()
+    .single();
+
   if (ticketError) throw ticketError;
 
   const { error: targetError } = await supabase
     .from(targetCollection)
     .update({ status: 'escalated' })
     .eq('id', targetId);
-  if (targetError) throw targetError;
 
-  return true;
+  if (targetError) {
+    // Rollback: remove ticket criado para evitar estado órfão
+    await supabase.from('tickets').delete().eq('id', ticket.id);
+    throw targetError;
+  }
+
+  await logAdminAction(
+    actor.id, actor.email,
+    'escalate', targetCollection, targetId,
+    { ticket_id: ticket.id, reason: ticketData.body }
+  );
+
+  return ticket;
 }
 
+// ---------------------------------------------------------------------------
+// Itens pendentes de aprovação
+// ---------------------------------------------------------------------------
 export async function fetchPendingItems() {
   const [{ data: ads }, { data: campaigns }, { data: merchants }, { data: news }] = await Promise.all([
     supabase.from('ads').select('*, profiles!seller_id(display_name)').eq('status', 'pending').eq('neighborhood', NEIGHBORHOOD).order('created_at', { ascending: true }),
@@ -63,10 +108,10 @@ export async function fetchPendingItems() {
   ];
 }
 
-// approveItem: ads usam status 'approved' (fetchAds filtra por 'approved').
-// campaigns usam status 'active' (fetchCampaigns filtra por 'active').
-// merchants usam is_active: true.
-export async function approveItem(table, id) {
+// ---------------------------------------------------------------------------
+// Aprovação de item
+// ---------------------------------------------------------------------------
+export async function approveItem(table, id, actor = {}) {
   const { data: item, error: fetchError } = await supabase.from(table).select('*').eq('id', id).single();
   if (fetchError) throw fetchError;
 
@@ -98,12 +143,20 @@ export async function approveItem(table, id) {
   if (userId) {
     await createNotification(userId, notifTitle, notifMsg, 'success');
   }
+
+  await logAdminAction(actor.id, actor.email, 'approve', table, id, {
+    title: item.title || item.name,
+  });
+
   return true;
 }
 
-// rejectItem: atualiza status para 'rejected' em vez de deletar — preserva trilha de auditoria.
+// ---------------------------------------------------------------------------
+// Rejeição de item
+// rejectItem: atualiza status para 'rejected' em vez de deletar — preserva trilha.
 // Exceção: merchants não têm coluna status, então são deletados ao rejeitar.
-export async function rejectItem(table, id) {
+// ---------------------------------------------------------------------------
+export async function rejectItem(table, id, actor = {}) {
   const { data: item, error: fetchError } = await supabase.from(table).select('*').eq('id', id).single();
   if (fetchError) throw fetchError;
 
@@ -119,6 +172,7 @@ export async function rejectItem(table, id) {
         'warning'
       );
     }
+    await logAdminAction(actor.id, actor.email, 'reject', table, id, { name: item.name });
     return true;
   }
 
@@ -131,39 +185,42 @@ export async function rejectItem(table, id) {
     const msg = table === 'news'
       ? `Sua notícia "${item.title}" foi removida por não atender às diretrizes da comunidade. Você pode corrigir e publicar novamente.`
       : `Seu ${table === 'ads' ? 'anúncio' : 'campanha'} "${item.title}" não atendeu às diretrizes.`;
-
     await createNotification(userId, title, msg, 'warning');
   }
+
+  await logAdminAction(actor.id, actor.email, 'reject', table, id, { title: item.title });
+
   return true;
 }
 
-export async function fetchUsers() {
+// ---------------------------------------------------------------------------
+// Diretório de usuários
+// ---------------------------------------------------------------------------
+export async function fetchUsers(page = 1, pageSize = 50) {
+  const offset = (page - 1) * pageSize;
   const { data, error } = await supabase.rpc('admin_user_directory', {
     p_search: '',
-    p_limit: 100,
-  });
-  if (!error) return data ?? [];
-
-  console.warn('adminService.fetchUsers rpc fallback:', error.message);
-  const fallback = await supabase
-    .from('profiles')
-    .select('*')
-    .limit(100)
-    .order('created_at', { ascending: false });
-  if (fallback.error) throw fallback.error;
-  return fallback.data ?? [];
-}
-
-export async function searchUsers(searchTerm, limit = 100) {
-  const { data, error } = await supabase.rpc('admin_user_directory', {
-    p_search: searchTerm || '',
-    p_limit: limit,
+    p_limit: pageSize,
+    p_offset: offset,
   });
   if (error) throw error;
   return data ?? [];
 }
 
-export async function updateUserRole(userId, newRole) {
+export async function searchUsers(searchTerm, limit = 50) {
+  const { data, error } = await supabase.rpc('admin_user_directory', {
+    p_search: searchTerm || '',
+    p_limit: limit,
+    p_offset: 0,
+  });
+  if (error) throw error;
+  return data ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// Troca de role
+// ---------------------------------------------------------------------------
+export async function updateUserRole(userId, newRole, actor = {}) {
   const { data, error } = await supabase
     .from('profiles')
     .update({ role: newRole })
@@ -172,53 +229,40 @@ export async function updateUserRole(userId, newRole) {
     .single();
   if (error) throw error;
 
-  const message = newRole === 'banned' 
-    ? 'Sua conta foi suspensa por violação das diretrizes.' 
+  const message = newRole === 'banned'
+    ? 'Sua conta foi suspensa por violação das diretrizes.'
     : `Seu cargo no sistema foi alterado para: ${newRole}.`;
-  
+
   await createNotification(userId, 'Atualização de Perfil', message, newRole === 'banned' ? 'error' : 'info');
+
+  await logAdminAction(actor.id, actor.email, 'role_change', 'profiles', userId, {
+    new_role: newRole,
+    target_email: data?.email,
+  });
 
   return data;
 }
 
+// ---------------------------------------------------------------------------
+// Tickets
+// ---------------------------------------------------------------------------
 export async function fetchOpenTickets() {
-  // Requer migration: docs/migrations/add-tickets-created-at.sql
-  // Resiliência: Tenta buscar os tickets, opcionalmente com profile se a relação existir
   const { data, error } = await supabase
     .from('tickets')
     .select('*, author:profiles!author_id(display_name)')
-    .eq('status', 'open');
+    .eq('status', 'open')
+    .order('created_at', { ascending: false });
 
-  if (error) {
-    // Fallback se o join ou tabela falhar
-    const { data: simpleData, error: simpleError } = await supabase.from('tickets').select('*').eq('status', 'open');
-    if (simpleError) throw simpleError;
-    return simpleData ?? [];
-  }
+  if (error) throw error;
   return data ?? [];
 }
 
-export async function resolveTicket(ticketId, ticketData) {
-  // Tenta o update completo (status + resolved_by)
-  let { data, error } = await supabase
+export async function resolveTicket(ticketId, ticketData, actor = {}) {
+  const { data, error } = await supabase
     .from('tickets')
     .update(ticketData)
     .eq('id', ticketId)
     .select();
-
-  // Retry resiliente: Se houver qualquer erro, tenta apenas com o status
-  if (error) {
-    console.warn('[resolveTicket] Primeiro attempt falhou, tentando fallback só com status:', error.message);
-    const { data: retryData, error: retryError } = await supabase
-      .from('tickets')
-      .update({ status: ticketData.status })
-      .eq('id', ticketId)
-      .select();
-    
-    if (retryError) throw retryError;
-    data = retryData;
-    error = null;
-  }
 
   if (error) throw error;
   const result = data?.[0];
@@ -232,17 +276,25 @@ export async function resolveTicket(ticketId, ticketData) {
       ticketData.status === 'resolved' ? 'success' : 'info'
     );
   }
+
+  await logAdminAction(actor.id, actor.email, 'resolve_ticket', 'tickets', ticketId, {
+    status: ticketData.status,
+    ref_table: result?.ref_table,
+    ref_id: result?.ref_id,
+  });
+
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// Seed, backup e reset
+// ---------------------------------------------------------------------------
 export async function seedDatabase(merchants, ads, news, campaigns) {
-  // Helper resiliente: se falhar por erro de coluna, tenta o insert sem as colunas que costumam faltar
   const safeInsert = async (table, data) => {
     const { error } = await supabase.from(table).insert(data);
     if (error && (error.message?.includes('column') || error.hint?.includes('column') || error.message?.includes('schema cache'))) {
       const sanitized = data.map(item => {
         const newItem = { ...item };
-        // Remove campos que causam falha comum se o schema estiver antigo
         delete newItem.gallery;
         delete newItem.social_links;
         delete newItem.is_premium;
@@ -265,7 +317,7 @@ export async function seedDatabase(merchants, ads, news, campaigns) {
   return true;
 }
 
-export async function backupDatabase() {
+export async function backupDatabase(actor = {}) {
   const [
     { data: merchants },
     { data: ads },
@@ -277,28 +329,22 @@ export async function backupDatabase() {
     supabase.from('ads').select('*').eq('neighborhood', NEIGHBORHOOD),
     supabase.from('news').select('*').eq('neighborhood', NEIGHBORHOOD),
     supabase.from('campaigns').select('*').eq('neighborhood', NEIGHBORHOOD),
-    supabase.from('suggestions').select('*').eq('neighborhood', NEIGHBORHOOD)
+    supabase.from('suggestions').select('*').eq('neighborhood', NEIGHBORHOOD),
   ]);
+
+  await logAdminAction(actor.id, actor.email, 'backup', null, null, { neighborhood: NEIGHBORHOOD });
 
   return {
     merchants: merchants || [],
     ads: ads || [],
     news: news || [],
     campaigns: campaigns || [],
-    suggestions: suggestions || []
+    suggestions: suggestions || [],
   };
 }
 
-export async function resetDatabase() {
-  const tables = [
-    'merchants',
-    'ads',
-    'news',
-    'campaigns',
-    'suggestions',
-    'click_events',
-  ];
-
+export async function resetDatabase(actor = {}) {
+  const tables = ['merchants', 'ads', 'news', 'campaigns', 'suggestions', 'click_events'];
   const results = {};
   const errors = [];
 
@@ -318,6 +364,11 @@ export async function resetDatabase() {
   if (errors.length > 0) {
     throw new Error(`Falha ao limpar tabelas:\n${errors.join('\n')}`);
   }
+
+  await logAdminAction(actor.id, actor.email, 'reset', null, null, {
+    neighborhood: NEIGHBORHOOD,
+    deleted_counts: results,
+  });
 
   return { success: true, deletedCounts: results };
 }

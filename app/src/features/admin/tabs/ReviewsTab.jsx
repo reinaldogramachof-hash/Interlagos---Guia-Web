@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Star, Trash2, MessageSquare, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Star, Trash2, MessageSquare, RefreshCw, AlertTriangle } from 'lucide-react';
 import { getRecentReviews, rejectReview } from '../../../services/merchantReviewsService';
 import { useToast } from '../../../components/Toast';
 
@@ -16,17 +16,25 @@ function StarRow({ rating }) {
 export default function ReviewsTab() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [acting, setActing] = useState(null);
   const showToast = useToast();
 
-  useEffect(() => { load(); }, []);
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
-    const data = await getRecentReviews();
-    setReviews(data);
-    setLoading(false);
-  }
+    setLoadError(null);
+    try {
+      const data = await getRecentReviews();
+      setReviews(data);
+    } catch (err) {
+      setLoadError(err.message || 'Erro ao carregar avaliações.');
+      showToast('Erro ao carregar avaliações.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   async function handleDelete(id) {
     setActing(id);
@@ -34,8 +42,8 @@ export default function ReviewsTab() {
       await rejectReview(id);
       setReviews(prev => prev.filter(r => r.id !== id));
       showToast('Avaliação removida.', 'success');
-    } catch {
-      showToast('Erro ao remover', 'error');
+    } catch (err) {
+      showToast('Erro ao remover: ' + (err.message || 'desconhecido'), 'error');
     } finally {
       setActing(null);
     }
@@ -54,18 +62,27 @@ export default function ReviewsTab() {
       <div className="flex items-center gap-2 mb-4">
         <MessageSquare size={18} className="text-indigo-500" />
         <h2 className="text-base font-black text-slate-900">Gerenciar Avaliações</h2>
-        <button onClick={load} className="ml-auto p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+        <button onClick={load} className="ml-auto p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Atualizar">
           <RefreshCw size={15} />
         </button>
-        <span className="bg-indigo-50 text-indigo-600 text-xs font-bold px-2 py-0.5 rounded-full">
-          {reviews.length}
-        </span>
+        {!loadError && (
+          <span className="bg-indigo-50 text-indigo-600 text-xs font-bold px-2 py-0.5 rounded-full">
+            {reviews.length}
+          </span>
+        )}
       </div>
 
-      {reviews.length === 0 ? (
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center gap-3 text-red-700 text-sm mb-4">
+          <AlertTriangle size={18} className="shrink-0" />
+          <span>{loadError}</span>
+        </div>
+      )}
+
+      {!loadError && reviews.length === 0 ? (
         <div className="text-center py-16">
           <MessageSquare size={40} className="text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">Nenhuma avaliação ainda.</p>
+          <p className="text-gray-500 font-medium">Nenhuma avaliação registrada.</p>
         </div>
       ) : (
         <div className="space-y-3">

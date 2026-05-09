@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Phone, Plus, Save, X, Trash2, Search, Shield, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Phone, Plus, Save, X, Trash2, Search, Shield, Loader2, AlertTriangle } from 'lucide-react';
 import { adminFetchPublicServices, createPublicService, updatePublicService, deletePublicService } from '../../../services/communityService';
 import { useToast } from '../../../components/Toast';
 
@@ -12,6 +12,7 @@ const INITIAL_FORM = {
 
 export default function UtilitiesTab() {
   const [services, setServices] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -19,18 +20,21 @@ export default function UtilitiesTab() {
   const [isSaving, setIsSaving] = useState(false);
   const showToast = useToast();
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
+    setLoadError(null);
     try {
       const data = await adminFetchPublicServices();
       setServices(data);
-    } catch (err) { console.error('Error fetching services:', err); }
-  };
+    } catch (err) {
+      setLoadError(err.message || 'Erro ao carregar serviços.');
+    }
+  }, []);
 
   useEffect(() => {
     fetchItems();
     const interval = setInterval(fetchItems, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchItems]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -71,6 +75,12 @@ export default function UtilitiesTab() {
           <button onClick={() => { setIsCreating(true); setEditingId(null); setForm(INITIAL_FORM); }} className="w-full bg-brand-600 text-white py-2.5 rounded-pill font-bold flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors shadow-sm text-sm"><Plus size={16} /> Novo Serviço</button>
           <div className="relative"><Search className="absolute left-3 top-2.5 text-slate-400" size={16} /><input className="w-full pl-9 p-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-500" placeholder="Buscar serviço..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
         </div>
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 p-3 rounded-lg flex items-start gap-2 text-red-700 text-xs mb-2">
+            <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+            <span>{loadError}</span>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
           {filtered.map(s => (
             <div key={s.id} onClick={() => { setEditingId(s.id); setIsCreating(false); setForm({ ...s }); }} className={`p-4 rounded-xl border transition-all cursor-pointer hover:bg-slate-50 relative group ${editingId === s.id ? 'border-brand-500 bg-brand-50/30 ring-1 ring-brand-500' : 'border-slate-100'}`}>

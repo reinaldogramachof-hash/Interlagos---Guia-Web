@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
-export default function DataManagementResetModal({ show, onClose, onConfirm, loading }) {
-    const [pin, setPin] = useState('');
+export default function DataManagementResetModal({ show, onClose, onConfirm, loading, userEmail }) {
     const [word, setWord] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [emailInput, setEmailInput] = useState('');
 
     if (!show) return null;
-    const canSubmit = word === 'RESETAR' && pin.length > 0;
+    const canSubmit = word === 'RESETAR' && emailInput.trim().toLowerCase() === (userEmail || '').toLowerCase();
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
@@ -20,7 +19,7 @@ export default function DataManagementResetModal({ show, onClose, onConfirm, loa
                     <p className="text-slate-300 text-sm mb-6">
                         Você está prestes a <strong className="text-red-400">APAGAR DEFINITIVAMENTE</strong> todos os dados de conteúdo deste bairro. Esta ação não pode ser desfeita.
                     </p>
-                    
+
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-1">
@@ -35,23 +34,17 @@ export default function DataManagementResetModal({ show, onClose, onConfirm, loa
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1">PIN Master</label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    value={pin}
-                                    onChange={(e) => setPin(e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500"
-                                    placeholder="••••"
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
+                            <label className="block text-sm font-medium text-slate-300 mb-1">
+                                Confirme seu e-mail de acesso
+                            </label>
+                            <input
+                                type="email"
+                                value={emailInput}
+                                onChange={(e) => setEmailInput(e.target.value)}
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500"
+                                placeholder="seu@email.com"
+                                autoComplete="off"
+                            />
                         </div>
                     </div>
                 </div>
@@ -64,7 +57,7 @@ export default function DataManagementResetModal({ show, onClose, onConfirm, loa
                         Cancelar
                     </button>
                     <button
-                        onClick={() => onConfirm({ word, pin })}
+                        onClick={() => onConfirm({ word })}
                         disabled={!canSubmit || loading}
                         className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >

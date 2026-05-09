@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BarChart2, Plus, Trash2, CheckCircle, X, Search, Clock, Calendar } from 'lucide-react';
 import { adminFetchPolls, createPoll, updatePollStatus, deletePoll } from '../../../services/pollsService';
 import { useToast } from '../../../components/Toast';
@@ -179,18 +179,18 @@ export default function PollsTab({ initialData, onCreated }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const showToast = useToast();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try { setPolls(await adminFetchPolls()); }
-    catch { showToast('Erro ao carregar enquetes.', 'error'); }
+    catch (err) { showToast('Erro ao carregar enquetes: ' + (err.message || 'desconhecido'), 'error'); }
     finally { setLoading(false); }
-  };
+  }, []);
 
   useEffect(() => {
     load();
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [load]);
 
   const handleCreate = async (question, options, expiresAt) => {
     try {

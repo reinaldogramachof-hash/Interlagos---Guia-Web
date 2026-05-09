@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ChevronUp, Lightbulb, Trash2, ChevronDown, TrendingUp, BarChart2, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronUp, Lightbulb, Trash2, ChevronDown, TrendingUp, BarChart2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { adminFetchSuggestions, updateSuggestionStatus, adminDeleteSuggestion, fetchSuggestionStats, SUGGESTION_CATEGORIES } from '../../../services/communityService';
 import { useToast } from '../../../components/Toast';
 import PollsTab from './PollsTab';
@@ -93,12 +93,14 @@ export default function SuggestionsTab() {
   const [suggestions, setSuggestions] = useState([]);
   const [stats, setStats]             = useState({});
   const [loading, setLoading]         = useState(true);
+  const [loadError, setLoadError]     = useState(null);
   const [filter, setFilter]           = useState('all');
   const [pollRedirect, setPollRedirect] = useState(null);
   const showToast = useToast();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const [data, sData] = await Promise.all([
         adminFetchSuggestions(),
@@ -106,18 +108,19 @@ export default function SuggestionsTab() {
       ]);
       setSuggestions(data);
       setStats(sData);
-    } catch {
+    } catch (err) {
+      setLoadError(err.message || 'Erro ao carregar sugestões.');
       showToast('Erro ao carregar sugestões.', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [load]);
 
   const handleStatusChange = async (id, status) => {
     try {
@@ -167,8 +170,15 @@ export default function SuggestionsTab() {
       <div className="flex items-center gap-2">
         <Lightbulb className="text-amber-500" size={22} />
         <h3 className="font-bold text-lg text-slate-800">Sugestões da Comunidade</h3>
-        <span className="ml-auto text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">{suggestions.length} total</span>
+        {!loadError && <span className="ml-auto text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">{suggestions.length} total</span>}
       </div>
+
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center gap-3 text-red-700 text-sm">
+          <AlertTriangle size={18} className="shrink-0" />
+          <span>{loadError}</span>
+        </div>
+      )}
 
       {/* Barra de Tendências */}
       {trends.length > 0 && (
@@ -218,7 +228,7 @@ export default function SuggestionsTab() {
           <div className="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3" />
           <p className="text-sm font-medium">Analisando sugestões...</p>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : !loadError && filtered.length === 0 ? (
         <div className="text-center py-20 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
           <Lightbulb size={40} className="mx-auto mb-3 text-slate-200" />
           <p className="font-bold text-slate-400">{filter === 'all' ? 'Nenhuma sugestão ainda.' : 'Nenhuma sugestão neste filtro.'}</p>

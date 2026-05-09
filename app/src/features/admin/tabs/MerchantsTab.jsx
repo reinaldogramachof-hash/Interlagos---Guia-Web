@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminGetMerchants, createMerchant, updateMerchant } from '../../../services/merchantService';
 import { uploadImage } from '../../../services/storageService';
-import { Trophy, Search, Plus, Save, X, ImagePlus, Loader2 } from 'lucide-react';
+import { Trophy, Search, Plus, Save, X, ImagePlus, Loader2, AlertTriangle } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 const INITIAL_FORM = { name: '', category: 'Alimentação', description: '', phone: '', whatsapp: '', address: '', plan: 'free', socialLinks: { instagram: '', facebook: '', site: '' }, gallery: [] };
@@ -15,6 +15,7 @@ const PLANS = [
 
 export default function MerchantsTab() {
   const [merchants, setMerchants] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -23,16 +24,21 @@ export default function MerchantsTab() {
   const [isSaving, setIsSaving] = useState(false);
   const showToast = useToast();
 
-  const fetchMerchants = async () => {
-    const data = await adminGetMerchants();
-    setMerchants(data);
-  };
+  const fetchMerchants = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const data = await adminGetMerchants();
+      setMerchants(data);
+    } catch (err) {
+      setLoadError(err.message || 'Erro ao carregar comércios.');
+    }
+  }, []);
 
   useEffect(() => {
     fetchMerchants();
     const interval = setInterval(fetchMerchants, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchMerchants]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -89,6 +95,12 @@ export default function MerchantsTab() {
           <button onClick={() => { setIsCreating(true); setEditingId(null); setForm(INITIAL_FORM); }} className="w-full bg-brand-600 text-white py-2 rounded-pill font-bold flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors"><Plus size={16} /> Novo</button>
           <div className="relative"><Search className="absolute left-3 top-2.5 text-gray-400" size={16} /><input className="w-full pl-9 p-2 border rounded-lg text-slate-900" placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
         </div>
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 p-3 rounded-lg flex items-start gap-2 text-red-700 text-xs mb-2">
+            <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+            <span>{loadError}</span>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto space-y-2">
           {filtered.map(m => (
             <div key={m.id} onClick={() => { setEditingId(m.id); setIsCreating(false); setForm({ ...INITIAL_FORM, ...m, socialLinks: m.social_links || INITIAL_FORM.socialLinks }); }} className={`p-3 rounded-lg border cursor-pointer hover:bg-gray-50 flex justify-between items-center ${editingId === m.id ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}>

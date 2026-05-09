@@ -1,26 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminFetchCampaigns, deleteCampaign } from '../../../services/communityService';
-import { Heart, Trash2, Store, Users } from 'lucide-react';
+import { Heart, Trash2, Store, Users, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 export default function CampaignsTab() {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const showToast = useToast();
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const data = await adminFetchCampaigns();
       setCampaigns(data);
     } catch (error) {
+      setLoadError(error.message || 'Erro ao carregar campanhas.');
       showToast('Erro ao carregar campanhas.', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchCampaigns(); }, []);
+  useEffect(() => { fetchCampaigns(); }, [fetchCampaigns]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Excluir esta campanha permanentemente?')) return;
@@ -82,6 +85,15 @@ export default function CampaignsTab() {
 
   return (
     <div className="space-y-8">
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center gap-3 text-red-700 text-sm">
+          <AlertTriangle size={18} className="shrink-0" />
+          <span>{loadError}</span>
+          <button onClick={fetchCampaigns} className="ml-auto flex items-center gap-1 text-xs font-bold border border-red-300 px-2 py-1 rounded hover:bg-red-100">
+            <RefreshCw size={12} /> Tentar novamente
+          </button>
+        </div>
+      )}
       {/* Ações Sociais (sem merchant_id) */}
       <div>
         <h3 className="font-bold text-lg flex items-center gap-2 text-slate-800 mb-4">
