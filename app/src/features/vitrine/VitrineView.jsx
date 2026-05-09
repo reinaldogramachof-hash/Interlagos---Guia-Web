@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Store, ImageIcon, Crown } from 'lucide-react';
 import { getNeighborhoodPosts } from '../../services/merchantPostsService';
 import CouponsCarousel from '../merchants/CouponsCarousel';
+import { PageHero, CategoryChips, SectionHeader } from '../../components/mobile';
 
 const TYPE_BADGE = {
   product: { label: 'Produto', cls: 'bg-blue-100 text-blue-700' },
@@ -56,7 +57,6 @@ export default function VitrineView({ onMerchantClick, onStoreClick, onViewCoupo
     return posts.filter(p => p.type === activeFilter);
   }, [posts, activeFilter]);
 
-  // Merchants Premium únicos para linha de destaque
   const featuredMerchants = useMemo(() => {
     if (activeFilter !== 'all') return [];
     const seen = new Set();
@@ -76,37 +76,30 @@ export default function VitrineView({ onMerchantClick, onStoreClick, onViewCoupo
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="sticky top-14 z-30 bg-white shadow-sm">
-        <div className="h-24 bg-gradient-to-r from-indigo-600 to-indigo-800 flex items-center px-4 relative overflow-hidden">
-          <div className="absolute right-0 top-0 opacity-10">
-            <Store size={120} className="transform translate-x-4 -translate-y-4" />
-          </div>
-          <div className="relative z-10 text-white">
-            <div className="flex items-center gap-2 mb-1">
-              <Store size={22} />
-              <h1 className="text-xl font-bold">Vitrine do Bairro</h1>
-            </div>
-            <p className="text-indigo-100 text-sm">Produtos e serviços locais</p>
-          </div>
-        </div>
-        <div className="px-4 py-3 border-b border-gray-100 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
-            {FILTERS.map(f => (
-              <button key={f.id} onClick={() => setActiveFilter(f.id)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
-                  activeFilter === f.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}>
-                {f.label}
-              </button>
-            ))}
-          </div>
+    <div className="mobile-page bg-gray-50">
+      <header className="sticky top-14 z-30 mobile-sticky-panel pb-2 shadow-sm">
+        <PageHero
+          section="vitrine"
+          title="Vitrine do Bairro"
+          subtitle="Explore as lojas da região"
+          icon={Store}
+          compact
+        />
+
+        <div className="px-3 pt-3">
+          <CategoryChips
+            items={FILTERS}
+            value={activeFilter}
+            onChange={setActiveFilter}
+            section="vitrine"
+            getId={(item) => item.id}
+            getLabel={(item) => item.label}
+          />
         </div>
       </header>
 
       <CouponsCarousel onMerchantClick={onMerchantClick} onViewAll={onViewCoupons} />
 
-      {/* LINHA DE DESTAQUE PREMIUM */}
       {featuredMerchants.length > 0 && (
         <section className="px-4 pt-4 pb-2">
           <div className="flex items-center gap-1.5 mb-3">
@@ -138,7 +131,12 @@ export default function VitrineView({ onMerchantClick, onStoreClick, onViewCoupo
         </section>
       )}
 
-      <main className="p-4">
+      <SectionHeader
+        title={activeFilter === 'all' ? 'Publicações da Vitrine' : FILTERS.find(f => f.id === activeFilter)?.label}
+        subtitle={`${filteredPosts.length} item${filteredPosts.length !== 1 ? 's' : ''}`}
+      />
+
+      <main className="p-4 pt-1">
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
