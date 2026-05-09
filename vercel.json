@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "installCommand": "cd app && npm install --legacy-peer-deps",
+  "buildCommand": "cd app && npm run build:interlagos",
+  "outputDirectory": "app/dist",
+  "rewrites": [
+    {
+      "source": "/interlagos/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/interlagos/:path*",
+      "destination": "/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

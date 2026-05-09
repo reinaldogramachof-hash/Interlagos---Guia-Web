@@ -32,22 +32,8 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const loading = useAuthStore(s => s.loading);
-  const session = useAuthStore(s => s.session);
-  // init() é chamado em main.jsx — não chamar aqui para evitar double-invoke do StrictMode
-
-  // [Bug#4] Bloqueamos rendering apenas no loading inicial (sem session conhecida).
-  // Se session existe mas profile ainda está carregando (ex: offline),
-  // deixamos o app renderizar — o usuário está logado; o restante do perfil é cosmético.
-  if (loading && !session) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-400 font-medium">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
+  // init() é chamado em main.jsx — não chamar aqui para evitar double-invoke do StrictMode.
+  // A shell pública não deve esperar a autenticação resolver; telas protegidas usam
+  // requireAuth/useAuthStore para decidir login, perfil e permissões.
   return children;
 }
