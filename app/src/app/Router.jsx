@@ -1,28 +1,37 @@
-import { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import useUiStore, { selectCurrentView, selectSelectedStore } from '../stores/uiStore';
 import useMerchantStore, { selectMerchants, selectMerchantsLoading, selectSelectedCategory, selectSearchTerm } from '../stores/merchantStore';
+import { SkeletonCard } from '../components/SkeletonCard';
 
-import MerchantsView from '../features/merchants/MerchantsView';
-import VitrineView from '../features/vitrine/VitrineView';
-import MerchantStorePage from '../features/vitrine/MerchantStorePage';
-import AdminPanel from '../features/admin/AdminPanel';
-import UnifiedPanel from '../features/dashboard/UnifiedPanel';
-import NewsFeed from '../features/news/NewsFeed';
-import AdsView from '../features/ads/AdsView';
-import DonationsView from '../features/community/DonationsView';
-import UtilityView from '../features/community/UtilityView';
-import HistoryView from '../features/community/HistoryView';
-import SuggestionsView from '../features/community/SuggestionsView';
-import ManagementView from '../features/plans/ManagementView';
-import PlansView from '../features/plans/PlansView';
-import MerchantLandingView from '../features/merchants/MerchantLandingView';
-import ProfileView from '../features/auth/ProfileView';
-import PollsView from '../features/community/PollsView';
-import SupportView from '../features/support/SupportView';
-import MembersLandingView from '../features/members/MembersLandingView';
-import MemberPanelView from '../features/members/MemberPanelView';
-import CouponsView from '../features/merchants/CouponsView';
-import SecurityView from '../features/security/SecurityView';
+const MerchantsView = lazy(() => import('../features/merchants/MerchantsView'));
+const VitrineView = lazy(() => import('../features/vitrine/VitrineView'));
+const MerchantStorePage = lazy(() => import('../features/vitrine/MerchantStorePage'));
+const AdminPanel = lazy(() => import('../features/admin/AdminPanel'));
+const UnifiedPanel = lazy(() => import('../features/dashboard/UnifiedPanel'));
+const NewsFeed = lazy(() => import('../features/news/NewsFeed'));
+const AdsView = lazy(() => import('../features/ads/AdsView'));
+const DonationsView = lazy(() => import('../features/community/DonationsView'));
+const UtilityView = lazy(() => import('../features/community/UtilityView'));
+const HistoryView = lazy(() => import('../features/community/HistoryView'));
+const SuggestionsView = lazy(() => import('../features/community/SuggestionsView'));
+const ManagementView = lazy(() => import('../features/plans/ManagementView'));
+const PlansView = lazy(() => import('../features/plans/PlansView'));
+const MerchantLandingView = lazy(() => import('../features/merchants/MerchantLandingView'));
+const ProfileView = lazy(() => import('../features/auth/ProfileView'));
+const PollsView = lazy(() => import('../features/community/PollsView'));
+const SupportView = lazy(() => import('../features/support/SupportView'));
+const MembersLandingView = lazy(() => import('../features/members/MembersLandingView'));
+const MemberPanelView = lazy(() => import('../features/members/MemberPanelView'));
+const CouponsView = lazy(() => import('../features/merchants/CouponsView'));
+const SecurityView = lazy(() => import('../features/security/SecurityView'));
+
+function RouteFallback() {
+  return (
+    <div className="px-3 pt-4">
+      <SkeletonCard count={3} />
+    </div>
+  );
+}
 
 export default function AppRouter({ requireAuth }) {
   const currentView = useUiStore(selectCurrentView);
@@ -42,66 +51,68 @@ export default function AppRouter({ requireAuth }) {
     const params = new URLSearchParams(window.location.search);
     const storeId = params.get('store');
     if (storeId) setSelectedStore({ id: storeId, _needsFetch: true });
-  }, []);
+  }, [setSelectedStore]);
 
   const goToMerchantPanel = () => requireAuth(() => setCurrentView('merchant-panel'));
 
-  // Overlay de prioridade máxima: loja selecionada
+  let route;
+
   if (selectedStore) {
-    return (
+    route = (
       <MerchantStorePage
         merchant={selectedStore}
         onBack={() => { setSelectedStore(null); setCurrentView('vitrine'); }}
         onMerchantClick={setSelectedMerchant}
       />
     );
-  }
-
-  switch (currentView) {
-    case 'security': return <SecurityView />;
-    case 'vitrine': return (
-      <VitrineView
-        onMerchantClick={setSelectedMerchant}
-        onStoreClick={(m) => setSelectedStore(m)}
-        onViewCoupons={() => setCurrentView('coupons')}
-      />
-    );
-    case 'news': return <NewsFeed />;
-    case 'ads': return <AdsView onRequireAuth={requireAuth} />;
-    case 'donations': return <DonationsView />;
-    case 'utility': return <UtilityView onServiceClick={setSelectedService} />;
-    case 'history': return <HistoryView />;
-    case 'suggestions': return <SuggestionsView />;
-    case 'management': return <ManagementView />;
-    case 'plans': return <PlansView onRegisterFree={goToMerchantPanel} onNavigate={setCurrentView} />;
-    case 'merchant-landing': return <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} onRegisterFree={goToMerchantPanel} />;
-    case 'profile': return <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />;
-    case 'admin': return <AdminPanel onClose={() => setCurrentView('news')} />;
-    case 'merchant-panel':
-    case 'resident-panel':
-      return <UnifiedPanel onClose={() => setCurrentView('profile')} />;
-    case 'polls': return <PollsView onRequireAuth={requireAuth} />;
-    case 'support': return <SupportView />;
-    case 'members-landing': return <MembersLandingView onNavigate={setCurrentView} />;
-    case 'member-panel': return requireAuth(() => <MemberPanelView onNavigate={setCurrentView} />) || null;
-    case 'coupons':
-      return (
+  } else {
+    switch (currentView) {
+      case 'security': route = <SecurityView />; break;
+      case 'vitrine': route = (
+        <VitrineView
+          onMerchantClick={setSelectedMerchant}
+          onStoreClick={(m) => setSelectedStore(m)}
+          onViewCoupons={() => setCurrentView('coupons')}
+        />
+      ); break;
+      case 'news': route = <NewsFeed />; break;
+      case 'ads': route = <AdsView onRequireAuth={requireAuth} />; break;
+      case 'donations': route = <DonationsView />; break;
+      case 'utility': route = <UtilityView onServiceClick={setSelectedService} />; break;
+      case 'history': route = <HistoryView />; break;
+      case 'suggestions': route = <SuggestionsView />; break;
+      case 'management': route = <ManagementView />; break;
+      case 'plans': route = <PlansView onRegisterFree={goToMerchantPanel} onNavigate={setCurrentView} />; break;
+      case 'merchant-landing': route = <MerchantLandingView onRegisterClick={() => setCurrentView('plans')} onRegisterFree={goToMerchantPanel} />; break;
+      case 'profile': route = <ProfileView onLoginOpen={() => setIsLoginOpen(true)} onNavigate={setCurrentView} />; break;
+      case 'admin': route = <AdminPanel onClose={() => setCurrentView('news')} />; break;
+      case 'merchant-panel':
+      case 'resident-panel':
+        route = <UnifiedPanel onClose={() => setCurrentView('profile')} />; break;
+      case 'polls': route = <PollsView onRequireAuth={requireAuth} />; break;
+      case 'support': route = <SupportView />; break;
+      case 'members-landing': route = <MembersLandingView onNavigate={setCurrentView} />; break;
+      case 'member-panel': route = requireAuth(() => <MemberPanelView onNavigate={setCurrentView} />) || null; break;
+      case 'coupons': route = (
         <CouponsView
           onMerchantClick={setSelectedMerchant}
           onBack={() => setCurrentView('merchants')}
         />
-      );
-    case 'merchants':
-    default:
-      return (
-        <MerchantsView
-          merchants={merchants}
-          loading={loading}
-          selectedCategory={selectedCategory}
-          searchTerm={searchTerm}
-          onMerchantClick={setSelectedMerchant}
-          onViewCoupons={() => setCurrentView('coupons')}
-        />
-      );
+      ); break;
+      case 'merchants':
+      default:
+        route = (
+          <MerchantsView
+            merchants={merchants}
+            loading={loading}
+            selectedCategory={selectedCategory}
+            searchTerm={searchTerm}
+            onMerchantClick={setSelectedMerchant}
+            onViewCoupons={() => setCurrentView('coupons')}
+          />
+        );
+    }
   }
+
+  return <Suspense fallback={<RouteFallback />}>{route}</Suspense>;
 }
