@@ -33,7 +33,7 @@ async function fetchNewsFromNetwork() {
   return data ?? [];
 }
 
-export async function fetchNews({ preferCache = false } = {}) {
+export async function fetchNews({ preferCache = true } = {}) {
   const key = newsCacheKey();
 
   if (preferCache) {
@@ -63,7 +63,7 @@ export function subscribeNews(callback) {
         table: 'news', 
         filter: `neighborhood=eq.${NEIGHBORHOOD}` 
       }, 
-      () => fetchNews().then(callback).catch(() => {})
+      () => fetchNews({ preferCache: false }).then(callback).catch(() => {})
     )
     .subscribe();
     
