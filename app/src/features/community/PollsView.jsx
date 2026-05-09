@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BarChart2, Clock, CheckCircle2 } from 'lucide-react';
 import { fetchPolls, fetchUserVotesForPolls, checkUserVoted, submitVote } from '../../services/pollsService';
 import { useAuth } from '../auth/AuthContext';
+import { PageHero, MobileCard, SectionHeader } from '../../components/mobile';
 
 const PollsView = ({ onRequireAuth }) => {
   const { currentUser } = useAuth();
@@ -33,7 +34,6 @@ const PollsView = ({ onRequireAuth }) => {
       setError(null);
       const data = await fetchPolls();
       setPolls(data);
-      // Derive voteCounts from join — zero extra requests
       const counts = {};
       data.forEach(poll => {
         counts[poll.id] = {};
@@ -69,131 +69,131 @@ const PollsView = ({ onRequireAuth }) => {
         await loadUserVoteStatus(poll.id);
       }
     } catch {
-      // voto já computado ou erro silencioso
+      // Voto já computado ou erro silencioso.
     } finally {
       setVoting(null);
     }
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-4 p-4">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 animate-pulse space-y-3">
-            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
-            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
-            <div className="space-y-2">
-              <div className="h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl" />
-              <div className="h-10 bg-slate-100 dark:bg-slate-700/50 rounded-xl" />
-            </div>
+  const renderSkeleton = () => (
+    <div className="space-y-3 px-3 pt-4">
+      {[1, 2, 3].map(i => (
+        <MobileCard key={i} bodyClassName="space-y-3 p-4 animate-pulse">
+          <div className="h-4 w-3/4 rounded bg-slate-200" />
+          <div className="h-3 w-1/2 rounded bg-slate-200" />
+          <div className="space-y-2">
+            <div className="h-10 rounded-xl bg-slate-100" />
+            <div className="h-10 rounded-xl bg-slate-100" />
           </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 min-h-[50vh] bg-white flex items-center justify-center">
-        <p className="text-sm text-red-500 text-center">{error}</p>
-      </div>
-    );
-  }
-
-  if (polls.length === 0) {
-    return (
-      <div className="p-4 min-h-[50vh] bg-white flex flex-col items-center justify-center gap-2">
-        <BarChart2 className="w-10 h-10 text-gray-300" />
-        <p className="text-sm text-gray-400 text-center">Nenhuma enquete disponível no momento.</p>
-      </div>
-    );
-  }
+        </MobileCard>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="p-4 bg-white min-h-screen pb-24">
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-1">
-          <BarChart2 className="w-6 h-6 text-brand-600" />
-          <h1 className="text-xl font-bold text-gray-900">Enquetes do Bairro</h1>
+    <div className="mobile-page bg-gray-50 pb-24 animate-in fade-in duration-300">
+      <div className="sticky top-14 z-20 mobile-sticky-panel pb-2 shadow-sm">
+        <PageHero
+          section="news"
+          title="Enquetes do Bairro"
+          subtitle="Vote e veja a opinião da comunidade"
+          icon={BarChart2}
+          compact
+        />
+      </div>
+
+      {loading ? renderSkeleton() : error ? (
+        <div className="flex min-h-[50vh] items-center justify-center p-4">
+          <p className="text-center text-sm text-red-500">{error}</p>
         </div>
-        <p className="text-gray-500 text-sm">Vote e veja a opinião da comunidade</p>
-      </div>
+      ) : polls.length === 0 ? (
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2 p-4 text-center">
+          <BarChart2 className="h-10 w-10 text-gray-300" aria-hidden="true" />
+          <p className="text-sm text-gray-400">Nenhuma enquete disponível no momento.</p>
+        </div>
+      ) : (
+        <>
+          <SectionHeader
+            title="Enquetes abertas"
+            subtitle={`${polls.length} enquete${polls.length !== 1 ? 's' : ''}`}
+          />
 
-      <div className="space-y-4">
-        {polls.map((poll) => {
-          const counts = voteCounts[poll.id] || {};
-          const totalVotes = Object.values(counts).reduce((a, b) => a + b, 0);
-          const isClosed = poll.status === 'closed';
-          const hasVoted = !!userVotes[poll.id];
-          const isVoting = voting === poll.id;
-          const showResults = isClosed || hasVoted;
-          const options = [...(poll.poll_options || [])].sort((a, b) => a.display_order - b.display_order);
+          <div className="space-y-3 px-3">
+            {polls.map((poll) => {
+              const counts = voteCounts[poll.id] || {};
+              const totalVotes = Object.values(counts).reduce((a, b) => a + b, 0);
+              const isClosed = poll.status === 'closed';
+              const hasVoted = !!userVotes[poll.id];
+              const isVoting = voting === poll.id;
+              const showResults = isClosed || hasVoted;
+              const options = [...(poll.poll_options || [])].sort((a, b) => a.display_order - b.display_order);
 
-          return (
-            <div key={poll.id} className="bg-white rounded-card shadow-card border border-gray-100 p-4">
-              <div className="flex justify-between items-start mb-3">
-                <h2 className="text-gray-900 font-medium text-sm leading-relaxed pr-8">{poll.question}</h2>
-                <span className={`text-[10px] px-2 py-1 rounded-pill flex items-center gap-1 shrink-0 ${isClosed ? 'bg-gray-100 text-gray-400' : 'bg-brand-50 text-brand-600'}`}>
-                  {isClosed ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                  {isClosed ? 'Encerrada' : 'Aberta'}
-                </span>
-              </div>
+              return (
+                <MobileCard key={poll.id} bodyClassName="p-4">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <h2 className="pr-2 text-sm font-bold leading-relaxed text-gray-900">{poll.question}</h2>
+                    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${isClosed ? 'bg-gray-100 text-gray-400' : 'bg-brand-50 text-brand-600'}`}>
+                      {isClosed ? <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> : <Clock className="h-3 w-3" aria-hidden="true" />}
+                      {isClosed ? 'Encerrada' : 'Aberta'}
+                    </span>
+                  </div>
 
-              <div className="space-y-3 mb-4">
-                {options.map((option) => {
-                  const count = counts[option.id] || 0;
-                  const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-                  return (
-                    <div
-                      key={option.id}
-                      className={`relative ${!showResults && !isClosed ? 'cursor-pointer group' : ''}`}
-                      onClick={() => !showResults && handleVote(poll, option.id)}
-                    >
-                      <div className="flex justify-between text-[11px] mb-1 px-1">
-                        <span className="text-gray-700">{option.text}</span>
-                        {showResults && <span className="text-gray-400">{percentage}%</span>}
-                      </div>
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        {showResults && (
-                          <div
-                            className="h-full bg-brand-600 rounded-full transition-all duration-500"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                  <div className="mb-4 space-y-3">
+                    {options.map((option) => {
+                      const count = counts[option.id] || 0;
+                      const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`w-full rounded-xl border p-3 text-left transition-all ${!showResults && !isClosed ? 'border-gray-100 bg-gray-50 active:scale-[0.99]' : 'border-transparent bg-transparent'}`}
+                          onClick={() => !showResults && handleVote(poll, option.id)}
+                          disabled={showResults || isClosed || isVoting}
+                        >
+                          <div className="mb-2 flex justify-between gap-3 text-xs">
+                            <span className="font-medium text-gray-700">{option.text}</span>
+                            {showResults && <span className="font-bold text-gray-500">{percentage}%</span>}
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                            {showResults && (
+                              <div
+                                className="h-full rounded-full bg-brand-600 transition-all duration-500"
+                                style={{ width: `${percentage}%` }}
+                              />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              {showResults && (
-                <p className="text-[11px] text-gray-400 text-right mb-2">
-                  {totalVotes} voto{totalVotes !== 1 ? 's' : ''}
-                </p>
-              )}
+                  <div className="min-h-[24px]">
+                    {showResults && (
+                      <p className="text-right text-[11px] text-gray-400">
+                        {totalVotes} voto{totalVotes !== 1 ? 's' : ''}
+                      </p>
+                    )}
 
-              {!showResults && (
-                <button
-                  disabled={isClosed || isVoting}
-                  className="w-full py-2.5 rounded-pill text-sm font-medium transition-all bg-brand-600 hover:bg-brand-700 text-white active:scale-95 min-h-[44px]"
-                >
-                  {isVoting ? 'Registrando...' : 'Selecione uma opção acima para votar'}
-                </button>
-              )}
+                    {isVoting && (
+                      <p className="text-center text-[11px] font-bold text-brand-600">Registrando voto...</p>
+                    )}
 
-              {hasVoted && !isClosed && (
-                <p className="text-center text-[11px] text-brand-600 mt-2 flex items-center justify-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> Voto registrado
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                    {hasVoted && !isClosed && (
+                      <p className="flex items-center justify-center gap-1 text-center text-[11px] text-brand-600">
+                        <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> Voto registrado
+                      </p>
+                    )}
+                  </div>
+                </MobileCard>
+              );
+            })}
+          </div>
 
-      <p className="mt-8 text-center text-xs text-gray-400">
-        Somente usuários registrados podem votar para garantir a transparência.
-      </p>
+          <p className="mt-8 px-6 text-center text-xs text-gray-400">
+            Somente usuários registrados podem votar para garantir a transparência.
+          </p>
+        </>
+      )}
     </div>
   );
 };

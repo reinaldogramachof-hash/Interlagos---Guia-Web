@@ -8,6 +8,7 @@ import {
   TERMS_ARTICLES, TERMS_VERSION, TERMS_DATE, PLATFORM_INFO,
   PRIVACY_SECTIONS, CONDUCT_RULES,
 } from '../terms/termsContent';
+import { PageHero, CategoryChips } from '../../components/mobile';
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 const TABS = [
@@ -457,34 +458,31 @@ export default function SecurityView() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-2 pb-10">
-      {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white">Central de Segurança</h1>
-        <p className="text-slate-500 text-sm mt-1">Termos, privacidade e regras da comunidade.</p>
-      </div>
-
-      {/* Tab navigation */}
-      <div className="overflow-x-auto pb-1 -mx-2 px-2 mb-6">
-        <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-max min-w-full">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${activeTab === id
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-            >
-              <Icon size={13} />
-              <span>{label}</span>
-            </button>
-          ))}
+    <div className="mobile-page bg-gray-50 pb-24 animate-in fade-in duration-300">
+      <div className="sticky top-14 z-20 mobile-sticky-panel pb-2 shadow-sm">
+        <PageHero
+          section="merchants"
+          title="Central de Segurança"
+          subtitle="Termos, privacidade e conduta"
+          icon={ShieldCheck}
+          compact
+        />
+        <div className="px-3 pt-3">
+          <CategoryChips
+            items={TABS}
+            value={activeTab}
+            onChange={setActiveTab}
+            section="merchants"
+            getId={(item) => item.id}
+            getLabel={(item) => item.label}
+            getIcon={(item) => item.icon}
+          />
         </div>
       </div>
 
-      {/* Tab content */}
-      {renderTab()}
+      <main className="mx-auto max-w-3xl px-3 pt-4">
+        {renderTab()}
+      </main>
     </div>
   );
 }
