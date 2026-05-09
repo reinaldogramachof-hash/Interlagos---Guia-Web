@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { X, LogIn, Eye, EyeOff, Lock, Mail, User, Shield, Send, KeyRound, RefreshCw } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { validateEmail } from '../../utils/validation';
+
+const normalizeEmail = (value) => value.trim().toLowerCase();
 
 // ── Sub-componente: verificação OTP ─────────────────────────────────────────
 function OtpVerification({ email, otpCode, setOtpCode, loading, onVerify, onResend }) {
@@ -20,22 +23,22 @@ function OtpVerification({ email, otpCode, setOtpCode, loading, onVerify, onRese
         <input
           type="text"
           inputMode="numeric"
-          maxLength={8}
+          maxLength={6}
           pattern="[0-9]*"
-          placeholder="00000000"
+          placeholder="000000"
           value={otpCode}
           autoFocus
           onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
           className="w-full text-center text-2xl font-black tracking-[0.35em] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
         />
-        <button type="submit" disabled={otpCode.length < 6 || loading}
+        <button type="submit" disabled={otpCode.length !== 6 || loading}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20 transition-all">
           {loading
             ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             : <><LogIn size={18} /> Verificar Código</>}
         </button>
       </form>
-      <button onClick={onResend} className="w-full flex items-center justify-center gap-2 text-xs text-slate-400 hover:text-indigo-600 font-bold transition-colors py-1">
+      <button type="button" onClick={onResend} disabled={loading} className="w-full flex items-center justify-center gap-2 text-xs text-slate-400 hover:text-indigo-600 font-bold transition-colors py-1 disabled:opacity-50">
         <RefreshCw size={13} /> Reenviar código
       </button>
     </div>
@@ -173,39 +176,80 @@ export default function LoginModal({ onClose, onSuccess }) {
   const handleTabSwitch = (tab) => {
     setLoginType(tab); setError(''); setMagicSent(false); setOtpCode('');
   };
-  const handleClose = () => { setMagicSent(false); setOtpCode(''); setTermsAccepted(false); onClose(); };
+  const resetTransientState = useCallback(() => {
+    setLoading(false);
+    setError('');
+    setMagicSent(false);
+    setOtpCode('');
+    setPassword('');
+    setTermsAccepted(false);
+  }, []);
+  const handleClose = useCallback(() => { resetTransientState(); onClose?.(); }, [onClose, resetTransientState]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleClose]);
 
   const handleGoogleLogin = async () => {
     setLoading(true); setError('');
-    try { await signInWithGoogle(); onSuccess?.(); onClose(); }
+    try { await signInWithGoogle(); onSuccess?.(); onClose?.(); }
     catch { setError('Erro ao conectar com Google.'); }
     finally { setLoading(false); }
   };
   const handleSendOtp = async (e) => {
-    e.preventDefault(); setLoading(true); setError('');
-    try { await signInWithMagicLink(email); setMagicSent(true); }
-    catch { setError('Erro ao enviar código. Verifique o e-mail.'); }
+    e.preventDefault();
+    const normalizedEmail = normalizeEmail(email);
+    setEmail(normalizedEmail);
+    setError('');
+
+    if (!validateEmail(normalizedEmail)) {
+      setError('Confira o e-mail digitado. Exemplo: nome@email.com');
+      return;
+    }
+
+    setLoading(true);
+    try { await signInWithMagicLink(normalizedEmail); setMagicSent(true); }
+    catch (err) {
+      console.warn('[LoginModal] signInWithMagicLink error:', err?.message);
+      setError('Não foi possível enviar o código agora. Confira o e-mail e tente novamente.');
+    }
     finally { setLoading(false); }
   };
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (otpCode.length < 6) return;
+    const normalizedEmail = normalizeEmail(email);
+    const token = otpCode.trim();
+    if (token.length !== 6) return;
     setLoading(true); setError('');
-    try { await verifyOtp(email, otpCode); onSuccess?.(); onClose(); }
+    try { await verifyOtp(normalizedEmail, token); onSuccess?.(); onClose?.(); }
     catch { setError('Código inválido ou expirado. Tente novamente.'); }
     finally { setLoading(false); }
   };
   const handlePasswordLogin = async (e) => {
-    e.preventDefault(); setLoading(true); setError('');
-    try { await signInWithPassword(email, password); onSuccess?.(); onClose(); }
+    e.preventDefault();
+    const normalizedEmail = normalizeEmail(email);
+    setEmail(normalizedEmail);
+    setError('');
+
+    if (!validateEmail(normalizedEmail)) {
+      setError('Confira o e-mail digitado. Exemplo: nome@email.com');
+      return;
+    }
+
+    setLoading(true);
+    try { await signInWithPassword(normalizedEmail, password); onSuccess?.(); onClose?.(); }
     catch (err) { setError(err.message?.includes('Invalid login') ? 'Credenciais inválidas.' : 'Erro ao entrar. Tente novamente.'); }
     finally { setLoading(false); }
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-      <div className={`bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20 relative ${loginType === 'partner' ? 'ring-4 ring-slate-900/10' : ''}`}>
-        <button onClick={handleClose} className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300" onClick={handleClose} role="presentation">
+      <div className={`bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20 relative ${loginType === 'partner' ? 'ring-4 ring-slate-900/10' : ''}`} onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Acesso ao Tem No Bairro">
+        <button type="button" onClick={handleClose} aria-label="Fechar acesso" className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
           <X size={18} />
         </button>
         <div className={`relative px-6 pt-7 pb-12 transition-colors duration-500 ${loginType === 'partner' ? 'bg-slate-900' : 'bg-indigo-600'}`}>

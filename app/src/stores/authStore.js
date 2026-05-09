@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
 
+const normalizeEmail = (value) => value.trim().toLowerCase();
+
 // Flag para evitar _fetchProfile paralelo (race condition no startup)
 let _profileFetchInFlight = false;
 
@@ -177,7 +179,7 @@ const useAuthStore = create((set, get) => ({
   signInWithMagicLink: async (email) => {
     // Sem emailRedirectTo → Supabase envia código de 6 dígitos (OTP),
     // não um link. O verifyOtp() processa o código dentro do próprio app.
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    const { error } = await supabase.auth.signInWithOtp({ email: normalizeEmail(email) });
     if (error) throw error;
   },
 
@@ -189,8 +191,8 @@ const useAuthStore = create((set, get) => ({
    */
   verifyOtp: async (email, token) => {
     const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token,
+      email: normalizeEmail(email),
+      token: token.trim(),
       type: 'email',
     });
     if (error) throw error;
@@ -198,7 +200,7 @@ const useAuthStore = create((set, get) => ({
   },
 
   signInWithPassword: async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
     if (error) throw error;
     return data;
   },
