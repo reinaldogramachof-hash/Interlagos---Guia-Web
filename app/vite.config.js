@@ -110,13 +110,14 @@ export default defineConfig(({ mode }) => {
                 expiration: { maxEntries: 300, maxAgeSeconds: 604800 }, // 7 dias
               },
             },
-            // Handler C — todo o resto da supabase.co — StaleWhileRevalidate
+            // Handler C — PostgREST/Realtime Supabase — NetworkFirst para refletir mocks e dados recentes
             {
               urlPattern: ({ url }) => url.hostname.includes('supabase.co') && !url.pathname.startsWith('/auth/v1/') && !url.pathname.startsWith('/storage/v1/'),
-              handler: 'StaleWhileRevalidate',
+              handler: 'NetworkFirst',
               options: {
-                cacheName: 'supabase-api',
-                expiration: { maxEntries: 200, maxAgeSeconds: 86400 }, // 24h
+                cacheName: 'supabase-api-network',
+                networkTimeoutSeconds: 5,
+                expiration: { maxEntries: 200, maxAgeSeconds: 300 }, // 5 min, apenas fallback offline
               },
             },
             // CacheFirst para imagens estáticas e Unsplash
