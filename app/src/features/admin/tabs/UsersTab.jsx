@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchUsers, updateUserRole } from '../../../services/adminService';
 import { fetchUserConsents } from '../../../services/consentService';
-import { User, Search } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, IdCard, Mail, MapPin, Phone, Search, Shield, User, X } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 
 // Nota: criação de usuário via Supabase Admin requer Edge Function (service_role key).
@@ -11,6 +11,7 @@ export default function UsersTab() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consentsMap, setConsentsMap] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
   const showToast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -63,7 +64,9 @@ export default function UsersTab() {
 
   const filtered = users.filter(u =>
     u.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    String(u.id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -89,12 +92,17 @@ export default function UsersTab() {
             <tbody className="divide-y divide-slate-100">
               {filtered.map(user => (
                 <tr key={user.id} className="hover:bg-slate-50">
-                  <td className="p-4 flex items-center gap-3">
-                    {user.photo_url
-                      ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
-                      : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
-                    }
-                    <div><div className="font-bold text-slate-900">{user.display_name || 'Sem Nome'}</div><div className="text-xs text-slate-400">{String(user.id).slice(0, 8)}…</div></div>
+                  <td className="p-4">
+                    <button type="button" onClick={() => setSelectedUser(user)} className="flex items-center gap-3 text-left group">
+                      {user.photo_url
+                        ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                        : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
+                      }
+                      <div>
+                        <div className="font-bold text-slate-900 group-hover:text-brand-600">{user.display_name || user.full_name || 'Sem Nome'}</div>
+                        <div className="text-xs text-slate-400">{user.email || `${String(user.id).slice(0, 8)}...`}</div>
+                      </div>
+                    </button>
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.role === 'master' ? 'bg-purple-100 text-purple-700' : user.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
@@ -111,6 +119,7 @@ export default function UsersTab() {
                     )}
                   </td>
                   <td className="p-4 text-right space-x-2">
+                    <button onClick={() => setSelectedUser(user)} className="text-slate-600 hover:bg-slate-100 px-3 py-1 rounded-lg font-bold text-xs border border-slate-200">Detalhes</button>
                     {user.role !== 'master' && (
                       <>
                         {user.role === 'admin'
@@ -127,6 +136,69 @@ export default function UsersTab() {
           </table>
         </div>
       )}
+      {selectedUser && (
+        <UserDetailsModal
+          user={selectedUser}
+          termsAcceptedAt={consentsMap[selectedUser.id] || selectedUser.terms_accepted_at}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function formatDate(value) {
+  if (!value) return 'Nao informado';
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(value));
+}
+
+function DetailItem({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+        <Icon size={14} /> {label}
+      </div>
+      <div className="mt-1 break-words text-sm font-semibold text-slate-800">{value || 'Nao informado'}</div>
+    </div>
+  );
+}
+
+function UserDetailsModal({ user, termsAcceptedAt, onClose }) {
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 p-4" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label="Detalhes do usuario">
+        <div className="flex items-start justify-between bg-slate-900 p-5 text-white">
+          <div className="flex items-center gap-3">
+            {user.photo_url
+              ? <img src={user.photo_url} className="h-12 w-12 rounded-full object-cover" alt="" />
+              : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-lg font-black">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
+            }
+            <div>
+              <h4 className="text-lg font-black">{user.display_name || user.full_name || 'Sem Nome'}</h4>
+              <p className="text-xs text-slate-300">{user.email || user.id}</p>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-full bg-white/10 p-2 hover:bg-white/20" aria-label="Fechar detalhes">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="grid gap-3 p-5 sm:grid-cols-2">
+          <DetailItem icon={Mail} label="E-mail" value={user.email} />
+          <DetailItem icon={Shield} label="Funcao" value={user.role || 'resident'} />
+          <DetailItem icon={IdCard} label="ID Auth" value={user.id} />
+          <DetailItem icon={MapPin} label="Bairro" value={user.neighborhood} />
+          <DetailItem icon={Phone} label="Telefone" value={user.phone} />
+          <DetailItem icon={CheckCircle2} label="E-mail confirmado" value={formatDate(user.email_confirmed_at)} />
+          <DetailItem icon={Clock} label="Ultimo login" value={formatDate(user.last_sign_in_at)} />
+          <DetailItem icon={Calendar} label="Cadastro auth" value={formatDate(user.auth_created_at || user.profile_created_at)} />
+          <DetailItem icon={CheckCircle2} label="Termos" value={termsAcceptedAt ? `Aceito em ${formatDate(termsAcceptedAt)}` : 'Pendente'} />
+          <DetailItem icon={CheckCircle2} label="Onboarding" value={user.onboarding_completed ? 'Concluido' : 'Pendente'} />
+        </div>
+      </div>
     </div>
   );
 }

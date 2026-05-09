@@ -138,11 +138,27 @@ export async function rejectItem(table, id) {
 }
 
 export async function fetchUsers() {
-  const { data, error } = await supabase
+  const { data, error } = await supabase.rpc('admin_user_directory', {
+    p_search: '',
+    p_limit: 100,
+  });
+  if (!error) return data ?? [];
+
+  console.warn('adminService.fetchUsers rpc fallback:', error.message);
+  const fallback = await supabase
     .from('profiles')
     .select('*')
     .limit(100)
     .order('created_at', { ascending: false });
+  if (fallback.error) throw fallback.error;
+  return fallback.data ?? [];
+}
+
+export async function searchUsers(searchTerm, limit = 100) {
+  const { data, error } = await supabase.rpc('admin_user_directory', {
+    p_search: searchTerm || '',
+    p_limit: limit,
+  });
   if (error) throw error;
   return data ?? [];
 }
