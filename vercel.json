@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "cd app && npm install",
+  "installCommand": "cd app && npm install --legacy-peer-deps",
   "buildCommand": "cd app && npm run build:interlagos",
   "outputDirectory": "app/dist",
   "rewrites": [
