@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Search, Store, MapPin, X, Star, ShieldCheck } from 'lucide-react';
 import { PLANS_CONFIG } from '../../constants/plans';
 import { SkeletonCard } from '../../components/SkeletonCard';
@@ -40,21 +41,32 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
   const setSearchTerm = useMerchantStore(state => state.setSearchTerm);
   const setSelectedCategory = useMerchantStore(state => state.setSelectedCategory);
 
-  const premiumMerchants = merchants.filter(m => m.plan === 'premium');
-  const proMerchants = merchants.filter(m => m.plan === 'pro');
+  const premiumMerchants = useMemo(
+    () => merchants.filter(m => m.plan === 'premium'),
+    [merchants]
+  );
+  const proMerchants = useMemo(
+    () => merchants.filter(m => m.plan === 'pro'),
+    [merchants]
+  );
   const showCarousels = selectedCategory === 'Todos' && !searchTerm;
 
-  const filteredMerchants = merchants
-    .filter(m => {
-      const matchesCategory = selectedCategory === 'Todos' || m.category === selectedCategory;
-      const matchesSearch = m.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-        m.description?.toLowerCase().includes(searchTerm?.toLowerCase());
-      return matchesCategory && matchesSearch;
-    })
-    .sort((a, b) => {
-      const priority = { premium: 4, pro: 3, basic: 2, free: 1 };
-      return (priority[b.plan] ?? 2) - (priority[a.plan] ?? 2);
-    });
+  const filteredMerchants = useMemo(() => {
+    const normalizedSearch = searchTerm?.toLowerCase() || '';
+
+    return merchants
+      .filter(m => {
+        const matchesCategory = selectedCategory === 'Todos' || m.category === selectedCategory;
+        const matchesSearch = !normalizedSearch ||
+          m.name?.toLowerCase().includes(normalizedSearch) ||
+          m.description?.toLowerCase().includes(normalizedSearch);
+        return matchesCategory && matchesSearch;
+      })
+      .sort((a, b) => {
+        const priority = { premium: 4, pro: 3, basic: 2, free: 1 };
+        return (priority[b.plan] ?? 2) - (priority[a.plan] ?? 2);
+      });
+  }, [merchants, selectedCategory, searchTerm]);
 
   return (
     <div className="pb-4">
@@ -66,6 +78,9 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
                 src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=800"
                 alt="Comércios Locais"
                 className="w-full h-full object-cover"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/90 via-indigo-900/60 to-transparent flex items-center justify-between px-5">
                 <div className="flex items-center gap-3">
@@ -171,6 +186,7 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
                       alt={merchant.name}
                       className="w-full h-full object-cover"
                       loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-300 bg-gray-100">
