@@ -179,7 +179,18 @@ const useAuthStore = create((set, get) => ({
   signInWithMagicLink: async (email) => {
     // Sem emailRedirectTo → Supabase envia código de 6 dígitos (OTP),
     // não um link. O verifyOtp() processa o código dentro do próprio app.
-    const { error } = await supabase.auth.signInWithOtp({ email: normalizeEmail(email) });
+    const cleanEmail = normalizeEmail(email);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: {
+        emailRedirectTo: window.location.origin + import.meta.env.BASE_URL,
+        shouldCreateUser: true,
+        data: {
+          display_name: cleanEmail.split('@')[0],
+          role: 'resident',
+        },
+      },
+    });
     if (error) throw error;
   },
 

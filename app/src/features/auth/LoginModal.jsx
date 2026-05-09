@@ -215,7 +215,14 @@ export default function LoginModal({ onClose, onSuccess }) {
     try { await signInWithMagicLink(normalizedEmail); setMagicSent(true); }
     catch (err) {
       console.warn('[LoginModal] signInWithMagicLink error:', err?.message);
-      setError('Não foi possível enviar o código agora. Confira o e-mail e tente novamente.');
+      const message = err?.message || '';
+      if (/rate|limit/i.test(message)) {
+        setError('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.');
+      } else if (/invalid|email/i.test(message)) {
+        setError('O Supabase recusou este e-mail. Confira se não há espaços, acentos ou caracteres incomuns.');
+      } else {
+        setError(`Não foi possível enviar o código agora. Detalhe: ${message || 'falha no serviço de autenticação'}.`);
+      }
     }
     finally { setLoading(false); }
   };
@@ -247,9 +254,25 @@ export default function LoginModal({ onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300" onClick={handleClose} role="presentation">
-      <div className={`bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20 relative ${loginType === 'partner' ? 'ring-4 ring-slate-900/10' : ''}`} onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Acesso ao Tem No Bairro">
-        <button type="button" onClick={handleClose} aria-label="Fechar acesso" className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
+    <div
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300"
+      onPointerDown={(event) => { if (event.target === event.currentTarget) handleClose(); }}
+      role="presentation"
+    >
+      <div
+        className={`bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20 relative ${loginType === 'partner' ? 'ring-4 ring-slate-900/10' : ''}`}
+        onPointerDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Acesso ao Tem No Bairro"
+      >
+        <button
+          type="button"
+          onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); handleClose(); }}
+          onClick={(event) => { event.preventDefault(); event.stopPropagation(); handleClose(); }}
+          aria-label="Fechar acesso"
+          className="absolute top-4 right-4 z-50 text-white bg-black/30 hover:bg-black/40 w-10 h-10 rounded-full flex items-center justify-center transition-all pointer-events-auto touch-manipulation"
+        >
           <X size={18} />
         </button>
         <div className={`relative px-6 pt-7 pb-12 transition-colors duration-500 ${loginType === 'partner' ? 'bg-slate-900' : 'bg-indigo-600'}`}>
