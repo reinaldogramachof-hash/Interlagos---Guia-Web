@@ -1,4 +1,28 @@
+import { cloneElement, isValidElement } from 'react';
 import { sectionThemes, mobileUi, cx } from '../../theme/mobileDesignTokens';
+
+function renderChipIcon(icon) {
+  if (!icon) return null;
+
+  if (isValidElement(icon)) {
+    return cloneElement(icon, {
+      size: icon.props?.size ?? 14,
+      'aria-hidden': true,
+      className: cx('shrink-0', icon.props?.className),
+    });
+  }
+
+  if (typeof icon === 'function') {
+    const Icon = icon;
+    return <Icon size={14} className="shrink-0" aria-hidden="true" />;
+  }
+
+  if (typeof icon === 'string' || typeof icon === 'number') {
+    return <span className="shrink-0" aria-hidden="true">{icon}</span>;
+  }
+
+  return null;
+}
 
 export default function CategoryChips({
   items = [],
@@ -17,7 +41,7 @@ export default function CategoryChips({
       {items.map((item) => {
         const id = getId(item);
         const label = getLabel(item);
-        const Icon = getIcon(item);
+        const icon = getIcon(item);
         const active = id === value;
 
         return (
@@ -31,7 +55,7 @@ export default function CategoryChips({
             )}
             aria-pressed={active}
           >
-            {Icon && <Icon size={14} aria-hidden="true" />}
+            {renderChipIcon(icon)}
             {label}
           </button>
         );
