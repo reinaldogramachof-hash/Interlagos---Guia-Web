@@ -1,8 +1,11 @@
 import { supabase } from '../lib/supabaseClient';
 import { uploadImage } from './storageService';
 import { notifyAdmins } from './notificationService';
+import { readCache, writeCache } from '../utils/localCache';
 
 const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
+const NEWS_CACHE_TTL_MS = 1000 * 60 * 10; // 10 min
+const newsCacheKey = () => `tnb:news:${NEIGHBORHOOD || 'default'}`;
 
 /**
  * Faz upload de imagem de notícia para o bucket 'news-images'.
@@ -15,7 +18,7 @@ export async function uploadNewsImage(file) {
   return uploadImage('news-images', file, path);
 }
 
-export async function fetchNews() {
+async function fetchNewsFromNetwork() {
   const { data, error } = await supabase
     .from('news')
     .select('*')
@@ -30,9 +33,27 @@ export async function fetchNews() {
   return data ?? [];
 }
 
+export async function fetchNews({ preferCache = false } = {}) {
+  const key = newsCacheKey();
+
+  if (preferCache) {
+    const cached = readCache(key, NEWS_CACHE_TTL_MS);
+    if (cached) {
+      fetchNewsFromNetwork()
+        .then((fresh) => writeCache(key, fresh))
+        .catch(() => {});
+      return cached;
+    }
+  }
+
+  const fresh = await fetchNewsFromNetwork();
+  writeCache(key, fresh);
+  return fresh;
+}
+
 export function subscribeNews(callback) {
-  // Chamada inicial
-  callback(); 
+  // Chamada inicial com cache quando disponível.
+  fetchNews({ preferCache: true }).then(callback).catch(() => callback([]));
   
   const channel = supabase.channel('news-realtime')
     .on('postgres_changes', 
@@ -42,7 +63,7 @@ export function subscribeNews(callback) {
         table: 'news', 
         filter: `neighborhood=eq.${NEIGHBORHOOD}` 
       }, 
-      () => callback() // Wrap to ensure any async callback is handled
+      () => fetchNews().then(callback).catch(() => {})
     )
     .subscribe();
     
