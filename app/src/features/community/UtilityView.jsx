@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Phone, Shield, Bus, Stethoscope, AlertTriangle, Search, Flame, Users, Trees, Heart, Loader2, Clock } from 'lucide-react';
+import { Phone, Shield, Bus, Stethoscope, AlertTriangle, Flame, Users, Trees, Heart, Loader2, Clock } from 'lucide-react';
 import { fetchPublicServices } from '../../services/communityService';
 import BusScheduleModal from './BusScheduleModal';
+import { PageHero, SearchBar, CategoryChips, MobileCard, SectionHeader } from '../../components/mobile';
 
 const ICON_MAP = {
   shield: Shield,
@@ -30,59 +31,70 @@ export default function UtilityView({ onServiceClick }) {
   const categories = ['Todos', ...new Set(services.map(s => s.category))];
 
   const filtered = services.filter(s => {
+    const normalizedSearch = searchTerm.toLowerCase();
     const matchesCat = selectedCategory === 'Todos' || s.category === selectedCategory;
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         (s.description?.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = s.name.toLowerCase().includes(normalizedSearch) ||
+      (s.description?.toLowerCase().includes(normalizedSearch));
     return matchesCat && matchesSearch;
   });
 
   if (loading) {
-    return <div className="flex justify-center items-center py-20"><Loader2 className="animate-spin text-brand-600" size={32} /></div>;
+    return (
+      <div className="mobile-page flex justify-center items-center py-20">
+        <Loader2 className="animate-spin text-brand-600" size={32} />
+      </div>
+    );
   }
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 pb-20">
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-4">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-pill text-sm font-bold whitespace-nowrap transition-all ${
-              selectedCategory === cat ? 'bg-brand-600 text-white shadow-card' : 'bg-white text-slate-600 border border-slate-200'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+    <div className="mobile-page animate-in fade-in slide-in-from-bottom-4">
+      <div className="sticky top-14 z-20 mobile-sticky-panel pb-2 shadow-sm">
+        <PageHero
+          section="news"
+          title="Serviços Úteis"
+          subtitle="Telefones e contatos importantes"
+          icon={Phone}
+          compact
+        />
+
+        <div className="px-3 pt-3 space-y-2">
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Buscar serviço..."
+          />
+          <CategoryChips
+            items={categories}
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+            section="news"
+            getId={(item) => item}
+            getLabel={(item) => item}
+          />
+        </div>
       </div>
 
-      <div className="relative mb-8">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-        <input
-          type="text"
-          placeholder="Buscar serviço..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-brand-500 outline-none transition-all"
-        />
-      </div>
+      <SectionHeader
+        title="Contatos do bairro"
+        subtitle={`${filtered.length} serviço${filtered.length !== 1 ? 's' : ''}`}
+      />
 
       {filtered.length === 0 ? (
-        <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-card border-2 border-dashed border-slate-200">
+        <div className="mx-4 text-center py-10 text-slate-500 bg-slate-50 rounded-card border-2 border-dashed border-slate-200">
           Nenhum serviço encontrado.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 px-4">
           {filtered.map(s => {
             const Icon = ICON_MAP[s.icon_type] || Phone;
             const busLineKey = s.name.includes('315') ? '315' : s.name.includes('316') ? '316' : null;
             return (
-              <div
+              <MobileCard
                 key={s.id}
                 onClick={() => onServiceClick?.(s)}
-                className="bg-white p-5 rounded-card shadow-card border border-slate-100 flex items-start gap-4 hover:border-brand-500 transition-all cursor-pointer group"
+                bodyClassName="flex items-start gap-4"
               >
-                <div className="p-3 bg-brand-50 rounded-xl text-brand-600 group-hover:scale-110 transition-transform">
+                <div className="p-3 bg-brand-50 rounded-xl text-brand-600 shrink-0">
                   <Icon size={24} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -108,7 +120,7 @@ export default function UtilityView({ onServiceClick }) {
                     </button>
                   )}
                 </div>
-              </div>
+              </MobileCard>
             );
           })}
         </div>
