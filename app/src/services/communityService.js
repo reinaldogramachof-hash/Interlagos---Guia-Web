@@ -6,7 +6,7 @@ const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
 const PUBLIC_CACHE_TTL_MS = 1000 * 60 * 10; // 10 min
 const cacheKey = (scope) => `tnb:${scope}:${NEIGHBORHOOD || 'default'}`;
 
-async function withCache(scope, request, { preferCache = false } = {}) {
+async function withCache(scope, request, { preferCache = true } = {}) {
   const key = cacheKey(scope);
 
   if (preferCache) {
