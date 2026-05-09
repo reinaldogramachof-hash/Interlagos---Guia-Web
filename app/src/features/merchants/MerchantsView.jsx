@@ -73,16 +73,18 @@ export default function MerchantsView({ merchants, loading, selectedCategory, se
       {/* Cabecalho Fixo Integrado */}
       <div className="sticky top-14 z-20 bg-gray-50/95 backdrop-blur-md pb-2 shadow-sm border-b border-gray-200">
         {/* Banner Simples Home */}
-        <div className="relative h-24 overflow-hidden">
+        <div className="relative h-24 overflow-hidden bg-indigo-900">
             <img
-                src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=800"
+                src="/banner-comercio.svg"
                 alt="Comércios Locais"
                 className="w-full h-full object-cover"
+                width="800"
+                height="180"
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/90 via-indigo-900/60 to-transparent flex items-center justify-between px-5">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/85 via-indigo-900/45 to-transparent flex items-center justify-between px-5">
                 <div className="flex items-center gap-3">
                     <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/20">
                         <Store size={20} className="text-white" />
