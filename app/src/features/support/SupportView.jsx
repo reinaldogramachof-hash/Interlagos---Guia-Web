@@ -3,6 +3,7 @@ import { MessageCircle, Send, User, Wrench, CheckCircle2, Loader2 } from 'lucide
 import { useAuth } from '../auth/AuthContext';
 import { createTicket } from '../../services/communityService';
 import { useToast } from '../../components/Toast';
+import { PageHero, CategoryChips, MobileCard } from '../../components/mobile';
 
 const CATEGORIES = [
   { id: 'ads', label: 'Meu anúncio', icon: Send },
@@ -42,13 +43,13 @@ export default function SupportView({ onRequireAuth }) {
 
   if (submitted) {
     return (
-      <div className="bg-white min-h-screen p-6 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in">
+      <div className="mobile-page flex flex-col items-center justify-center px-6 text-center animate-in fade-in zoom-in">
         <div className="bg-emerald-100 p-6 rounded-full text-emerald-600 mb-6">
           <CheckCircle2 size={48} />
         </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Chamado enviado!</h2>
         <p className="text-slate-500 max-w-xs mb-8">Nossa equipe recebeu sua solicitação e responderá em breve via e-mail.</p>
-        <button 
+        <button
           onClick={() => { setSubmitted(false); setSubject(''); setBody(''); }}
           className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-8 rounded-pill shadow-card transition-all"
         >
@@ -59,45 +60,38 @@ export default function SupportView({ onRequireAuth }) {
   }
 
   return (
-    <div className="bg-white min-h-screen p-4 pb-24 animate-in fade-in">
-      <div className="mb-10 text-center">
-        <div className="inline-flex p-3 bg-brand-50 rounded-card text-brand-600 mb-4">
-          <MessageCircle size={32} />
-        </div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Suporte</h1>
-        <p className="text-slate-500">Como podemos te ajudar hoje?</p>
-      </div>
+    <div className="mobile-page animate-in fade-in">
+      <PageHero
+        section="news"
+        title="Suporte"
+        subtitle="Como podemos te ajudar hoje?"
+        icon={MessageCircle}
+        compact
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-5 px-4 pt-5 max-w-xl mx-auto">
         {!currentUser && (
-          <div 
-            onClick={onRequireAuth} 
-            className="bg-brand-50 p-4 rounded-xl flex items-center gap-3 text-brand-700 cursor-pointer border border-brand-100"
+          <MobileCard
+            onClick={onRequireAuth}
+            className="border-brand-100 bg-brand-50"
+            bodyClassName="flex items-center gap-3 text-brand-700"
           >
             <User size={20} />
             <span className="text-sm font-bold text-brand-700">Faça login para abrir um chamado</span>
-          </div>
+          </MobileCard>
         )}
 
         <div className="space-y-3">
           <label className="text-sm font-bold text-slate-700">Categoria</label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center justify-center p-4 rounded-card border-2 transition-all ${
-                  selectedCategory === cat.id 
-                    ? 'border-brand-600 bg-brand-50 text-brand-600 shadow-sm' 
-                    : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
-                }`}
-              >
-                <cat.icon size={24} className="mb-2" />
-                <span className="text-xs font-bold leading-tight">{cat.label}</span>
-              </button>
-            ))}
-          </div>
+          <CategoryChips
+            items={CATEGORIES}
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+            section="news"
+            getId={(item) => item.id}
+            getLabel={(item) => item.label}
+            getIcon={(item) => item.icon}
+          />
         </div>
 
         <div className="space-y-2">
@@ -106,7 +100,7 @@ export default function SupportView({ onRequireAuth }) {
             type="text"
             value={subject}
             onChange={e => setSubject(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 outline-none text-slate-900"
+            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 outline-none text-slate-900 shadow-sm"
             placeholder="Ex: Problema no pagamento"
             required
           />
@@ -117,7 +111,7 @@ export default function SupportView({ onRequireAuth }) {
           <textarea
             value={body}
             onChange={e => setBody(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 outline-none resize-none text-slate-900"
+            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 outline-none resize-none text-slate-900 shadow-sm"
             rows={5}
             placeholder="Descreva o que aconteceu..."
             required
