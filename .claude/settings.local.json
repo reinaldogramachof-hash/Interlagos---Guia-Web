@@ -32,7 +32,19 @@
       "Bash(powershell -Command \"Compress-Archive -Path 'dist/*' -DestinationPath '../deploy.zip' -Force\")",
       "Read(//c/Users/reina/OneDrive/Desktop/Projetos/**)",
       "Bash(node scripts/create_test_merchants.mjs)",
-      "Bash(powershell -Command \"Compress-Archive -Path 'app/dist/*' -DestinationPath 'deploy.zip' -Force\")"
+      "Bash(powershell -Command \"Compress-Archive -Path 'app/dist/*' -DestinationPath 'deploy.zip' -Force\")",
+      "Bash(node audit-store.mjs)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(npx playwright *)",
+      "Bash(where playwright *)",
+      "Read(//c/Users/reina/**)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(node -e \"const p = require.resolve\\('playwright/package.json'\\); console.log\\(p\\)\")",
+      "Read(//c/c/Users/reina/OneDrive/Desktop/Projetos/Tem No Bairro/**)",
+      "Bash(node -e ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\reina\\OneDrive\\Desktop\\Projetos\\Guia Digital Interlagos\\.claude"

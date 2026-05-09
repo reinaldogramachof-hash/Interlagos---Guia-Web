@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Loja PRO · Coleções + WhatsApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: #eef1f4; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+    .mobile-frame { max-width: 390px; width: 100%; background: white; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); padding-bottom: 75px; position: relative; }
+    .top-header { padding: 16px 16px 8px; background: white; }
+    .top-header h2 { font-size: 20px; font-weight: 700; color: #1e1e2a; display: flex; align-items: center; gap: 6px; }
+    .badge-pro { background: #3b4b9b; color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; margin-left: 8px; }
+    .search-row { padding: 0 16px 12px; background: white; }
+    .search-box { background: #f3f4f8; border-radius: 40px; padding: 12px 18px; color: #5e5e6e; display: flex; gap: 8px; }
+    .tabs-container { padding: 8px 16px; background: white; border-bottom: 1px solid #f0f0f5; display: flex; gap: 20px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+    .tabs-container::-webkit-scrollbar { display: none; }
+    .tab { font-weight: 500; padding: 8px 0; color: #6b6b7a; border-bottom: 3px solid transparent; }
+    .tab.active { color: #0b5e42; border-bottom: 3px solid #0b5e42; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 18px 14px; }
+    .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #efeff4; }
+    .img-placeholder { aspect-ratio: 1/1; background: #d9dde3; display: flex; align-items: center; justify-content: center; font-size: 34px; position: relative; }
+    .tag { position: absolute; top: 8px; left: 8px; background: #e05a2c; color: white; font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .card-info { padding: 12px 10px; }
+    .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+    .price { font-weight: 700; font-size: 18px; color: #1e4620; }
+    .actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-primary { background: #0b5e42; border: none; color: white; padding: 10px 12px; border-radius: 30px; font-weight: 600; font-size: 13px; flex: 2; cursor: pointer; }
+    .btn-wa { background: #25d366; border: none; color: white; padding: 10px; border-radius: 30px; font-size: 18px; flex: 0.7; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 390px; background: white; display: flex; justify-content: space-around; padding: 10px 12px 20px; border-top: 1px solid #eaeaef; box-shadow: 0 -2px 10px rgba(0,0,0,0.02); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #7c7c8a; font-size: 12px; }
+    .nav-item.active { color: #0b5e42; font-weight: 500; }
+    .nav-icon { font-size: 22px; margin-bottom: 2px; }
+    .float-wa { position: fixed; bottom: 80px; right: 20px; background: #25d366; width: 56px; height: 56px; border-radius: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px #25d36680; color: white; font-size: 28px; z-index: 30; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="mobile-frame">
+  <div class="top-header">
+    <h2>🌿 Essencial Store <span class="badge-pro">PRO</span></h2>
+  </div>
+  <div class="search-row">
+    <div class="search-box">🔍 Pesquisar em coleções...</div>
+  </div>
+  <!-- Tabs deslizáveis (swipe) -->
+  <div class="tabs-container">
+    <div class="tab active">🔥 Mais Vendidos</div>
+    <div class="tab">✨ Lançamentos</div>
+    <div class="tab">🏷️ Promoções</div>
+    <div class="tab">🎁 Kits</div>
+  </div>
+
+  <div class="grid">
+    <!-- Produto 1 -->
+    <div class="card">
+      <div class="img-placeholder">🪴<span class="tag">-15%</span></div>
+      <div class="card-info">
+        <div class="title">Vaso Autoirrigável</div>
+        <div class="price">R$ 129,90</div>
+        <div class="actions">
+          <button class="btn-primary">Comprar</button>
+          <button class="btn-wa" onclick="alert('💬 Dúvida sobre Vaso Autoirrigável? Vendedor responde rápido.')">💬</button>
+        </div>
+      </div>
+    </div>
+    <!-- Produto 2 -->
+    <div class="card">
+      <div class="img-placeholder">☕<span class="tag">Novo</span></div>
+      <div class="card-info">
+        <div class="title">Kit Café + Caneca</div>
+        <div class="price">R$ 79,90</div>
+        <div class="actions">
+          <button class="btn-primary">Comprar</button>
+          <button class="btn-wa" onclick="alert('💬 Gostaria de mais informações sobre o Kit Café?')">💬</button>
+        </div>
+      </div>
+    </div>
+    <!-- Produto 3 -->
+    <div class="card">
+      <div class="img-placeholder">🎧</div>
+      <div class="card-info">
+        <div class="title">Fone Pro ANC</div>
+        <div class="price">R$ 349,90</div>
+        <div class="actions">
+          <button class="btn-primary">Comprar</button>
+          <button class="btn-wa" onclick="alert('💬 Tem garantia? Sim! 12 meses.')">💬</button>
+        </div>
+      </div>
+    </div>
+    <!-- Produto 4 -->
+    <div class="card">
+      <div class="img-placeholder">⌚</div>
+      <div class="card-info">
+        <div class="title">Smartwatch Fit</div>
+        <div class="price">R$ 459,90</div>
+        <div class="actions">
+          <button class="btn-primary">Comprar</button>
+          <button class="btn-wa" onclick="alert('💬 Qual a cor disponível? Preto e Prata.')">💬</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificação simulada de carrinho abandonado -->
+  <div style="margin: 8px 16px 16px; background: #fef7e9; padding: 14px; border-radius: 20px; border-left: 5px solid #f0b37b;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 20px;">🔔</span>
+      <span style="font-size: 13px; color: #a15503;"><strong>Você tem itens no carrinho!</strong> Finalize em até 1h e ganhe frete grátis.</span>
+    </div>
+  </div>
+
+  <!-- Link de pagamento rápido (exemplo) -->
+  <div style="padding: 0 16px 20px;">
+    <div style="background: #eef3f0; border-radius: 40px; padding: 14px 18px; display: flex; justify-content: space-between;">
+      <span>🔗 Link de pagamento rápido</span>
+      <span style="color:#0b5e42; font-weight:600;" onclick="alert('Link copiado: https://pag.pro/seulink')">📋 Copiar</span>
+    </div>
+  </div>
+
+  <!-- Bottom navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active"><span class="nav-icon">🏠</span><span>Início</span></div>
+    <div class="nav-item"><span class="nav-icon">🔍</span><span>Buscar</span></div>
+    <div class="nav-item"><span class="nav-icon">📦</span><span>Pedidos</span></div>
+    <div class="nav-item"><span class="nav-icon">👤</span><span>Perfil</span></div>
+  </div>
+
+  <!-- Botão flutuante WhatsApp (abre conversa geral) -->
+  <div class="float-wa" onclick="alert('💬 Olá, vim pela loja PRO. Pode me ajudar?')">
+    💬
+  </div>
+</div>
+<script>
+  // Simula clique em comprar
+  document.querySelectorAll('.btn-primary').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      alert('🛒 Produto adicionado! Carrinho abandonado? Notificação enviada em breve.');
+    });
+  });
+  // Swipe tabs simbólico
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

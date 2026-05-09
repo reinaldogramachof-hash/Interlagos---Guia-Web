@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Loja Básica · Catálogo Simples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .mobile-frame {
+            max-width: 390px;
+            width: 100%;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            position: relative;
+            padding-bottom: 70px;
+        }
+
+        .header {
+            padding: 16px 12px 8px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 12px;
+        }
+
+        .search-bar {
+            background: #f2f2f2;
+            border-radius: 30px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+        }
+
+        .search-bar span {
+            font-size: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 16px 12px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f0f0f0;
+        }
+
+        .product-img {
+            aspect-ratio: 1/1;
+            background: #e9e9ef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 32px;
+        }
+
+        .product-info {
+            padding: 10px 8px 12px;
+        }
+
+        .product-title {
+            font-weight: 500;
+            font-size: 15px;
+            color: #222;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .price {
+            font-weight: 700;
+            font-size: 18px;
+            color: #0b5e42;
+            margin-bottom: 10px;
+        }
+
+        .buy-btn {
+            background: #0b5e42;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px 0;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .cart-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0b5e42;
+            width: 56px;
+            height: 56px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(11, 94, 66, 0.3);
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #e03a3a;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .footer-note {
+            text-align: center;
+            padding: 8px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mobile-frame">
+        <div class="header">
+            <h1>📦 Minha Loja</h1>
+            <div class="search-bar">
+                <span>🔍</span> Buscar produtos...
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="product-card">
+                <div class="product-img">🪴</div>
+                <div class="product-info">
+                    <div class="product-title">Vaso Decorativo</div>
+                    <div class="price">R$ 89,90</div>
+                    <button class="buy-btn">Comprar</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-img">☕</div>
+                <div class="product-info">
+                    <div class="product-title">Caneca Térmica</div>
+                    <div class="price">R$ 54,90</div>
+                    <button class="buy-btn">Comprar</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-img">🕶️</div>
+                <div class="product-info">
+                    <div class="product-title">Óculos de Sol</div>
+                    <div class="price">R$ 129,90</div>
+                    <button class="buy-btn">Comprar</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-img">🎧</div>
+                <div class="product-info">
+                    <div class="product-title">Fone Bluetooth</div>
+                    <div class="price">R$ 199,90</div>
+                    <button class="buy-btn">Comprar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            🛒 Toque no ícone flutuante para ver o carrinho
+        </div>
+
+        <!-- Carrinho flutuante básico -->
+        <div class="cart-float" onclick="alert('Carrinho: 2 itens · R$ 144,80')">
+            🛒
+            <span class="cart-badge">2</span>
+        </div>
+
+        <!-- Simples indicação de checkout mínimo -->
+        <div style="padding: 12px; margin-top: 8px;">
+            <div style="background: #f9f9fb; padding: 14px; border-radius: 20px; text-align: center; color: #444;">
+                ⚡ Checkout rápido: Nome, Telefone, Pix/Cartão
+            </div>
+        </div>
+    </div>
+    <script>
+        // apenas para demonstração: clique nos botões comprar simula ação
+        document.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                alert('✅ Produto adicionado ao carrinho!');
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -3,6 +3,7 @@ import { fetchUsers, updateUserRole } from '../../../services/adminService';
 import { fetchUserConsents } from '../../../services/consentService';
 import { Calendar, CheckCircle2, Clock, IdCard, Mail, MapPin, Phone, Search, Shield, User, X } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
+import UserDetailsModal from './UserDetailsModal';
 
 // Nota: criação de usuário via Supabase Admin requer Edge Function (service_role key).
 // Por ora, este painel apenas GERENCIA perfis existentes.
@@ -71,11 +72,18 @@ export default function UsersTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><User className="text-indigo-600" /> Gerenciamento de Usuários</h3>
-        <div className="relative">
-          <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
-          <input className="pl-9 p-2 border rounded-lg w-64 text-slate-900" placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+      <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+          <User className="text-indigo-600" size={20} /> Gerenciamento de Usuários
+        </h3>
+        <div className="relative w-full lg:w-64">
+          <Search className="absolute left-3 top-3 text-gray-400" size={16} />
+          <input
+            className="w-full pl-9 p-2 lg:p-2 border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Buscar por nome, email ou ID..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
       <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-lg">
@@ -83,58 +91,124 @@ export default function UsersTab() {
       </div>
       {loading ? (
         <p className="text-center text-slate-400 py-10">Carregando usuários...</p>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-10 text-slate-400">Nenhum usuário encontrado.</div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
-              <tr><th className="p-4">Usuário</th><th className="p-4">Função</th><th className="p-4">Termos</th><th className="p-4 text-right">Ações</th></tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map(user => (
-                <tr key={user.id} className="hover:bg-slate-50">
-                  <td className="p-4">
-                    <button type="button" onClick={() => setSelectedUser(user)} className="flex items-center gap-3 text-left group">
-                      {user.photo_url
-                        ? <img src={user.photo_url} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
-                        : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
-                      }
-                      <div>
-                        <div className="font-bold text-slate-900 group-hover:text-brand-600">{user.display_name || user.full_name || 'Sem Nome'}</div>
-                        <div className="text-xs text-slate-400">{user.email || `${String(user.id).slice(0, 8)}...`}</div>
-                      </div>
-                    </button>
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.role === 'master' ? 'bg-purple-100 text-purple-700' : user.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
-                      {user.role || 'resident'}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    {consentsMap[user.id] !== undefined ? (
-                      consentsMap[user.id]
-                        ? <span className="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✓ Aceito</span>
-                        : <span className="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Pendente</span>
-                    ) : (
-                      <span className="text-slate-300 text-xs">—</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right space-x-2">
-                    <button onClick={() => setSelectedUser(user)} className="text-slate-600 hover:bg-slate-100 px-3 py-1 rounded-lg font-bold text-xs border border-slate-200">Detalhes</button>
-                    {user.role !== 'master' && (
-                      <>
-                        {user.role === 'admin'
-                          ? <button onClick={() => handleRoleChange(user.id, 'resident')} className="text-orange-600 hover:bg-orange-50 px-3 py-1 rounded-lg font-bold text-xs border border-orange-200">Rebaixar</button>
-                          : <button onClick={() => handleRoleChange(user.id, 'admin')} className="text-brand-600 hover:bg-brand-50 px-3 py-1 rounded-lg font-bold text-xs border border-brand-200">Promover Admin</button>
-                        }
-                        <button onClick={() => handleBan(user.id)} className="text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg font-bold text-xs border border-red-200">Banir</button>
-                      </>
-                    )}
-                  </td>
+        <>
+          {/* Tabela Desktop */}
+          <div className="hidden lg:block bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                <tr>
+                  <th className="p-4">Usuário</th>
+                  <th className="p-4">Função</th>
+                  <th className="p-4">Termos</th>
+                  <th className="p-4 text-right">Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.map(user => (
+                  <tr key={user.id} className="hover:bg-slate-50">
+                    <td className="p-4">
+                      <button type="button" onClick={() => setSelectedUser(user)} className="flex items-center gap-3 text-left group">
+                        {user.photo_url
+                          ? <img src={user.photo_url} alt={`Foto de ${user.display_name || user.email}`} className="w-8 h-8 rounded-full object-cover" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                          : <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm" aria-label="Avatar">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
+                        }
+                        <div>
+                          <div className="font-bold text-slate-900 group-hover:text-brand-600">{user.display_name || user.full_name || 'Sem Nome'}</div>
+                          <div className="text-xs text-slate-400">{user.email || `${String(user.id).slice(0, 8)}...`}</div>
+                        </div>
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.role === 'master' ? 'bg-purple-100 text-purple-700' : user.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {user.role || 'resident'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      {consentsMap[user.id] !== undefined ? (
+                        consentsMap[user.id]
+                          ? <span className="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✓ Aceito</span>
+                          : <span className="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Pendente</span>
+                      ) : (
+                        <span className="text-slate-300 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right space-x-2">
+                      <button onClick={() => setSelectedUser(user)} className="text-slate-600 hover:bg-slate-100 px-3 py-2 rounded-lg font-bold text-xs border border-slate-200 min-h-[44px] lg:min-h-auto">Detalhes</button>
+                      {user.role !== 'master' && (
+                        <>
+                          {user.role === 'admin'
+                            ? <button onClick={() => handleRoleChange(user.id, 'resident')} className="text-orange-600 hover:bg-orange-50 px-3 py-2 rounded-lg font-bold text-xs border border-orange-200 min-h-[44px] lg:min-h-auto">Rebaixar</button>
+                            : <button onClick={() => handleRoleChange(user.id, 'admin')} className="text-brand-600 hover:bg-brand-50 px-3 py-2 rounded-lg font-bold text-xs border border-brand-200 min-h-[44px] lg:min-h-auto">Promover Admin</button>
+                          }
+                          <button onClick={() => handleBan(user.id)} className="text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg font-bold text-xs border border-red-200 min-h-[44px] lg:min-h-auto">Banir</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Cards Mobile */}
+          <div className="lg:hidden space-y-3">
+            {filtered.map(user => (
+              <div key={user.id} className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <button type="button" onClick={() => setSelectedUser(user)} className="flex items-center gap-3 flex-1 text-left group">
+                    {user.photo_url
+                      ? <img src={user.photo_url} alt={`Foto de ${user.display_name || user.email}`} className="w-10 h-10 rounded-full object-cover flex-shrink-0" onError={e => { e.target.onerror=null; e.target.style.display='none'; }} />
+                      : <div className="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm flex-shrink-0" aria-label="Avatar">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
+                    }
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 truncate">{user.display_name || user.full_name || 'Sem Nome'}</div>
+                      <div className="text-xs text-slate-400 truncate">{user.email || `${String(user.id).slice(0, 8)}...`}</div>
+                    </div>
+                  </button>
+                  <button onClick={() => setSelectedUser(user)} className="text-slate-600 hover:bg-slate-100 px-2 py-1 rounded font-bold text-xs border border-slate-200 whitespace-nowrap flex-shrink-0 min-h-[44px] flex items-center">
+                    Detalh.
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-500">Função:</span>
+                    <div className="mt-1">
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold inline-block ${user.role === 'master' ? 'bg-purple-100 text-purple-700' : user.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {user.role || 'resident'}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Termos:</span>
+                    <div className="mt-1">
+                      {consentsMap[user.id] !== undefined ? (
+                        consentsMap[user.id]
+                          ? <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 inline-block">✓ Aceito</span>
+                          : <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 inline-block">Pendente</span>
+                      ) : (
+                        <span className="text-slate-300 text-xs">—</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {user.role !== 'master' && (
+                  <div className="flex gap-2 flex-wrap">
+                    {user.role === 'admin'
+                      ? <button onClick={() => handleRoleChange(user.id, 'resident')} className="flex-1 text-orange-600 hover:bg-orange-50 px-3 py-2 rounded font-bold text-xs border border-orange-200 min-h-[44px] flex items-center justify-center">Rebaixar</button>
+                      : <button onClick={() => handleRoleChange(user.id, 'admin')} className="flex-1 text-brand-600 hover:bg-brand-50 px-3 py-2 rounded font-bold text-xs border border-brand-200 min-h-[44px] flex items-center justify-center">Promover</button>
+                    }
+                    <button onClick={() => handleBan(user.id)} className="flex-1 text-red-600 hover:bg-red-50 px-3 py-2 rounded font-bold text-xs border border-red-200 min-h-[44px] flex items-center justify-center">Banir</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
       {selectedUser && (
         <UserDetailsModal
@@ -147,58 +221,3 @@ export default function UsersTab() {
   );
 }
 
-function formatDate(value) {
-  if (!value) return 'Nao informado';
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value));
-}
-
-function DetailItem({ icon: Icon, label, value }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-      <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
-        <Icon size={14} /> {label}
-      </div>
-      <div className="mt-1 break-words text-sm font-semibold text-slate-800">{value || 'Nao informado'}</div>
-    </div>
-  );
-}
-
-function UserDetailsModal({ user, termsAcceptedAt, onClose }) {
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 p-4" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label="Detalhes do usuario">
-        <div className="flex items-start justify-between bg-slate-900 p-5 text-white">
-          <div className="flex items-center gap-3">
-            {user.photo_url
-              ? <img src={user.photo_url} className="h-12 w-12 rounded-full object-cover" alt="" />
-              : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-lg font-black">{user.display_name?.[0]?.toUpperCase() ?? '?'}</div>
-            }
-            <div>
-              <h4 className="text-lg font-black">{user.display_name || user.full_name || 'Sem Nome'}</h4>
-              <p className="text-xs text-slate-300">{user.email || user.id}</p>
-            </div>
-          </div>
-          <button type="button" onClick={onClose} className="rounded-full bg-white/10 p-2 hover:bg-white/20" aria-label="Fechar detalhes">
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="grid gap-3 p-5 sm:grid-cols-2">
-          <DetailItem icon={Mail} label="E-mail" value={user.email} />
-          <DetailItem icon={Shield} label="Funcao" value={user.role || 'resident'} />
-          <DetailItem icon={IdCard} label="ID Auth" value={user.id} />
-          <DetailItem icon={MapPin} label="Bairro" value={user.neighborhood} />
-          <DetailItem icon={Phone} label="Telefone" value={user.phone} />
-          <DetailItem icon={CheckCircle2} label="E-mail confirmado" value={formatDate(user.email_confirmed_at)} />
-          <DetailItem icon={Clock} label="Ultimo login" value={formatDate(user.last_sign_in_at)} />
-          <DetailItem icon={Calendar} label="Cadastro auth" value={formatDate(user.auth_created_at || user.profile_created_at)} />
-          <DetailItem icon={CheckCircle2} label="Termos" value={termsAcceptedAt ? `Aceito em ${formatDate(termsAcceptedAt)}` : 'Pendente'} />
-          <DetailItem icon={CheckCircle2} label="Onboarding" value={user.onboarding_completed ? 'Concluido' : 'Pendente'} />
-        </div>
-      </div>
-    </div>
-  );
-}

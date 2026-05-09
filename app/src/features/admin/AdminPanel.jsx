@@ -120,64 +120,96 @@ export default function AdminPanel({ onClose }) {
     <div className="flex-1 animate-in fade-in">
       <div className="bg-white w-full min-h-[calc(100vh-160px)] flex flex-col overflow-hidden">
 
-        {/* Header */}
-        <div className="bg-slate-900 text-white p-6 flex justify-between items-center shrink-0">
+        {/* Header — Responsivo */}
+        <div className="bg-slate-900 text-white px-4 py-4 lg:px-6 lg:py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center shrink-0 gap-3">
           <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Shield className="text-emerald-400" /> Painel Administrativo
+            <h2 className="text-base lg:text-2xl font-bold flex items-center gap-2">
+              <Shield className="text-emerald-400 w-5 h-5 lg:w-6 lg:h-6" />
+              <span className="hidden lg:inline">Painel Administrativo</span>
+              <span className="lg:hidden text-sm">Admin</span>
             </h2>
-            <p className="text-slate-400 text-sm flex items-center gap-2 mt-1">
+            <p className="text-slate-400 text-xs lg:text-sm flex items-center gap-2 mt-2 lg:mt-1">
               {isMaster ? (
-                <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded text-xs font-bold border border-purple-500/30 flex items-center gap-1">
-                  <Database size={12} /> MASTER — Acesso Total
+                <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded text-[10px] lg:text-xs font-bold border border-purple-500/30 flex items-center gap-1 whitespace-nowrap">
+                  <Database size={10} /> <span className="hidden lg:inline">MASTER — Acesso Total</span><span className="lg:hidden">MASTER</span>
                 </span>
               ) : (
-                <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-xs font-bold border border-blue-500/30 flex items-center gap-1">
-                  <Lock size={12} /> ADMIN — Acesso Limitado
+                <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-[10px] lg:text-xs font-bold border border-blue-500/30 flex items-center gap-1 whitespace-nowrap">
+                  <Lock size={10} /> <span className="hidden lg:inline">ADMIN — Acesso Limitado</span><span className="lg:hidden">ADMIN</span>
                 </span>
               )}
             </p>
           </div>
-          <button onClick={onClose} className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors"><X size={24} /></button>
+          <button
+            onClick={onClose}
+            className="self-end lg:self-auto bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors"
+            aria-label="Fechar painel administrativo"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar nav */}
-          <nav className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col py-6 gap-1 overflow-y-auto shrink-0">
-            <div className="px-6 mb-2">
+        {/* Container Principal — Mobile-First */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+
+          {/* Sidebar Nav — Responsivo (horizontal em mobile, vertical em desktop) */}
+          <nav className="w-full lg:w-64 bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-200 flex lg:flex-col py-2 lg:py-6 gap-0 lg:gap-1 overflow-x-auto lg:overflow-y-auto shrink-0">
+
+            {/* Seção: Operação Diária */}
+            <div className="hidden lg:block px-6 mb-2">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Operação Diária</h3>
             </div>
-            {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => setActiveTab(id)} className={`mx-3 px-3 py-2.5 rounded-lg text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'}`}>
-                <Icon size={18} /> {label}
-                {id === 'approvals' && pendingCount > 0 && (
-                  <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-auto">{pendingCount}</span>
-                )}
-              </button>
-            ))}
 
+            {/* Botões de navegação — flexbox horizontal em mobile, stack vertical em lg */}
+            <div className="flex lg:flex-col gap-0.5 lg:gap-1 flex-shrink-0 lg:flex-shrink">
+              {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={`px-2 lg:px-3 py-2 lg:py-2.5 rounded-lg text-center lg:text-left font-bold text-xs lg:text-sm flex flex-col lg:flex-row items-center lg:items-center gap-1 lg:gap-3 transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'}`}
+                  title={label}
+                >
+                  <Icon size={16} className="lg:w-[18px] lg:h-[18px]" />
+                  <span className="hidden lg:inline">{label}</span>
+                  {id === 'approvals' && pendingCount > 0 && (
+                    <span className="bg-emerald-500 text-white text-[8px] lg:text-[10px] px-1.5 lg:px-2 py-0.5 rounded-full lg:ml-auto">{pendingCount}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Seção: Governança Master */}
             {isMaster && (
               <>
-                <div className="my-4 mx-6 border-t border-slate-200" />
-                <div className="px-6 mb-2">
+                <div className="hidden lg:block my-4 mx-6 border-t border-slate-200" />
+                <div className="hidden lg:block px-6 mb-2">
                   <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
                     <Shield size={12} /> Governança Master
                   </h3>
                 </div>
-                {MASTER_NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-                  <button key={id} onClick={() => setActiveTab(id)} className={`mx-3 px-3 py-2.5 rounded-lg text-left font-bold text-sm flex items-center gap-3 transition-colors ${activeTab === id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'}`}>
-                    <Icon size={18} /> {label}
-                    {id === 'tickets' && ticketsCount > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-auto">{ticketsCount}</span>
-                    )}
-                  </button>
-                ))}
+
+                <div className="flex lg:flex-col gap-0.5 lg:gap-1 flex-shrink-0 lg:flex-shrink">
+                  {MASTER_NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => setActiveTab(id)}
+                      className={`px-2 lg:px-3 py-2 lg:py-2.5 rounded-lg text-center lg:text-left font-bold text-xs lg:text-sm flex flex-col lg:flex-row items-center lg:items-center gap-1 lg:gap-3 transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'}`}
+                      title={label}
+                    >
+                      <Icon size={16} className="lg:w-[18px] lg:h-[18px]" />
+                      <span className="hidden lg:inline">{label}</span>
+                      {id === 'tickets' && ticketsCount > 0 && (
+                        <span className="bg-red-500 text-white text-[8px] lg:text-[10px] px-1.5 lg:px-2 py-0.5 rounded-full lg:ml-auto">{ticketsCount}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </>
             )}
           </nav>
 
-          {/* Conteúdo da tab ativa */}
-          <div className="flex-1 bg-white overflow-y-auto p-6">
+          {/* Conteúdo da Tab Ativa — Responsivo */}
+          <div className="flex-1 bg-white overflow-y-auto px-4 py-6 lg:px-6">
             {renderTab()}
           </div>
         </div>

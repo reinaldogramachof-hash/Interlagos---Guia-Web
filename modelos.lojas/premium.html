@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Loja PREMIUM · AR + Vídeo + Fidelidade</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif; }
+    body { background: #1a1a1f; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+    .mobile-frame { max-width: 390px; width: 100%; background: #fcfcfc; min-height: 100vh; box-shadow: 0 0 30px rgba(0,0,0,0.1); padding-bottom: 85px; }
+    .premium-header { background: linear-gradient(145deg, #1f1f2e 0%, #2a2a3c 100%); color: white; padding: 20px 18px 16px; border-radius: 0 0 28px 28px; }
+    .premium-badge { display: flex; justify-content: space-between; align-items: center; }
+    .premium-badge h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
+    .crown { background: #d4af37; padding: 5px 12px; border-radius: 40px; font-size: 14px; font-weight: 600; color: black; }
+    .member-card { background: rgba(255,215,0,0.12); margin-top: 18px; padding: 12px 16px; border-radius: 40px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(2px); }
+    .member-points { color: #FFD966; font-weight: 700; }
+    .video-hero { margin: 16px 18px 8px; background: #0a0c12; border-radius: 24px; overflow: hidden; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative; }
+    .video-placeholder { width: 100%; height: 100%; background: #1c1e26; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ccc; }
+    .play-icon { font-size: 44px; background: #ffffff20; width: 70px; height: 70px; border-radius: 40px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+    .badge-ar { background: #00000060; color: white; padding: 4px 12px; border-radius: 50px; position: absolute; bottom: 10px; right: 10px; font-size: 12px; backdrop-filter: blur(4px); }
+    .section-title { padding: 18px 18px 8px; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 6px; }
+    .grid-premium { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 16px 20px; }
+    .product-premium { background: white; border-radius: 28px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f0f0f6; transition: all 0.1s; }
+    .media-area { aspect-ratio: 1/1; background: #eef0f5; display: flex; align-items: center; justify-content: center; position: relative; }
+    .ar-badge { position: absolute; bottom: 8px; left: 8px; background: #212121e0; color: #ffd966; padding: 5px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 4px; }
+    .product-detail { padding: 14px 12px; }
+    .product-name { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .price-premium { font-size: 20px; font-weight: 800; color: #1f1f2e; }
+    .points-bonus { color: #b8860b; font-size: 12px; margin: 6px 0 10px; font-weight: 500; }
+    .btn-ar { background: #1e1e2a; color: white; border: none; padding: 12px 8px; border-radius: 40px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+    .bottom-nav-premium { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 390px; background: white; display: flex; justify-content: space-around; padding: 10px 12px 22px; border-top: 1px solid #f0f0f6; }
+    .nav-premium-item { display: flex; flex-direction: column; align-items: center; color: #8e8e98; }
+    .nav-premium-item.active { color: #1f1f2e; }
+    .checkout-bar { background: white; margin: 12px 18px; border-radius: 60px; padding: 8px 8px 8px 20px; display: flex; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #eaeaf0; }
+    .checkout-bar input { border: none; background: transparent; flex:1; padding: 12px 0; font-size: 14px; outline: none; }
+    .checkout-bar button { background: #1f1f2e; color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="mobile-frame">
+  <div class="premium-header">
+    <div class="premium-badge">
+      <h1>LUXE<span style="font-weight:300;">·STORE</span></h1>
+      <div class="crown">👑 PREMIUM</div>
+    </div>
+    <div class="member-card">
+      <span style="font-size: 28px;">🏆</span>
+      <div><strong style="font-size: 16px;">Membro Premium</strong><br><span class="member-points">⭐ 2.450 pontos</span></div>
+      <span style="margin-left: auto; background: #d4af3720; padding: 6px 12px; border-radius: 30px;">🎁 Resgatar</span>
+    </div>
+  </div>
+
+  <!-- Hero com player de vídeo simulado -->
+  <div class="video-hero">
+    <div class="video-placeholder">
+      <div class="play-icon">▶️</div>
+      <p style="margin-top: 12px;">Nova Coleção · Outono 2026</p>
+    </div>
+    <div class="badge-ar">🎬 Vídeo em loop</div>
+  </div>
+
+  <div class="section-title">
+    <span>✨ Experiência AR</span> <span style="font-size: 14px; background:#f3f3f9; padding:2px 10px; border-radius: 20px;">Visualize no seu espaço</span>
+  </div>
+
+  <div class="grid-premium">
+    <!-- Produto 1 com AR -->
+    <div class="product-premium">
+      <div class="media-area">
+        <span style="font-size: 40px;">🛋️</span>
+        <div class="ar-badge" onclick="alert('🔮 AR ativada: Posicione a cadeira no seu ambiente (Simulação)')">📱 Visualizar 3D</div>
+      </div>
+      <div class="product-detail">
+        <div class="product-name">Poltrona Cloud</div>
+        <div class="price-premium">R$ 1.899</div>
+        <div class="points-bonus">➕ 189 pontos</div>
+        <button class="btn-ar" onclick="alert('🪄 Abrindo câmera AR... (simulação premium)')">✨ Ver no seu espaço</button>
+      </div>
+    </div>
+    <!-- Produto 2 com AR -->
+    <div class="product-premium">
+      <div class="media-area">
+        <span style="font-size: 40px;">💡</span>
+        <div class="ar-badge" onclick="alert('🔮 AR: Luminária no seu quarto')">📱 Visualizar 3D</div>
+      </div>
+      <div class="product-detail">
+        <div class="product-name">Luminária Pendente</div>
+        <div class="price-premium">R$ 649</div>
+        <div class="points-bonus">➕ 64 pontos</div>
+        <button class="btn-ar" onclick="alert('🪄 Visualização AR iniciada')">✨ Ver no seu espaço</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout com geolocalização / autocomplete -->
+  <div class="checkout-bar">
+    <input type="text" placeholder="CEP p/ frete grátis" value="01414-000">
+    <button onclick="alert('📍 Frete calculado: R$ 0,00 (Premium)')">Calcular</button>
+  </div>
+
+  <!-- Cupom automático fidelidade -->
+  <div style="margin: 0 18px 20px; background: #ede7d9; padding: 14px; border-radius: 28px; display: flex; gap: 10px;">
+    <span>🎟️</span>
+    <span><strong>Cupom de 10% aplicado</strong> (Clube Premium)</span>
+  </div>
+
+  <!-- Navegação inferior -->
+  <div class="bottom-nav-premium">
+    <div class="nav-premium-item active"><span>🏠</span><span>Início</span></div>
+    <div class="nav-premium-item"><span>🔍</span><span>Explorar</span></div>
+    <div class="nav-premium-item"><span>👑</span><span>Vantagens</span></div>
+    <div class="nav-premium-item"><span>🛒</span><span>Carrinho</span></div>
+    <div class="nav-premium-item"><span>☰</span><span>Perfil</span></div>
+  </div>
+</div>
+<script>
+  // Interações premium
+  document.querySelectorAll('.btn-ar').forEach(btn => {
+    btn.addEventListener('click', (e) => e.stopPropagation());
+  });
+</script>
+</body>
+</html>
