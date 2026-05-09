@@ -1,7 +1,26 @@
 import { supabase } from '../lib/supabaseClient';
 import { createNotification, notifyAdmins } from './notificationService';
+import { readCache, writeCache } from '../utils/localCache';
 
 const NEIGHBORHOOD = import.meta.env.VITE_NEIGHBORHOOD;
+const PUBLIC_CACHE_TTL_MS = 1000 * 60 * 10; // 10 min
+const cacheKey = (scope) => `tnb:${scope}:${NEIGHBORHOOD || 'default'}`;
+
+async function withCache(scope, request, { preferCache = false } = {}) {
+  const key = cacheKey(scope);
+
+  if (preferCache) {
+    const cached = readCache(key, PUBLIC_CACHE_TTL_MS);
+    if (cached) {
+      request().then((fresh) => writeCache(key, fresh)).catch(() => {});
+      return cached;
+    }
+  }
+
+  const fresh = await request();
+  writeCache(key, fresh);
+  return fresh;
+}
 
 // Suggestions
 export async function fetchSuggestions() {
@@ -25,16 +44,18 @@ export async function createSuggestion(suggestion) {
 }
 
 // Campaigns / Donations
-export async function fetchCampaigns() {
-  const { data, error } = await supabase
-    .from('campaigns')
-    .select('*')
-    .eq('neighborhood', NEIGHBORHOOD)
-    .eq('status', 'active')
-    .is('merchant_id', null)          // apenas ações sociais, sem cupons de comerciantes
-    .order('start_date', { ascending: false });
-  if (error) throw error;
-  return data ?? [];
+export async function fetchCampaigns(options = {}) {
+  return withCache('campaigns', async () => {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('neighborhood', NEIGHBORHOOD)
+      .eq('status', 'active')
+      .is('merchant_id', null)          // apenas ações sociais, sem cupons de comerciantes
+      .order('start_date', { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  }, options);
 }
 
 export async function createCampaign(campaign) {
@@ -159,28 +180,32 @@ export async function createMerchantCampaign(campaign) {
   return data;
 }
 
-export async function fetchActiveCoupons() {
-  const today = new Date().toISOString().split('T')[0];
-  const { data, error } = await supabase
-    .from('campaigns')
-    .select('*, merchants(id, name, image_url, category, plan)')
-    .eq('status', 'active')
-    .eq('neighborhood', NEIGHBORHOOD)
-    .not('merchant_id', 'is', null)
-    .gte('end_date', today)
-    .order('start_date', { ascending: false });
-  if (error) { return []; }
-  return data ?? [];
+export async function fetchActiveCoupons(options = {}) {
+  return withCache('active-coupons', async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('*, merchants(id, name, image_url, category, plan)')
+      .eq('status', 'active')
+      .eq('neighborhood', NEIGHBORHOOD)
+      .not('merchant_id', 'is', null)
+      .gte('end_date', today)
+      .order('start_date', { ascending: false });
+    if (error) { return []; }
+    return data ?? [];
+  }, options);
 }
 
-export async function fetchPublicServices() {
-  const { data, error } = await supabase
-    .from('public_services')
-    .select('*')
-    .eq('neighborhood', NEIGHBORHOOD)
-    .order('is_emergency', { ascending: false });
-  if (error) throw error;
-  return data ?? [];
+export async function fetchPublicServices(options = {}) {
+  return withCache('public-services', async () => {
+    const { data, error } = await supabase
+      .from('public_services')
+      .select('*')
+      .eq('neighborhood', NEIGHBORHOOD)
+      .order('is_emergency', { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  }, options);
 }
 
 export async function adminFetchPublicServices() {
