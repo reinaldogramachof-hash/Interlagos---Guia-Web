@@ -2,6 +2,44 @@ import { supabase } from '../lib/supabaseClient';
 import { createNotification, notifyAdmins } from './notificationService';
 import { PLAN_RANK } from '../constants/plans';
 
+const MERCHANT_LIST_COLUMNS = `
+  id,
+  owner_id,
+  name,
+  description,
+  category,
+  plan,
+  image_url,
+  phone,
+  address,
+  instagram,
+  whatsapp,
+  is_active,
+  created_at,
+  neighborhood,
+  is_featured,
+  avg_rating,
+  review_count,
+  store_color,
+  store_tagline,
+  store_url
+`;
+
+const sortByPlanPriority = (items = []) =>
+  [...items].sort((a, b) => (PLAN_RANK[b.plan] ?? 0) - (PLAN_RANK[a.plan] ?? 0));
+
+export const getMerchantsList = async () => {
+  const { data, error } = await supabase
+    .from('merchants')
+    .select(MERCHANT_LIST_COLUMNS)
+    .eq('is_active', true)
+    .eq('neighborhood', import.meta.env.VITE_NEIGHBORHOOD)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('merchantService.getMerchantsList:', error); return []; }
+  return sortByPlanPriority(data || []);
+};
+
 export const getMerchants = async () => {
   const { data, error } = await supabase
     .from('merchants')
@@ -12,7 +50,7 @@ export const getMerchants = async () => {
   if (error) { console.error('merchantService.getMerchants:', error); return []; }
   
   // Ordena por prioridade de plano (hasTopSearch)
-  return data.sort((a, b) => (PLAN_RANK[b.plan] ?? 0) - (PLAN_RANK[a.plan] ?? 0));
+  return sortByPlanPriority(data || []);
 };
 
 export const adminGetMerchants = async () => {
@@ -24,11 +62,11 @@ export const adminGetMerchants = async () => {
   if (error) { console.error('merchantService.adminGetMerchants:', error); return []; }
 
   // Mesmo critério de sorteio para o admin
-  return data.sort((a, b) => (PLAN_RANK[b.plan] ?? 0) - (PLAN_RANK[a.plan] ?? 0));
+  return sortByPlanPriority(data || []);
 };
 
 export const subscribeMerchants = (callback) => {
-  getMerchants().then(callback);
+  getMerchantsList().then(callback);
 
   const channel = supabase.channel('merchants-realtime')
     .on('postgres_changes', {
@@ -37,7 +75,7 @@ export const subscribeMerchants = (callback) => {
       table: 'merchants',
       filter: `neighborhood=eq.${import.meta.env.VITE_NEIGHBORHOOD}`
     }, () => {
-      getMerchants().then(callback);
+      getMerchantsList().then(callback);
     })
     .subscribe();
 
